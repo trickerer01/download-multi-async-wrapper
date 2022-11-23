@@ -14,16 +14,20 @@ UTF8 = 'utf-8'
 ACTION_STORE_TRUE = 'store_true'
 
 
-class Config(object):
+class BaseConfig(object):
     DEST_LOGS_BASE = '../logs/'
 
-    debug = False
-    dest_base = '../'
-    dest_bak_base = '../'
-    script_path = '../queries.txt.list'
-    update = False
-    fetcher_root = '../../0maxidsfetcher/'
-    ignore_download_mode = False
+    def __init__(self):
+        self.debug = False
+        self.dest_base = '../'
+        self.dest_bak_base = '../'
+        self.script_path = '../queries.txt.list'
+        self.update = False
+        self.fetcher_root = '../../0maxidsfetcher/'
+        self.ignore_download_mode = False
+
+
+Config = BaseConfig()
 
 
 DOWNLOADER_NM = 'nm'

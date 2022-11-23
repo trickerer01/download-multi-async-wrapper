@@ -6,9 +6,9 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 
-from defs import DOWNLOADERS, RANGE_TEMPLATES, RUXX_INDECIES, IntPair, Config
+from defs import DOWNLOADERS, RANGE_TEMPLATES, RUXX_INDECIES, IntPair, Config, BaseConfig
 from logger import trace
 from strings import normalize_ruxx_tag, path_args, NEWLINE
 
@@ -17,10 +17,24 @@ def validate_sequences(sequences_ids_vid, sequences_ids_img,
                        sequences_paths_vid, sequences_paths_img,
                        sequences_tags_vid, sequences_tags_img,
                        sequences_subfolders_vid, sequences_subfolders_img) -> None:
-    if not all(len(nlist.ids) == len(sequences_ids_vid[DOWNLOADERS[-1]].ids) for nlist in sequences_ids_vid.values() if nlist):
+    existing_index_vid = -1
+    existing_index_img = -1
+    for i, dt in enumerate(DOWNLOADERS):
+        if sequences_ids_vid[dt] is not None:
+            existing_index_vid = i
+            break
+    for i, dt in enumerate(DOWNLOADERS):
+        if sequences_ids_img[dt] is not None:
+            existing_index_img = i
+            break
+    assert all(index != -1 for index in [existing_index_vid, existing_index_img])
+
+    idx = existing_index_vid
+    if not all(len(nlist.ids) == len(sequences_ids_vid[DOWNLOADERS[idx]].ids) for nlist in sequences_ids_vid.values() if nlist):
         trace('Error: vid id sequences are not even in length! Aborting')
         raise IOError
-    if not all(len(nlist.ids) == len(sequences_ids_img[DOWNLOADERS[-1]].ids) for nlist in sequences_ids_img.values() if nlist):
+    idx = existing_index_img
+    if not all(len(nlist.ids) == len(sequences_ids_img[DOWNLOADERS[idx]].ids) for nlist in sequences_ids_img.values() if nlist):
         trace('Error: img id sequences are not even in length! Aborting')
         raise IOError
     for dt in DOWNLOADERS:
@@ -71,7 +85,10 @@ def queries_from_sequences(sequences_ids_vid, sequences_ids_img,
                            sequences_paths_vid, sequences_paths_img,
                            sequences_tags_vid, sequences_tags_img,
                            sequences_subfolders_vid, sequences_subfolders_img,
-                           sequences_common_vid, sequences_common_img) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
+                           sequences_common_vid, sequences_common_img,
+                           config: Optional[BaseConfig] = None) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
+    c = config or Config
+
     vrange, irange = (
         {dt: IntPair(sids[dt].ids[:2]) for dt in DOWNLOADERS if sids[dt]} for sids in [sequences_ids_vid, sequences_ids_img]
     )  # type: Dict[str, IntPair]
@@ -82,12 +99,12 @@ def queries_from_sequences(sequences_ids_vid, sequences_ids_img,
     } for spath, srange in zip([sequences_paths_vid, sequences_paths_img], [vrange, irange]))  # type: Dict[str, str]
 
     queries_final_vid, queries_final_img = ({
-        dt: ([f'{sbase_q[dt]} {path_args(Config.dest_base, not is_vidpath, ssub[dt][i])} '
+        dt: ([f'{sbase_q[dt]} {path_args(c.dest_base, not is_vidpath, ssub[dt][i])} '
               f'{" ".join(normalize_ruxx_tag(tag) for tag in ctags[dt])} '
-              f'{" ".join(normalize_ruxx_tag(tag) if DOWNLOADERS.index(dt) in RUXX_INDECIES else tag for tag in staglist)}'
+              f'{" ".join(normalize_ruxx_tag(tag) for tag in staglist)}'
               for i, staglist in enumerate(stags[dt]) if len(staglist) > 0]
              ) if DOWNLOADERS.index(dt) in RUXX_INDECIES else
-            ([f'{sbase_q[dt]} {path_args(Config.dest_base, not is_vidpath, "")} '
+            ([f'{sbase_q[dt]} {path_args(c.dest_base, not is_vidpath, "")} '
               f'{" ".join(ctags[dt])} '
               f'-script "'
               f'{"; ".join(" ".join([f"{ssub[dt][i]}:"] + staglist) for i, staglist in enumerate(stags[dt]))}'

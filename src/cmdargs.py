@@ -11,10 +11,11 @@ from os import path
 from typing import Optional, List
 
 from defs import (
-    HELP_DEBUG, HELP_PATH, HELP_SCRIPT_PATH, HELP_BAK_PATH, HELP_UPDATE, HELP_FETCHER_PATH, HELP_IGNORE_DMODE, ACTION_STORE_TRUE, Config
+    HELP_DEBUG, HELP_PATH, HELP_SCRIPT_PATH, HELP_BAK_PATH, HELP_UPDATE, HELP_FETCHER_PATH, HELP_IGNORE_DMODE, ACTION_STORE_TRUE,
+    BaseConfig, Config
 )
 from logger import trace
-from strings import SLASH, normalize_path, unquote
+from strings import normalize_path, unquote
 
 parser = None  # type: Optional[ArgumentParser]
 
@@ -32,7 +33,7 @@ def valid_positive_nonzero_int(val: str) -> int:
 def valid_path(pathstr: str) -> str:
     try:
         newpath = normalize_path(unquote(pathstr))
-        if not path.exists(newpath[:(newpath.find(SLASH) + 1)]):
+        if not path.exists(newpath):
             raise ValueError
     except Exception:
         raise ArgumentError
@@ -51,8 +52,10 @@ def valid_file_path(pathstr: str) -> str:
     return newpath
 
 
-def parse_arglist(args: List[str]) -> None:
+def parse_arglist(args: List[str], config: Optional[BaseConfig] = None) -> None:
     global parser
+
+    c = config or Config  # type: BaseConfig
 
     parser = ArgumentParser(add_help=False)
     parser.add_argument('--help', action='help')
@@ -74,13 +77,13 @@ def parse_arglist(args: List[str]) -> None:
             if parsed.bakpath == '':
                 trace('-bakpath is required!')
                 raise ArgumentError
-        Config.debug = parsed.debug
-        Config.dest_base = parsed.path
-        Config.script_path = parsed.script
-        Config.ignore_download_mode = parsed.ignore_download_mode
-        Config.update = parsed.update
-        Config.dest_bak_base = parsed.bakpath
-        Config.fetcher_root = parsed.fetcherpath
+        c.debug = parsed.debug
+        c.dest_base = parsed.path
+        c.script_path = parsed.script
+        c.ignore_download_mode = parsed.ignore_download_mode
+        c.update = parsed.update
+        c.dest_bak_base = parsed.bakpath
+        c.fetcher_root = parsed.fetcherpath
     except (ArgumentError, TypeError, ValueError, Exception):
         raise
 
