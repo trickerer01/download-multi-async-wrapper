@@ -35,6 +35,8 @@ def read_queries_file(config: Optional[BaseConfig] = None) -> None:
 def form_queries(config: Optional[BaseConfig] = None):
     c = config or Config
 
+    python_executable = ''
+
     sequences_paths_vid = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[str]]
     sequences_paths_img = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[str]]
     sequences_common_vid = {dt: [] for dt in DOWNLOADERS}  # type: Dict[str, List[str]]
@@ -77,14 +79,17 @@ def form_queries(config: Optional[BaseConfig] = None):
                 trace(f'Error: corrupted line beginning found at line {i + 1:d}!')
                 raise IOError
             if line[0] == '#':
-                if fullmatch(r'^##.*?$', line):
+                if fullmatch(r'^##[^#].*?$', line):
                     trace(f'Ignoring commented out line {i + 1:d}: \'{line}\'')
                     continue
                 if fullmatch(r'^.*[: ]-dmode .+?$', line):
                     if c.ignore_download_mode is True:
                         trace(f'Info: \'{line}\' download mode found at line {i + 1:d}. Ignored!')
                         continue
-                if fullmatch(fr'^# (?:{"|".join(DOWNLOADERS)}).*?$', line):
+                if fullmatch(r'^### PYTHON:.*?$', line):
+                    assert python_executable == '', 'Python executable must be declared exactly once!'
+                    python_executable = line[line.find(':') + 1:]
+                elif fullmatch(fr'^# (?:{"|".join(DOWNLOADERS)}).*?$', line):
                     cur_downloader_idx = DOWNLOADERS.index(line.split(' ')[1])
                 elif fullmatch(r'^#(?: \d+)+$', line):
                     cur_seq_ids[DOWNLOADERS[cur_downloader_idx]] = Sequence([int(num) for num in line.split(' ')[1:]], i + 1)
@@ -135,14 +140,15 @@ def form_queries(config: Optional[BaseConfig] = None):
                      sequences_tags_vid, sequences_tags_img, sequences_subfolders_vid, sequences_subfolders_img,
                      sequences_common_vid, sequences_common_img)
     validate_sequences(sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img,
-                       sequences_tags_vid, sequences_tags_img, sequences_subfolders_vid, sequences_subfolders_img)
+                       sequences_tags_vid, sequences_tags_img, sequences_subfolders_vid, sequences_subfolders_img,
+                       python_executable)
 
     trace('Sequences are validated. Preparing final lists...')
     queries_final_vid, queries_final_img = queries_from_sequences(
         sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img,
         sequences_tags_vid, sequences_tags_img, sequences_subfolders_vid, sequences_subfolders_img,
         sequences_common_vid, sequences_common_img,
-        c
+        python_executable, c
     )
 
     report_finals(queries_final_vid, queries_final_img)

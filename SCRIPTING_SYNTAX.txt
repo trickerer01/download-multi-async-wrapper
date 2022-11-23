@@ -1,6 +1,7 @@
 ## made by: somebody             <-- COMMENTS
 ## This file is only for syntax reference
 
+### PYTHON:python3               <-- PATH TO PYTHON EXECUTABLE (NORMALLY PRESENT IN PATH) <REQUIRED>
 ### (VIDEOS) ###                 <-- VIDEOS MARKER <REQUIRED>
 # nm                             <-- DOWNLOADER TYPE <REQUIRED>
 # 50000 51000                    <-- AT LEAST TWO IDS FOR RANGE <REQUIRED>

@@ -16,7 +16,8 @@ from strings import normalize_ruxx_tag, path_args, NEWLINE
 def validate_sequences(sequences_ids_vid, sequences_ids_img,
                        sequences_paths_vid, sequences_paths_img,
                        sequences_tags_vid, sequences_tags_img,
-                       sequences_subfolders_vid, sequences_subfolders_img) -> None:
+                       sequences_subfolders_vid, sequences_subfolders_img,
+                       python_executable) -> None:
     # existing_index_vid = -1
     # existing_index_img = -1
     # for i, dt in enumerate(DOWNLOADERS):
@@ -36,6 +37,9 @@ def validate_sequences(sequences_ids_vid, sequences_ids_img,
     # if not all(len(nlist) == len(sequences_ids_img[DOWNLOADERS[idx]]) for nlist in sequences_ids_img.values() if nlist):
     #     trace('Error: img id sequences are not even in length! Aborting')
     #     raise IOError
+    if python_executable == '':
+        trace('Error: python_executable was not declared!')
+        raise IOError
     for dt in DOWNLOADERS:
         ivlist = list(sequences_ids_vid[dt].ids if sequences_ids_vid[dt] else [])
         for iv in range(len(ivlist)):
@@ -85,6 +89,7 @@ def queries_from_sequences(sequences_ids_vid, sequences_ids_img,
                            sequences_tags_vid, sequences_tags_img,
                            sequences_subfolders_vid, sequences_subfolders_img,
                            sequences_common_vid, sequences_common_img,
+                           python_executable,
                            config: Optional[BaseConfig] = None) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
     c = config or Config
 
@@ -93,7 +98,9 @@ def queries_from_sequences(sequences_ids_vid, sequences_ids_img,
     )  # type: Dict[str, IntPair]
 
     base_q_v, base_q_i = ({
-        dt: f'python3 {spath[dt]} {RANGE_TEMPLATES[dt].first % srange[dt].first} {RANGE_TEMPLATES[dt].second % (srange[dt].second - 1)}'
+        dt: (f'{python_executable} {spath[dt]} '
+             f'{RANGE_TEMPLATES[dt].first % srange[dt].first} '
+             f'{RANGE_TEMPLATES[dt].second % (srange[dt].second - 1)}')
         for dt in DOWNLOADERS if dt in srange.keys() and dt in spath.keys()
     } for spath, srange in zip([sequences_paths_vid, sequences_paths_img], [vrange, irange]))  # type: Dict[str, str]
 
