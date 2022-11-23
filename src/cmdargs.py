@@ -65,8 +65,8 @@ def parse_arglist(args: List[str], config: Optional[BaseConfig] = None) -> None:
     parser.add_argument('-script', metavar='#PATH_TO_FILE', required=True, help=HELP_SCRIPT_PATH, type=valid_file_path)
     parser.add_argument('--ignore-download-mode', action=ACTION_STORE_TRUE, help=HELP_IGNORE_DMODE)
     parser.add_argument('--update', action=ACTION_STORE_TRUE, help=HELP_UPDATE)
-    parser.add_argument('-bakpath', metavar='#PATH_TO_DIR', default='', help=HELP_BAK_PATH, type=valid_path)
-    parser.add_argument('-fetcherpath', metavar='#PATH_TO_DIR', default='', help=HELP_FETCHER_PATH, type=valid_path)
+    parser.add_argument('-bakpath', metavar='#PATH_TO_DIR', default='./', help=HELP_BAK_PATH, type=valid_path)
+    parser.add_argument('-fetcherpath', metavar='#PATH_TO_DIR', default='./', help=HELP_FETCHER_PATH, type=valid_path)
 
     try:
         parsed = parser.parse_args(args)
