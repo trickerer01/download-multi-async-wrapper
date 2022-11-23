@@ -14,6 +14,7 @@
 -a -b -c -dfff                   <-- EXCLUDED TAGS <DOWNLOADER ARGUMENTS>
 ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
                                      AT LEAST ONE 'TAGS' ARGUMENT IS REQUIRED FOR QUERY TO BE VALID
+                                     NO MIXING OF REQUIRED / EXCLUDED TAGS: '-a -b -c -dfff ggg' => ERROR
 # send                           <-- QUERY END MARKER <REQUIRED>
                                      '<cmdline base...> -a -b -c -dfff ggg'
                                      DOWNLOADER ARGUMENTS STILL ACCUMULATE AFTER THIS, SEE BELOW
