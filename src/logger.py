@@ -40,7 +40,7 @@ def log_to(msg: str, log_file: TextIO, add_timestamp=True) -> None:
 
 def trace(msg: str, add_timestamp=True) -> None:
     t_msg = f'{timestamped_string(msg, datetime_str_nfull()) if add_timestamp else msg}\n'
-    print(t_msg)
+    print(t_msg, end='')
     if logfile:
         logfile.write(t_msg)
 
