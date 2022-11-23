@@ -11,7 +11,7 @@ from os import path
 from typing import Optional, List
 
 from defs import (
-    HELP_PATH, HELP_SCRIPT_PATH, HELP_BAK_PATH, HELP_UPDATE, HELP_FETCHER_PATH, HELP_IGNORE_DMODE, ACTION_STORE_TRUE, Config
+    HELP_DEBUG, HELP_PATH, HELP_SCRIPT_PATH, HELP_BAK_PATH, HELP_UPDATE, HELP_FETCHER_PATH, HELP_IGNORE_DMODE, ACTION_STORE_TRUE, Config
 )
 from logger import trace
 from strings import SLASH, normalize_path, unquote
@@ -57,6 +57,7 @@ def parse_arglist(args: List[str]) -> None:
     parser = ArgumentParser(add_help=False)
     parser.add_argument('--help', action='help')
 
+    parser.add_argument('--debug', action=ACTION_STORE_TRUE, help=HELP_DEBUG)
     parser.add_argument('-path', metavar='#PATH_TO_DIR', required=True, help=HELP_PATH, type=valid_path)
     parser.add_argument('-script', metavar='#PATH_TO_FILE', required=True, help=HELP_SCRIPT_PATH, type=valid_file_path)
     parser.add_argument('--ignore-download-mode', action=ACTION_STORE_TRUE, help=HELP_IGNORE_DMODE)
@@ -73,6 +74,7 @@ def parse_arglist(args: List[str]) -> None:
             if parsed.bakpath == '':
                 trace('-bakpath is required!')
                 raise ArgumentError
+        Config.debug = parsed.debug
         Config.dest_base = parsed.path
         Config.script_path = parsed.script
         Config.ignore_download_mode = parsed.ignore_download_mode

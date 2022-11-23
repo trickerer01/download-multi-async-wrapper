@@ -9,6 +9,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 import sys
 
 from cmdargs import parse_arglist
+from defs import Config
 from executor import execute
 from logger import open_logfile, close_logfile, trace
 from queries import read_queries_file, form_queries, update_next_ids
@@ -21,9 +22,9 @@ def cleanup() -> None:
 
 def run_main() -> None:
     try:
-        open_logfile()
-        trace('Logfile opened...', False)
         parse_arglist(sys.argv[1:])
+        open_logfile(not Config.debug)
+        trace('Logfile opened...', False)
         trace(f'\n# Started at {datetime_str_full()} #')
         read_queries_file()
         form_queries()

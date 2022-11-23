@@ -17,6 +17,7 @@ ACTION_STORE_TRUE = 'store_true'
 class Config(object):
     DEST_LOGS_BASE = '../logs/'
 
+    debug = False
     dest_base = '../'
     dest_bak_base = '../'
     script_path = '../queries.txt.list'
@@ -35,11 +36,12 @@ DOWNLOADERS = [DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RN, DOWNLOADER_RX]
 RUXX_INDECIES = [DOWNLOADERS.index(DOWNLOADER_RN), DOWNLOADERS.index(DOWNLOADER_RX)]
 RV_INDEX = DOWNLOADERS.index(DOWNLOADER_RV)
 
+HELP_DEBUG = 'Run in debug mode (for development)'
 HELP_PATH = 'Path to the folder where all the files / subfolders will be put'
 HELP_SCRIPT_PATH = 'Full path to the script (queries) file'
 HELP_BAK_PATH = 'Path to the folder where script backup will be put before updating'
 HELP_UPDATE = 'Boolean flag to update script file with current max ids fetched from the websites'
-HELP_FETCHER_PATH = 'Path to the folder where max ids fetcher is located'
+HELP_FETCHER_PATH = 'Path to the folder where max ids fetcher\'s \'main.py\' is located'
 HELP_IGNORE_DMODE = 'Boolean flag to ignore all \'-dmode\' arguments and always download files in full'
 
 
