@@ -17,26 +17,25 @@ def validate_sequences(sequences_ids_vid, sequences_ids_img,
                        sequences_paths_vid, sequences_paths_img,
                        sequences_tags_vid, sequences_tags_img,
                        sequences_subfolders_vid, sequences_subfolders_img) -> None:
-    existing_index_vid = -1
-    existing_index_img = -1
-    for i, dt in enumerate(DOWNLOADERS):
-        if sequences_ids_vid[dt] is not None:
-            existing_index_vid = i
-            break
-    for i, dt in enumerate(DOWNLOADERS):
-        if sequences_ids_img[dt] is not None:
-            existing_index_img = i
-            break
-    assert all(index != -1 for index in [existing_index_vid, existing_index_img])
-
-    idx = existing_index_vid
-    if not all(len(nlist.ids) == len(sequences_ids_vid[DOWNLOADERS[idx]].ids) for nlist in sequences_ids_vid.values() if nlist):
-        trace('Error: vid id sequences are not even in length! Aborting')
-        raise IOError
-    idx = existing_index_img
-    if not all(len(nlist.ids) == len(sequences_ids_img[DOWNLOADERS[idx]].ids) for nlist in sequences_ids_img.values() if nlist):
-        trace('Error: img id sequences are not even in length! Aborting')
-        raise IOError
+    # existing_index_vid = -1
+    # existing_index_img = -1
+    # for i, dt in enumerate(DOWNLOADERS):
+    #     if sequences_ids_vid[dt] is not None:
+    #         existing_index_vid = i
+    #         break
+    # for i, dt in enumerate(DOWNLOADERS):
+    #     if sequences_ids_img[dt] is not None:
+    #         existing_index_img = i
+    #         break
+    # assert all(index != -1 for index in [existing_index_vid, existing_index_img])
+    # idx = existing_index_vid
+    # if not all(len(nlist) == len(sequences_ids_vid[DOWNLOADERS[idx]]) for nlist in sequences_ids_vid.values() if nlist):
+    #     trace('Error: vid id sequences are not even in length! Aborting')
+    #     raise IOError
+    # idx = existing_index_img
+    # if not all(len(nlist) == len(sequences_ids_img[DOWNLOADERS[idx]]) for nlist in sequences_ids_img.values() if nlist):
+    #     trace('Error: img id sequences are not even in length! Aborting')
+    #     raise IOError
     for dt in DOWNLOADERS:
         ivlist = list(sequences_ids_vid[dt].ids if sequences_ids_vid[dt] else [])
         for iv in range(len(ivlist)):
