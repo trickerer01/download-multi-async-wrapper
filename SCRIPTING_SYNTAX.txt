@@ -1,3 +1,4 @@
+##                               <-- FIRST LINE IS ALWAYS IGNORED
 ## made by: somebody             <-- COMMENTS
 ## This file is only for syntax reference
 
