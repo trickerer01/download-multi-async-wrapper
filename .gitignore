@@ -1,15 +1,17 @@
 
 # Dev
 1venv/
-logs/*/
-*.7zip
-*.7z
+src/__pycache__/
+logs/*
 *.pyc
 *.bak
 src/curr.py
 
 # IDE
 /.idea/*
+
+# Excludes
+!logs/.dummy
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
