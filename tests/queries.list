@@ -1,0 +1,52 @@
+## comment
+### (VIDEOS) ###
+# nm
+# 1 2
+# path:D:/nm/ids.py
+# common:-dmode touch
+# common:--dump-tags
+# common:--verbose
+# sub:a
+-quality 1080p
+-a -b -c -dfff
+ggg
+# send
+
+
+# sub:b
+-+ggg
+-ggg
+-(x,z)
+(h~i~j~k)
+# send
+
+# sub:c
+-h -i -j -k
+--(x,z)
+(l~m~n)
+# send
+
+# sub:d
+-l -m -n
+--dfff
+-quality 360p
+-uvp always
+# send
+# end
+
+### (IMAGES) ###
+# rx
+# 1 2
+# path:D:/ruxx/app_gui.py
+# common:-dmode 2
+# common:-module rx
+# sub:a
+a
+# send
+
+# sub:b
+-+a
+-a
+b
+# send
+# end

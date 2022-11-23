@@ -1,9 +1,11 @@
 
+# Dev
 1venv/
-logs/
+logs/*/
+*.7zip
+*.7z
 *.pyc
 *.bak
-*.log
 src/curr.py
 
 # IDE
