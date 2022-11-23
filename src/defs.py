@@ -12,6 +12,7 @@ from typing import List, Union, Tuple
 
 UTF8 = 'utf-8'
 ACTION_STORE_TRUE = 'store_true'
+MIN_IDS_SEQ_LENGTH = 2
 
 
 class BaseConfig(object):

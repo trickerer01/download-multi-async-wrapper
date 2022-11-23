@@ -12,7 +12,7 @@ from re import fullmatch
 from subprocess import check_output
 from typing import List, Dict, Optional, Tuple
 
-from defs import DOWNLOADERS, UTF8, Sequence, Config, BaseConfig
+from defs import DOWNLOADERS, UTF8, Sequence, Config, BaseConfig, MIN_IDS_SEQ_LENGTH
 from executor import register_vid_queries, register_img_queries
 from logger import trace
 from sequences import validate_sequences, report_sequences, queries_from_sequences, report_finals
@@ -88,6 +88,7 @@ def form_queries(config: Optional[BaseConfig] = None):
                     cur_downloader_idx = DOWNLOADERS.index(line.split(' ')[1])
                 elif fullmatch(r'^#(?: \d+)+$', line):
                     cur_seq_ids[DOWNLOADERS[cur_downloader_idx]] = Sequence([int(num) for num in line.split(' ')[1:]], i + 1)
+                    assert len(cur_seq_ids[DOWNLOADERS[cur_downloader_idx]]) >= MIN_IDS_SEQ_LENGTH
                 elif fullmatch(r'^# path:[A-Z/~].+?$', line):
                     cur_seq_paths[DOWNLOADERS[cur_downloader_idx]] = line[line.find(':') + 1:]
                 elif fullmatch(r'^# common:-.+?$', line):
