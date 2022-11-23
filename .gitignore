@@ -1,3 +1,14 @@
+
+1venv/
+logs/
+*.pyc
+*.bak
+*.log
+src/curr.py
+
+# IDE
+/.idea/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

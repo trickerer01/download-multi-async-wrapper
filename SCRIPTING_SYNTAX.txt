@@ -1,0 +1,80 @@
+## made by: somebody             <-- COMMENTS
+## This file is only for syntax reference
+
+### (VIDEOS) ###                 <-- VIDEOS MARKER <REQUIRED>
+# nm                             <-- DOWNLOADER TYPE <REQUIRED>
+# 50000 51000                    <-- AT LEAST TWO IDS FOR RANGE <REQUIRED>
+                                     ALL DOWNLOADERS NEED TO HAVE THE SAME NUMBER OF IDS FOR SCRIPT TO BE VALID
+# path:D:/Projects/nm/src/ids.py <-- PATH TO THE DOWNLOADER PYTHON FILE (IDS, NOT PAGES) <REQUIRED>
+# common:-dmode touch            <-- ARGUMENTS TO ADD TO EVERY QUERY <OPTIONAL>
+# common:--dump-tags             <-- ARGUMENTS TO ADD TO EVERY QUERY <OPTIONAL>
+# common:--verbose               <-- ARGUMENTS TO ADD TO EVERY QUERY <OPTIONAL>
+# sub:a                          <-- SUBFOLDER FOR QUERY (NEW QUERY MARKER) <REQUIRED>
+-quality 1080p                   <-- QUERY ARGUMENT (QUALITY) <DOWNLOADER ARGUMENTS>
+-a -b -c -dfff                   <-- EXCLUDED TAGS <DOWNLOADER ARGUMENTS>
+ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
+                                     AT LEAST ONE 'TAGS' ARGUMENT IS REQUIRED FOR QUERY TO BE VALID
+# send                           <-- QUERY END MARKER <REQUIRED>
+                                     '<cmdline base...> -a -b -c -dfff ggg'
+                                     DOWNLOADER ARGUMENTS STILL ACCUMULATE AFTER THIS, SEE BELOW
+# sub:b
+-+ggg                            <-- REMOVE PREVIOUSLY REQUIRED SINGLE TAG (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
+-ggg                             <-- EXCLUDE PREVIOUSLY REQUIRED TAG <DOWNLOADER ARGUMENTS>
+-(x,z)                           <-- EXCLUDED TAGS COMBINATION <DOWNLOADER ARGUMENTS>
+(h~i~j~k)                        <-- REQUIRED 'ANY OF' TAGS GROUP <DOWNLOADER ARGUMENTS>
+# send                           <-- '<cmdline base...> -a -b -c -dfff -ggg -(x,z) (h~i~j~k)'
+
+# sub:c
+-h -i -j -k                      <-- REMOVE PREVIOUS TAGS GROUP AND EXCLUDE THEM (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
+--(x,z)                          <-- REMOVE PREVIOUSLY EXCLUDED TAGS COMBINATION (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
+(l~m~n)                          <-- REQUIRED 'ANY OF' TAGS GROUP <DOWNLOADER ARGUMENTS>
+# send                           <-- '<cmdline base...> -a -b -c -dfff -ggg -h -i -j -k (l~m~n)'
+
+# sub:d
+-l -m -n                         <-- REMOVE PREVIOUS TAGS GROUP AND EXCLUDE THEM (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
+--dfff                           <-- REMOVE PREVIOUS EXCLUDED SINGLE TAG (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
+-quality 360p                    <-- QUERY ARGUMENT (QUALITY, OVERRIDE) <DOWNLOADER ARGUMENTS>
+-uvp always                      <-- QUERY ARGUMENT (ULISTED VIDEOS DOWNLOAD POLICY) <DOWNLOADER ARGUMENTS>
+# send                           <-- '<cmdline base...> -a -b -c -ggg -h -i -j -k -l -m -n -uvp always'
+# end                            <-- DOWNLOADER QUERIES FINISH MARKER <REQUIRED>
+
+# rv
+# 3050000 3051000
+# path:D:/Projects/rv/src/ids.py
+# common:...
+# sub:...
+...
+# send
+
+# sub:...
+...
+# send
+# end
+
+# rn
+# 450000 451000
+# path:D:/Projects/ruxx/src/app_gui.py
+# common:...
+# sub:...
+...
+# send
+# end
+
+# rx
+# 5050000 5051000
+# path:D:/Projects/ruxx/src/app_gui.py
+# common:...
+# sub:...
+...
+# send
+# end
+
+### (IMAGES) ###                 <-- IMAGES MARKER (RUXX ONLY) <REQUIRED>
+# rx
+# 5050000 5051000
+# path:D:/Projects/ruxx/src/app_gui.py
+# common:...
+# sub:...
+...
+# send
+# end
