@@ -138,7 +138,8 @@ def form_queries(config: Optional[BaseConfig] = None):
     trace('Sequences are successfully read\n')
     report_sequences(sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img,
                      sequences_tags_vid, sequences_tags_img, sequences_subfolders_vid, sequences_subfolders_img,
-                     sequences_common_vid, sequences_common_img)
+                     sequences_common_vid, sequences_common_img,
+                     python_executable)
     validate_sequences(sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img,
                        sequences_tags_vid, sequences_tags_img, sequences_subfolders_vid, sequences_subfolders_img,
                        python_executable)

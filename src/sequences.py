@@ -71,7 +71,9 @@ def report_sequences(sequences_ids_vid, sequences_ids_img,
                      sequences_paths_vid, sequences_paths_img,
                      sequences_tags_vid, sequences_tags_img,
                      sequences_subfolders_vid, sequences_subfolders_img,
-                     sequences_common_vid, sequences_common_img) -> None:
+                     sequences_common_vid, sequences_common_img,
+                     python_executable) -> None:
+    trace(f'Python executable: \'{python_executable}\'')
     [trace(f'{len([q for q in seq.values() if q]):d} {name} sequences')
      for seq, name in zip([sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img],
                           ['sequences_ids_vid', 'sequences_ids_img', 'sequences_paths_vid', 'sequences_paths_img'])]
