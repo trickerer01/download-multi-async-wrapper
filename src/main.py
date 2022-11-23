@@ -40,6 +40,7 @@ def run_main() -> None:
 
 
 if __name__ == '__main__':
+    assert sys.version_info >= (3, 7), 'Minimum python version required is 3.7!'
     run_main()
     sys.exit(0)
 
