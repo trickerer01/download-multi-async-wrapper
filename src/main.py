@@ -9,7 +9,6 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 import sys
 
 from cmdargs import parse_arglist
-from defs import __DEBUG__
 from executor import execute
 from logger import open_logfile, close_logfile, trace
 from queries import read_queries_file, form_queries, update_next_ids
@@ -22,7 +21,7 @@ def cleanup() -> None:
 
 def run_main() -> None:
     try:
-        open_logfile(not __DEBUG__)
+        open_logfile()
         trace('Logfile opened...', False)
         parse_arglist(sys.argv[1:])
         trace(f'\n# Started at {datetime_str_full()} #')

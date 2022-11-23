@@ -10,8 +10,6 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 from abc import ABC, abstractmethod
 from typing import List, Union, Tuple
 
-__DEBUG__ = True
-
 UTF8 = 'utf-8'
 ACTION_STORE_TRUE = 'store_true'
 

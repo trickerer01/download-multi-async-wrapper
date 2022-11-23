@@ -9,7 +9,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 from asyncio import new_event_loop, AbstractEventLoop, as_completed, Future, SubprocessProtocol
 from typing import Dict, List, Optional
 
-from defs import __DEBUG__, UTF8, DOWNLOADERS, Config
+from defs import UTF8, DOWNLOADERS, Config
 from logger import trace, log_to
 from strings import datetime_str_nfull, unquote
 
@@ -70,10 +70,9 @@ async def run_cmd(query: str, dt: str, qi: int, begin_msg: str) -> None:
         trace(f'Executing cmdline: \'{query}\'')
         cmd_args = split_into_args(query)
         trace(f'Splitted into: \'{str(cmd_args)}\'')
-        if __DEBUG__:
-            if DOWNLOADERS.index(dt) not in [0, 1] or qi not in range(0, 90):
-                return
-                pass
+        if DOWNLOADERS.index(dt) not in [0, 1] or qi not in range(0, 90):
+            # return
+            pass
         ef = Future(loop=executor_event_loop)
         tr, _ = await executor_event_loop.subprocess_exec(lambda: DummyResultProtocol(ef), *cmd_args, stderr=log_file, stdout=log_file)
         await ef
