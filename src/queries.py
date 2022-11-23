@@ -76,11 +76,12 @@ def form_queries():
             if line[0] == '#':
                 if fullmatch(r'^##.*?$', line):
                     trace(f'Ignoring commented out line {i + 1:d}: \'{line}\'')
-                elif fullmatch(r'^.*[: ]-dmode .+?$', line):
+                    continue
+                if fullmatch(r'^.*[: ]-dmode .+?$', line):
                     if Config.ignore_download_mode is True:
-                        trace(f'Info: \'{line}\' found at line {i + 1:d}. Ignored!')
+                        trace(f'Info: \'{line}\' download mode found at line {i + 1:d}. Ignored!')
                         continue
-                elif fullmatch(fr'^# (?:{"|".join(DOWNLOADERS)}).*?$', line):
+                if fullmatch(fr'^# (?:{"|".join(DOWNLOADERS)}).*?$', line):
                     cur_downloader_idx = DOWNLOADERS.index(line.split(' ')[1])
                 elif fullmatch(r'^#(?: \d+)+$', line):
                     cur_seq_ids[DOWNLOADERS[cur_downloader_idx]] = Sequence([int(num) for num in line.split(' ')[1:]], i + 1)
