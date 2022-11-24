@@ -13,6 +13,7 @@ from cmdargs import parse_arglist
 from defs import DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RN, DOWNLOADER_RX, BaseConfig
 from executor import queues_vid, queues_img
 from queries import read_queries_file, form_queries
+from strings import date_str_md
 
 args_argparse_str1 = (
     '-path ../tests '
@@ -55,7 +56,7 @@ class QueriesFormTests(TestCase):
         self.assertEqual(len(queues_img[DOWNLOADER_RX]), 2)
         self.assertEqual(
             queues_vid[DOWNLOADER_NM][0],
-            'python3 D:/nm/ids.py -start 1 -end 1 -path "../tests/1123/" --dump-tags --verbose -script "'
+            f'python3 D:/nm/ids.py -start 1 -end 1 -path "../tests/{date_str_md(False)}/" --dump-tags --verbose -script "'
             'a: -quality 1080p -a -b -c -dfff ggg; '
             'b: -quality 1080p -a -b -c -dfff -ggg -(x,z) (h~i~j~k); '
             'c: -quality 1080p -a -b -c -dfff -ggg -h -i -j -k (l~m~n); '
@@ -63,11 +64,11 @@ class QueriesFormTests(TestCase):
         )
         self.assertEqual(
             queues_img[DOWNLOADER_RX][0],
-            'python3 D:/ruxx/app_gui.py id:>=1 id:<=1 -path "../tests/img_1123/a/" -module rx a'
+            f'python3 D:/ruxx/app_gui.py id:>=1 id:<=1 -path "../tests/{date_str_md(True)}/a/" -module rx a'
         )
         self.assertEqual(
             queues_img[DOWNLOADER_RX][1],
-            'python3 D:/ruxx/app_gui.py id:>=1 id:<=1 -path "../tests/img_1123/b/" -module rx -a b'
+            f'python3 D:/ruxx/app_gui.py id:>=1 id:<=1 -path "../tests/{date_str_md(True)}/b/" -module rx -a b'
         )
         print('test_queries1 passed')
 
