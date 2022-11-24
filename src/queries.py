@@ -58,8 +58,8 @@ def form_queries(config: Optional[BaseConfig] = None):
 
     for i, line in enumerate(queries_file_lines):
         try:
-            line = line.strip()
-            if i == 0 or line in ['', '### (VIDEOS) ###', '### (IMAGES) ###']:
+            line = line.strip(' \n\ufeff')  # remove BOM too
+            if line in ['', '### (VIDEOS) ###', '### (IMAGES) ###']:
                 if line == '### (VIDEOS) ###':
                     cur_seq_ids = sequences_ids_vid
                     cur_seq_paths = sequences_paths_vid
