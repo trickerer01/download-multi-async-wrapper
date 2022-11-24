@@ -6,9 +6,9 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple
 
-from defs import DOWNLOADERS, RANGE_TEMPLATES, RUXX_INDECIES, IntPair, Config, BaseConfig
+from defs import DOWNLOADERS, RANGE_TEMPLATES, RUXX_INDECIES, IntPair, Config
 from logger import trace
 from strings import normalize_ruxx_tag, path_args, NEWLINE
 
@@ -92,9 +92,7 @@ def queries_from_sequences(sequences_ids_vid, sequences_ids_img,
                            sequences_subfolders_vid, sequences_subfolders_img,
                            sequences_common_vid, sequences_common_img,
                            python_executable,
-                           config: Optional[BaseConfig] = None) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
-    c = config or Config
-
+                           config=Config) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
     vrange, irange = (
         {dt: IntPair(sids[dt].ids[:2]) for dt in DOWNLOADERS if sids[dt]} for sids in [sequences_ids_vid, sequences_ids_img]
     )  # type: Dict[str, IntPair]
@@ -107,12 +105,12 @@ def queries_from_sequences(sequences_ids_vid, sequences_ids_img,
     } for spath, srange in zip([sequences_paths_vid, sequences_paths_img], [vrange, irange]))  # type: Dict[str, str]
 
     queries_final_vid, queries_final_img = ({
-        dt: ([f'{sbase_q[dt]} {path_args(c.dest_base, not is_vidpath, ssub[dt][i])} '
+        dt: ([f'{sbase_q[dt]} {path_args(config.dest_base, not is_vidpath, ssub[dt][i])} '
               f'{" ".join(normalize_ruxx_tag(tag) for tag in ctags[dt])} '
               f'{" ".join(normalize_ruxx_tag(tag) for tag in staglist)}'
               for i, staglist in enumerate(stags[dt]) if len(staglist) > 0]
              ) if DOWNLOADERS.index(dt) in RUXX_INDECIES else
-            ([f'{sbase_q[dt]} {path_args(c.dest_base, not is_vidpath, "")} '
+            ([f'{sbase_q[dt]} {path_args(config.dest_base, not is_vidpath, "")} '
               f'{" ".join(ctags[dt])} '
               f'-script "'
               f'{"; ".join(" ".join([f"{ssub[dt][i]}:"] + staglist) for i, staglist in enumerate(stags[dt]))}'

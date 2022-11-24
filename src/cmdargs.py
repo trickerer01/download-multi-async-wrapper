@@ -11,8 +11,7 @@ from os import path
 from typing import Optional, List
 
 from defs import (
-    HELP_DEBUG, HELP_PATH, HELP_SCRIPT_PATH, HELP_BAK_PATH, HELP_UPDATE, HELP_FETCHER_PATH, HELP_IGNORE_DMODE, ACTION_STORE_TRUE,
-    BaseConfig, Config
+    HELP_DEBUG, HELP_PATH, HELP_SCRIPT_PATH, HELP_BAK_PATH, HELP_UPDATE, HELP_FETCHER_PATH, HELP_IGNORE_DMODE, ACTION_STORE_TRUE, Config
 )
 from logger import trace
 from strings import normalize_path, unquote
@@ -52,10 +51,8 @@ def valid_file_path(pathstr: str) -> str:
     return newpath
 
 
-def parse_arglist(args: List[str], config: Optional[BaseConfig] = None) -> None:
+def parse_arglist(args: List[str], config=Config) -> None:
     global parser
-
-    c = config or Config  # type: BaseConfig
 
     parser = ArgumentParser(add_help=False)
     parser.add_argument('--help', action='help')
@@ -77,13 +74,13 @@ def parse_arglist(args: List[str], config: Optional[BaseConfig] = None) -> None:
             if parsed.bakpath == '':
                 trace('-bakpath is required!')
                 raise ArgumentError
-        c.debug = parsed.debug
-        c.dest_base = parsed.path
-        c.script_path = parsed.script
-        c.ignore_download_mode = parsed.ignore_download_mode
-        c.update = parsed.update
-        c.dest_bak_base = parsed.bakpath
-        c.fetcher_root = parsed.fetcherpath
+        config.debug = parsed.debug
+        config.dest_base = parsed.path
+        config.script_path = parsed.script
+        config.ignore_download_mode = parsed.ignore_download_mode
+        config.update = parsed.update
+        config.dest_bak_base = parsed.bakpath
+        config.fetcher_root = parsed.fetcherpath
     except (ArgumentError, TypeError, ValueError, Exception):
         raise
 

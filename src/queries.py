@@ -12,7 +12,7 @@ from re import fullmatch
 from subprocess import check_output
 from typing import List, Dict, Optional, Tuple
 
-from defs import DOWNLOADERS, UTF8, Sequence, Config, BaseConfig, MIN_IDS_SEQ_LENGTH
+from defs import DOWNLOADERS, UTF8, Sequence, Config, MIN_IDS_SEQ_LENGTH
 from executor import register_vid_queries, register_img_queries
 from logger import trace
 from sequences import validate_sequences, report_sequences, queries_from_sequences, report_finals
@@ -24,19 +24,15 @@ sequences_ids_vid = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional
 sequences_ids_img = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[Sequence]]
 
 
-def read_queries_file(config: Optional[BaseConfig] = None) -> None:
+def read_queries_file(config=Config) -> None:
     global queries_file_lines
 
-    c = config or Config
-    with open(c.script_path, 'rt', encoding=UTF8) as qfile:
+    with open(config.script_path, 'rt', encoding=UTF8) as qfile:
         queries_file_lines = qfile.readlines()
 
 
-def form_queries(config: Optional[BaseConfig] = None):
-    c = config or Config
-
+def form_queries(config=Config):
     python_executable = ''
-
     sequences_paths_vid = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[str]]
     sequences_paths_img = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[str]]
     sequences_common_vid = {dt: [] for dt in DOWNLOADERS}  # type: Dict[str, List[str]]
@@ -83,7 +79,7 @@ def form_queries(config: Optional[BaseConfig] = None):
                     trace(f'Ignoring commented out line {i + 1:d}: \'{line}\'')
                     continue
                 if fullmatch(r'^.*[: ]-dmode .+?$', line):
-                    if c.ignore_download_mode is True:
+                    if config.ignore_download_mode is True:
                         trace(f'Info: \'{line}\' download mode found at line {i + 1:d}. Ignored!')
                         continue
                 if fullmatch(r'^### PYTHON:.*?$', line):
@@ -149,7 +145,7 @@ def form_queries(config: Optional[BaseConfig] = None):
         sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img,
         sequences_tags_vid, sequences_tags_img, sequences_subfolders_vid, sequences_subfolders_img,
         sequences_common_vid, sequences_common_img,
-        python_executable, c
+        python_executable, config
     )
 
     report_finals(queries_final_vid, queries_final_img)
