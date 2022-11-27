@@ -121,6 +121,7 @@ def form_queries(config=Config):
                         assert len(tags_to_remove) == 0
                         continue
                     else:
+                        assert all(len(tag) > 0 for tag in [tag[1:] for tag in line.split(' ')])
                         for j in reversed(range(len(cur_tags_list))):
                             if cur_tags_list[j][0] == '(' and cur_tags_list[j][-1] == ')' and cur_tags_list[j].find('~') != -1:
                                 assert cur_tags_list[j][1:-1] == '~'.join(tag[1:] for tag in line.split(' '))
