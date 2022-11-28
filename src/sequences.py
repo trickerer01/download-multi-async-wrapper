@@ -75,7 +75,7 @@ def queries_from_sequences(sequences_ids_vid: Dict[str, Optional[Sequence]], seq
                            python_executable: str,
                            config=Config) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
     vrange, irange = (
-        {dt: IntPair(sids[dt].ids[:2]) for dt in DOWNLOADERS if sids[dt]} for sids in [sequences_ids_vid, sequences_ids_img]
+        {dt: IntPair(sids[dt][:2]) for dt in DOWNLOADERS if sids[dt]} for sids in [sequences_ids_vid, sequences_ids_img]
     )  # type: Dict[str, IntPair]
 
     base_q_v, base_q_i = ({

@@ -8,7 +8,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 
 from abc import ABC, abstractmethod
-from typing import List, Union, Tuple
+from typing import List, Union, Tuple, Iterable
 
 UTF8 = 'utf-8'
 ACTION_STORE_TRUE = 'store_true'
@@ -60,6 +60,12 @@ class Sequence:
 
     def __len__(self) -> int:
         return len(self.ids)
+
+    def __getitem__(self, item: Union[int, slice]) -> Union[int, List[int]]:
+        return self.ids.__getitem__(item)
+
+    def __setitem__(self, key: Union[int, slice], value: Union[int, Iterable[int]]) -> None:
+        self.ids.__setitem__(key, value)
 
 
 class Pair(ABC):

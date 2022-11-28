@@ -70,7 +70,7 @@ async def run_cmd(query: str, dt: str, qi: int, begin_msg: str) -> None:
         trace(f'Executing cmdline: \'{query}\'')
         cmd_args = split_into_args(query)
         trace(f'Splitted into: \'{str(cmd_args)}\'')
-        if DOWNLOADERS.index(dt) not in [0, 1] or qi not in range(0, 90):
+        if DOWNLOADERS.index(dt) not in [3] or qi not in range(1, 10):
             # return
             pass
         ef = Future(loop=executor_event_loop)

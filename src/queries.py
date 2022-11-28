@@ -104,7 +104,7 @@ def form_queries(config=Config):
                     trace(f'Error: unknown param at line {i + 1:d}!')
                     raise IOError
             else:  # elif line[0] in ['(', '-', '*'] or line[0].isalpha():
-                assert len(cur_seq_ids[DOWNLOADERS[cur_downloader_idx]].ids) > 0
+                assert len(cur_seq_ids[DOWNLOADERS[cur_downloader_idx]]) > 0
                 if line[0] not in ['('] and (not line.startswith('-+(')) and line.find('~') != -1:
                     trace(f'Error: unsupported ungrouped OR symbol at line {i + 1:d}!')
                     raise IOError
