@@ -6,37 +6,18 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 
-from defs import DOWNLOADERS, RANGE_TEMPLATES, RUXX_INDECIES, IntPair, Config
+from defs import DOWNLOADERS, RANGE_TEMPLATES, RUXX_INDECIES, IntPair, Config, Sequence
 from logger import trace
 from strings import normalize_ruxx_tag, path_args, NEWLINE
 
 
-def validate_sequences(sequences_ids_vid, sequences_ids_img,
-                       sequences_paths_vid, sequences_paths_img,
-                       sequences_tags_vid, sequences_tags_img,
-                       sequences_subfolders_vid, sequences_subfolders_img,
-                       python_executable) -> None:
-    # existing_index_vid = -1
-    # existing_index_img = -1
-    # for i, dt in enumerate(DOWNLOADERS):
-    #     if sequences_ids_vid[dt] is not None:
-    #         existing_index_vid = i
-    #         break
-    # for i, dt in enumerate(DOWNLOADERS):
-    #     if sequences_ids_img[dt] is not None:
-    #         existing_index_img = i
-    #         break
-    # assert all(index != -1 for index in [existing_index_vid, existing_index_img])
-    # idx = existing_index_vid
-    # if not all(len(nlist) == len(sequences_ids_vid[DOWNLOADERS[idx]]) for nlist in sequences_ids_vid.values() if nlist):
-    #     trace('Error: vid id sequences are not even in length! Aborting')
-    #     raise IOError
-    # idx = existing_index_img
-    # if not all(len(nlist) == len(sequences_ids_img[DOWNLOADERS[idx]]) for nlist in sequences_ids_img.values() if nlist):
-    #     trace('Error: img id sequences are not even in length! Aborting')
-    #     raise IOError
+def validate_sequences(sequences_ids_vid: Dict[str, Optional[Sequence]], sequences_ids_img: Dict[str, Optional[Sequence]],
+                       sequences_paths_vid: Dict[str, Optional[str]], sequences_paths_img: Dict[str, Optional[str]],
+                       sequences_tags_vid: Dict[str, List[List[str]]], sequences_tags_img: Dict[str, List[List[str]]],
+                       sequences_subfolders_vid: Dict[str, List[str]], sequences_subfolders_img: Dict[str, List[str]],
+                       python_executable: str) -> None:
     if python_executable == '':
         trace('Error: python_executable was not declared!')
         raise IOError
@@ -67,12 +48,12 @@ def validate_sequences(sequences_ids_vid, sequences_ids_img,
             raise IOError
 
 
-def report_sequences(sequences_ids_vid, sequences_ids_img,
-                     sequences_paths_vid, sequences_paths_img,
-                     sequences_tags_vid, sequences_tags_img,
-                     sequences_subfolders_vid, sequences_subfolders_img,
-                     sequences_common_vid, sequences_common_img,
-                     python_executable) -> None:
+def report_sequences(sequences_ids_vid: Dict[str, Optional[Sequence]], sequences_ids_img: Dict[str, Optional[Sequence]],
+                     sequences_paths_vid: Dict[str, Optional[str]], sequences_paths_img: Dict[str, Optional[str]],
+                     sequences_tags_vid: Dict[str, List[List[str]]], sequences_tags_img: Dict[str, List[List[str]]],
+                     sequences_subfolders_vid: Dict[str, List[str]], sequences_subfolders_img: Dict[str, List[str]],
+                     sequences_common_vid: Dict[str, List[str]], sequences_common_img: Dict[str, List[str]],
+                     python_executable: str) -> None:
     trace(f'Python executable: \'{python_executable}\'')
     [trace(f'{len([q for q in seq.values() if q]):d} {name} sequences')
      for seq, name in zip([sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img],
@@ -86,12 +67,12 @@ def report_sequences(sequences_ids_vid, sequences_ids_img,
                                   sequences_common_vid, sequences_common_img, sequences_tags_vid, sequences_tags_img])]
 
 
-def queries_from_sequences(sequences_ids_vid, sequences_ids_img,
-                           sequences_paths_vid, sequences_paths_img,
-                           sequences_tags_vid, sequences_tags_img,
-                           sequences_subfolders_vid, sequences_subfolders_img,
-                           sequences_common_vid, sequences_common_img,
-                           python_executable,
+def queries_from_sequences(sequences_ids_vid: Dict[str, Optional[Sequence]], sequences_ids_img: Dict[str, Optional[Sequence]],
+                           sequences_paths_vid: Dict[str, Optional[str]], sequences_paths_img: Dict[str, Optional[str]],
+                           sequences_tags_vid: Dict[str, List[List[str]]], sequences_tags_img: Dict[str, List[List[str]]],
+                           sequences_subfolders_vid: Dict[str, List[str]], sequences_subfolders_img: Dict[str, List[str]],
+                           sequences_common_vid: Dict[str, List[str]], sequences_common_img: Dict[str, List[str]],
+                           python_executable: str,
                            config=Config) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
     vrange, irange = (
         {dt: IntPair(sids[dt].ids[:2]) for dt in DOWNLOADERS if sids[dt]} for sids in [sequences_ids_vid, sequences_ids_img]
@@ -124,7 +105,7 @@ def queries_from_sequences(sequences_ids_vid, sequences_ids_img,
     return queries_final_vid, queries_final_img
 
 
-def report_finals(queries_final_vid, queries_final_img) -> None:
+def report_finals(queries_final_vid: Dict[str, List[str]], queries_final_img: Dict[str, List[str]]) -> None:
     trace(f'\nQueries vid:\n{NEWLINE.join(NEWLINE.join(finals) for finals in queries_final_vid.values() if len(finals) > 0)}', False)
     trace(f'\nQueries img:\n{NEWLINE.join(NEWLINE.join(finals) for finals in queries_final_img.values() if len(finals) > 0)}', False)
 
