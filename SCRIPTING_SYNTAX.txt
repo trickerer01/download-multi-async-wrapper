@@ -5,7 +5,6 @@
 ### (VIDEOS) ###                 <-- VIDEOS MARKER <REQUIRED>
 # nm                             <-- DOWNLOADER TYPE <REQUIRED>
 # 50000 51000                    <-- AT LEAST TWO IDS FOR RANGE <REQUIRED>
-                                     ALL DOWNLOADERS NEED TO HAVE THE SAME NUMBER OF IDS FOR SCRIPT TO BE VALID
 # path:D:/Projects/nm/src/ids.py <-- PATH TO THE DOWNLOADER PYTHON FILE (IDS, NOT PAGES) <REQUIRED>
 # common:-dmode touch            <-- ARGUMENTS TO ADD TO EVERY QUERY <OPTIONAL>
 # common:--dump-tags             <-- ARGUMENTS TO ADD TO EVERY QUERY <OPTIONAL>
