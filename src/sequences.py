@@ -106,8 +106,8 @@ def queries_from_sequences(sequences_ids_vid: Dict[str, Optional[Sequence]], seq
 
 
 def report_finals(queries_final_vid: Dict[str, List[str]], queries_final_img: Dict[str, List[str]]) -> None:
-    trace(f'\nQueries vid:\n{NEWLINE.join(NEWLINE.join(finals) for finals in queries_final_vid.values() if len(finals) > 0)}', False)
-    trace(f'\nQueries img:\n{NEWLINE.join(NEWLINE.join(finals) for finals in queries_final_img.values() if len(finals) > 0)}', False)
+    [trace(f'\nQueries {ty}:\n{NEWLINE.join(NEWLINE.join(finals) for finals in final_q.values() if len(finals) > 0)}', False)
+     for ty, final_q in zip(['vid', 'img'], [queries_final_vid, queries_final_img])]
 
 #
 #

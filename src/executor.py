@@ -67,7 +67,7 @@ async def run_cmd(query: str, dt: str, qi: int, begin_msg: str) -> None:
     with open(f'{Config.DEST_LOGS_BASE}log_{dt}_{exec_time}.log', 'at', encoding=UTF8, buffering=True) as log_file:
         trace(begin_msg)
         log_to(begin_msg, log_file)
-        trace(f'Executing cmdline: \'{query}\'')
+        trace(f'Executing cmdline {qi:d}: \'{query}\'')
         cmd_args = split_into_args(query)
         trace(f'Splitted into: \'{str(cmd_args)}\'')
         if DOWNLOADERS.index(dt) not in [3] or qi not in range(1, 10):
@@ -83,15 +83,13 @@ async def run_cmd(query: str, dt: str, qi: int, begin_msg: str) -> None:
 
 async def run_dt_cmds(dts: List[str], tys: List[str], queries: List[str]) -> None:
     assert all(dt == dts[0] for dt in dts)
-    vts = its = 0
+    dt = dts[0]
+    qis = [0, 0]
     for qi in range(len(queries)):
-        is_vid_q = tys[qi] == 'vid'
-        if is_vid_q:
-            vts += 1
-        else:
-            its += 1
-        await run_cmd(queries[qi], dts[0], qi, f'\nExecuting {dts[0]} {tys[qi]} query {vts if is_vid_q else its:d}:\n{queries[qi]}')
-    trace(f'{dts[0].upper()} COMPLETED\n')
+        q_idx = 1 - int(tys[qi] == 'vid')
+        qis[q_idx] += 1
+        await run_cmd(queries[qi], dt, qi, f'\nExecuting {dt} {tys[qi]} query {qis[q_idx]:d}:\n{queries[qi]}')
+    trace(f'{dt.upper()} COMPLETED\n')
 
 
 async def run_all_cmds() -> None:

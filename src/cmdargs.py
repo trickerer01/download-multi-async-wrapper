@@ -29,10 +29,10 @@ def valid_positive_nonzero_int(val: str) -> int:
     return val
 
 
-def valid_path(pathstr: str) -> str:
+def valid_dir_path(pathstr: str) -> str:
     try:
         newpath = normalize_path(unquote(pathstr))
-        if not path.exists(newpath):
+        if not path.isdir(newpath):
             raise ValueError
     except Exception:
         raise ArgumentError
@@ -58,12 +58,12 @@ def parse_arglist(args: List[str], config=Config) -> None:
     parser.add_argument('--help', action='help')
 
     parser.add_argument('--debug', action=ACTION_STORE_TRUE, help=HELP_DEBUG)
-    parser.add_argument('-path', metavar='#PATH_TO_DIR', default='./', help=HELP_PATH, type=valid_path)
+    parser.add_argument('-path', metavar='#PATH_TO_DIR', default='./', help=HELP_PATH, type=valid_dir_path)
     parser.add_argument('-script', metavar='#PATH_TO_FILE', required=True, help=HELP_SCRIPT_PATH, type=valid_file_path)
     parser.add_argument('--ignore-download-mode', action=ACTION_STORE_TRUE, help=HELP_IGNORE_DMODE)
     parser.add_argument('--update', action=ACTION_STORE_TRUE, help=HELP_UPDATE)
-    parser.add_argument('-bakpath', metavar='#PATH_TO_DIR', default='./', help=HELP_BAK_PATH, type=valid_path)
-    parser.add_argument('-fetcherpath', metavar='#PATH_TO_DIR', default='./', help=HELP_FETCHER_PATH, type=valid_path)
+    parser.add_argument('-bakpath', metavar='#PATH_TO_DIR', default='./', help=HELP_BAK_PATH, type=valid_dir_path)
+    parser.add_argument('-fetcherpath', metavar='#PATH_TO_DIR', default='./', help=HELP_FETCHER_PATH, type=valid_dir_path)
 
     try:
         parsed = parser.parse_args(args)

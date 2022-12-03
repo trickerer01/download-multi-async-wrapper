@@ -15,16 +15,15 @@ NEWLINE = '\n'
 
 
 def unquote(tag: str) -> str:
-    while len(tag) > 1 and tag[0] == tag[-1] and tag[0] in ['"', '\'']:
+    while len(tag) > 1 and tag[0] == tag[-1] in '"\'':
         tag = tag[1:-1]
     return tag
 
 
-def normalize_path(basepath: str, append_slash: bool = True) -> str:
+def normalize_path(basepath: str, append_slash=True) -> str:
     normalized_path = basepath.replace('\\', SLASH)
-    if append_slash and len(normalized_path) != 0 and normalized_path[-1] != SLASH:
-        normalized_path += SLASH
-    return normalized_path
+    need_slash = append_slash is True and len(normalized_path) != 0 and normalized_path[-1] != SLASH
+    return f'{normalized_path}{SLASH}' if need_slash else normalized_path
 
 
 def timestamped_string(msg: str, timestamp: str) -> str:
@@ -34,7 +33,7 @@ def timestamped_string(msg: str, timestamp: str) -> str:
 def all_tags_negative(taglist: List[str]) -> bool:
     all_neg = True
     for tag in taglist:
-        all_neg &= tag[0] == '-'
+        all_neg &= len(tag) > 0 and tag[0] == '-'
     return all_neg
 
 
