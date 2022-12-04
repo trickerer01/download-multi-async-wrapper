@@ -121,12 +121,17 @@ def form_queries(config=Config):
                         assert len(tags_to_remove) == 0
                         continue
                     else:
-                        assert all(len(tag) > 0 for tag in [tag[1:] for tag in line.split(' ')])
+                        tags_split = [tag[1:] for tag in line.split(' ')]
+                        assert all(len(tag) > 0 for tag in tags_split)
+                        need_find_previous_or_group = len(tags_split) > 1
                         for j in reversed(range(len(cur_tags_list))):
                             if cur_tags_list[j][0] == '(' and cur_tags_list[j][-1] == ')' and cur_tags_list[j].find('~') != -1:
-                                assert cur_tags_list[j][1:-1] == '~'.join(tag[1:] for tag in line.split(' '))
+                                assert cur_tags_list[j][1:-1] == '~'.join(tags_split)
                                 del cur_tags_list[j]
+                                need_find_previous_or_group = False
                                 break
+                        if need_find_previous_or_group is True:
+                            trace(f'Info: multiple exclusion at {i + 1:d}, no previous matching \'or\' group found. Line: \'{line}\'')
                 cur_tags_list += line.split(' ')
         except Exception:
             trace(f'Error: issue encountered while parsing queries file at line {i + 1:d}!')
