@@ -15,7 +15,7 @@ from typing import List, Dict, Optional, Tuple
 from defs import DOWNLOADERS, UTF8, Sequence, Config, MIN_IDS_SEQ_LENGTH
 from executor import register_vid_queries, register_img_queries
 from logger import trace
-from sequences import validate_sequences, report_sequences, queries_from_sequences, report_finals
+from sequences import validate_sequences, report_sequences, queries_from_sequences_base, queries_from_sequences, report_finals
 from strings import datetime_str_nfull, bytes_to_lines, all_tags_negative, SLASH, NEWLINE
 
 queries_file_lines = []  # type: List[str]
@@ -142,6 +142,17 @@ def form_queries(config=Config):
                        python_executable)
 
     trace('Sequences are validated. Preparing final lists...')
+
+    # base final sequences
+    trace('\nBase:')
+    report_finals(*queries_from_sequences_base(
+        sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img,
+        sequences_tags_vid, sequences_tags_img, sequences_subfolders_vid, sequences_subfolders_img,
+        sequences_common_vid, sequences_common_img,
+        python_executable, config
+    ))
+
+    trace('\nOptimized:')
     queries_final_vid, queries_final_img = queries_from_sequences(
         sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img,
         sequences_tags_vid, sequences_tags_img, sequences_subfolders_vid, sequences_subfolders_img,

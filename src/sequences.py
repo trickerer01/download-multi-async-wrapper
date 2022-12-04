@@ -67,6 +67,45 @@ def report_sequences(sequences_ids_vid: Dict[str, Optional[Sequence]], sequences
                                   sequences_common_vid, sequences_common_img, sequences_tags_vid, sequences_tags_img])]
 
 
+def _get_base_qs(
+        sequences_ids_vid: Dict[str, Optional[Sequence]], sequences_ids_img: Dict[str, Optional[Sequence]],
+        sequences_paths_vid: Dict[str, Optional[str]], sequences_paths_img: Dict[str, Optional[str]],
+        python_executable: str) -> Tuple[Dict[str, str], Dict[str, str]]:
+    vrange, irange = (
+        {dt: IntPair(sids[dt][:2]) for dt in DOWNLOADERS if sids[dt]} for sids in [sequences_ids_vid, sequences_ids_img]
+    )  # type: Dict[str, IntPair]
+    base_q_v, base_q_i = ({
+        dt: (f'{python_executable} {spath[dt]} '
+             f'{RANGE_TEMPLATES[dt].first % srange[dt].first} '
+             f'{RANGE_TEMPLATES[dt].second % (srange[dt].second - 1)}')
+        for dt in DOWNLOADERS if dt in srange.keys() and dt in spath.keys()
+    } for spath, srange in zip([sequences_paths_vid, sequences_paths_img], [vrange, irange]))  # type: Dict[str, str]
+    return base_q_v, base_q_i
+
+
+def queries_from_sequences_base(
+        sequences_ids_vid: Dict[str, Optional[Sequence]], sequences_ids_img: Dict[str, Optional[Sequence]],
+        sequences_paths_vid: Dict[str, Optional[str]], sequences_paths_img: Dict[str, Optional[str]],
+        sequences_tags_vid: Dict[str, List[List[str]]], sequences_tags_img: Dict[str, List[List[str]]],
+        sequences_subfolders_vid: Dict[str, List[str]], sequences_subfolders_img: Dict[str, List[str]],
+        sequences_common_vid: Dict[str, List[str]], sequences_common_img: Dict[str, List[str]],
+        python_executable: str, config=Config) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
+
+    base_q_v, base_q_i = _get_base_qs(sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img, python_executable)
+
+    queries_final_vid, queries_final_img = ({
+        dt: ([f'{sbase_q[dt]} {path_args(config.dest_base, not is_vidpath, ssub[dt][i])} '
+              f'{" ".join(normalize_ruxx_tag(tag) if DOWNLOADERS.index(dt) in RUXX_INDECIES else tag for tag in ctags[dt])} '
+              f'{" ".join(normalize_ruxx_tag(tag) if DOWNLOADERS.index(dt) in RUXX_INDECIES else tag for tag in staglist)}'
+              for i, staglist in enumerate(stags[dt]) if len(staglist) > 0])
+        for dt in DOWNLOADERS
+    } for sbase_q, ssub, ctags, stags, is_vidpath in
+        zip([base_q_v, base_q_i], [sequences_subfolders_vid, sequences_subfolders_img], [sequences_common_vid, sequences_common_img],
+            [sequences_tags_vid, sequences_tags_img], [True, False]))  # type: Dict[str, List[str]]
+
+    return queries_final_vid, queries_final_img
+
+
 def queries_from_sequences(sequences_ids_vid: Dict[str, Optional[Sequence]], sequences_ids_img: Dict[str, Optional[Sequence]],
                            sequences_paths_vid: Dict[str, Optional[str]], sequences_paths_img: Dict[str, Optional[str]],
                            sequences_tags_vid: Dict[str, List[List[str]]], sequences_tags_img: Dict[str, List[List[str]]],
@@ -74,16 +113,8 @@ def queries_from_sequences(sequences_ids_vid: Dict[str, Optional[Sequence]], seq
                            sequences_common_vid: Dict[str, List[str]], sequences_common_img: Dict[str, List[str]],
                            python_executable: str,
                            config=Config) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
-    vrange, irange = (
-        {dt: IntPair(sids[dt][:2]) for dt in DOWNLOADERS if sids[dt]} for sids in [sequences_ids_vid, sequences_ids_img]
-    )  # type: Dict[str, IntPair]
 
-    base_q_v, base_q_i = ({
-        dt: (f'{python_executable} {spath[dt]} '
-             f'{RANGE_TEMPLATES[dt].first % srange[dt].first} '
-             f'{RANGE_TEMPLATES[dt].second % (srange[dt].second - 1)}')
-        for dt in DOWNLOADERS if dt in srange.keys() and dt in spath.keys()
-    } for spath, srange in zip([sequences_paths_vid, sequences_paths_img], [vrange, irange]))  # type: Dict[str, str]
+    base_q_v, base_q_i = _get_base_qs(sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img, python_executable)
 
     queries_final_vid, queries_final_img = ({
         dt: ([f'{sbase_q[dt]} {path_args(config.dest_base, not is_vidpath, ssub[dt][i])} '
