@@ -27,6 +27,8 @@ ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
 
 # sub:c
 -h -i -j -k                      <-- REMOVE PREVIOUS TAGS GROUP AND EXCLUDE THEM (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
+                                 <-- MUST MATCH THIS WAY EXACTLY OTHERWISE YOU GET SOMETHING LIKE '(h~i~j~k~l) -h -i -j -k'
+                                 <-- LOGS WILL MENTION MULTIPLE EXCLUSIONS LIKE THIS WHERE MATCHING 'OR' GROUP WASN'T FOUND
 --(x,z)                          <-- REMOVE PREVIOUSLY EXCLUDED TAGS COMBINATION (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
 (l~m~n)                          <-- REQUIRED 'ANY OF' TAGS GROUP <DOWNLOADER ARGUMENTS>
 # send                           <-- '<cmdline base...> -a -b -c -dfff -ggg -h -i -j -k (l~m~n)'
