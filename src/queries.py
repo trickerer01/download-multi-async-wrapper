@@ -108,7 +108,7 @@ def form_queries(config=Config):
                 if line[0] not in ['('] and (not line.startswith('-+(')) and line.find('~') != -1:
                     trace(f'Error: unsupported ungrouped OR symbol at line {i + 1:d}!')
                     raise IOError
-                if all_tags_negative(line.split(' ')):
+                if all_tags_negative(line.split(' ')):  # line[0] === '-'
                     if line[1] in ['-', '+']:
                         # remove --tag(s) or -+tag(s) from list, convert: --a --b -> [-a, -b] OR -+a -+b -> [a, b]
                         tags_to_remove = [tag[2 if line[1] == '+' else 1:] for tag in line.split(' ')]
