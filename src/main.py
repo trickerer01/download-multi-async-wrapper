@@ -9,9 +9,10 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 import sys
 
 from cmdargs import parse_arglist
-from defs import Config
+from defs import Config, SUPPORTED_SYSTEMS
 from executor import execute
 from logger import open_logfile, close_logfile, trace
+from platform import system as running_system
 from queries import read_queries_file, form_queries, update_next_ids
 from strings import datetime_str_full
 
@@ -41,6 +42,7 @@ def run_main() -> None:
 
 if __name__ == '__main__':
     assert sys.version_info >= (3, 7), 'Minimum python version required is 3.7!'
+    assert running_system() in SUPPORTED_SYSTEMS
     run_main()
     sys.exit(0)
 

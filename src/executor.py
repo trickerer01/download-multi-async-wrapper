@@ -9,8 +9,10 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 from asyncio import new_event_loop, AbstractEventLoop, as_completed, Future, SubprocessProtocol
 from typing import Dict, List, Optional
 
-from defs import UTF8, DOWNLOADERS, Config
+from defs import UTF8, DOWNLOADERS, MAX_CMD_LEN, RUXX_INDECIES, Config
 from logger import trace, log_to
+from os import path
+from platform import system as running_system
 from strings import datetime_str_nfull, unquote
 
 
@@ -73,6 +75,15 @@ async def run_cmd(query: str, dt: str, qi: int, begin_msg: str) -> None:
         if DOWNLOADERS.index(dt) not in [3] or qi not in range(1, 10):
             # return
             pass
+        if DOWNLOADERS.index(dt) not in RUXX_INDECIES and (len(query) > MAX_CMD_LEN[running_system()]):
+            run_file_name = f'{Config.DEST_RUN_BASE}run_{dt}_{exec_time}.conf'
+            trace(f'Cmdline is too long ({len(query):d}/{MAX_CMD_LEN[running_system()]:d})! Converting to run file: {run_file_name}')
+            run_file_abspath = path.abspath(run_file_name)
+            cmd_args_new = cmd_args[2:]
+            cmd_args = cmd_args[:2] + ['file', '-path', run_file_abspath]
+            trace(f'New cmd args: \'{str(cmd_args)}\'\nFile cmd args: \'{str(cmd_args_new)}\'')
+            with open(run_file_abspath, 'wt', encoding=UTF8, buffering=True) as run_file:
+                run_file.write('\n'.join(cmd_args_new))
         ef = Future(loop=executor_event_loop)
         tr, _ = await executor_event_loop.subprocess_exec(lambda: DummyResultProtocol(ef), *cmd_args, stderr=log_file, stdout=log_file)
         await ef

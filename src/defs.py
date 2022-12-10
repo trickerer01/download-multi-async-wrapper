@@ -17,6 +17,7 @@ MIN_IDS_SEQ_LENGTH = 2
 
 class BaseConfig(object):
     DEST_LOGS_BASE = '../logs/'
+    DEST_RUN_BASE = '../run/'
 
     def __init__(self):
         self.debug = False
@@ -106,6 +107,23 @@ RANGE_TEMPLATES = {
     DOWNLOADER_RN: StrPair(['id>=%d', 'id<=%d']),
     DOWNLOADER_RX: StrPair(['id:>=%d', 'id:<=%d']),
 }
+
+OS_WINDOWS = 'Windows'
+OS_LINUX = 'Linux'
+OS_MACOS = 'Darwin'
+
+SUPPORTED_SYSTEMS = [
+    OS_WINDOWS,
+    OS_LINUX,
+    # OS_MACOS,
+]
+
+MAX_CMD_LEN = {
+    OS_WINDOWS: 32000,
+    OS_LINUX: 127000,
+    OS_MACOS: 65000,
+}
+
 
 #
 #
