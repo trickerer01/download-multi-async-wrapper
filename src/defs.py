@@ -8,7 +8,10 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 
 from abc import ABC, abstractmethod
+from os import environ
 from typing import List, Union, Tuple, Iterable
+
+IS_IDE = environ.get('PYCHARM_HOSTED') == '1'
 
 UTF8 = 'utf-8'
 ACTION_STORE_TRUE = 'store_true'
