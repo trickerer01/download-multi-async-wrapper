@@ -22,7 +22,7 @@ def get_logfile() -> TextIO:
 def open_logfile(timestamped=True) -> None:
     global logfile
     log_basename = f'log_{datetime_str_nfull()}.log' if timestamped else 'log.log'
-    logfile = open(f'{Config.DEST_LOGS_BASE}{log_basename}', 'at', encoding=UTF8, buffering=True)
+    logfile = open(f'{Config.dest_logs_base}{log_basename}', 'at', encoding=UTF8, buffering=True)
 
 
 def close_logfile() -> None:

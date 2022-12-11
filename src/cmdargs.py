@@ -11,7 +11,8 @@ from os import path
 from typing import Optional, List
 
 from defs import (
-    HELP_DEBUG, HELP_PATH, HELP_SCRIPT_PATH, HELP_BAK_PATH, HELP_UPDATE, HELP_FETCHER_PATH, HELP_IGNORE_DMODE, ACTION_STORE_TRUE, Config
+    HELP_DEBUG, HELP_PATH, HELP_SCRIPT_PATH, HELP_RUN_PATH, HELP_LOGS_PATH, HELP_BAK_PATH, HELP_UPDATE, HELP_FETCHER_PATH,
+    HELP_IGNORE_DMODE, ACTION_STORE_TRUE, Config
 )
 from logger import trace
 from strings import normalize_path, unquote
@@ -62,8 +63,10 @@ def parse_arglist(args: List[str], config=Config) -> None:
     parser.add_argument('-script', metavar='#PATH_TO_FILE', required=True, help=HELP_SCRIPT_PATH, type=valid_file_path)
     parser.add_argument('--ignore-download-mode', action=ACTION_STORE_TRUE, help=HELP_IGNORE_DMODE)
     parser.add_argument('--update', action=ACTION_STORE_TRUE, help=HELP_UPDATE)
-    parser.add_argument('-bakpath', metavar='#PATH_TO_DIR', default='./', help=HELP_BAK_PATH, type=valid_dir_path)
-    parser.add_argument('-fetcherpath', metavar='#PATH_TO_DIR', default='./', help=HELP_FETCHER_PATH, type=valid_dir_path)
+    parser.add_argument('-runpath', metavar='#PATH_TO_DIR', default='../run', help=HELP_RUN_PATH, type=valid_dir_path)
+    parser.add_argument('-logspath', metavar='#PATH_TO_DIR', default='../logs', help=HELP_LOGS_PATH, type=valid_dir_path)
+    parser.add_argument('-bakpath', metavar='#PATH_TO_DIR', default='../bak', help=HELP_BAK_PATH, type=valid_dir_path)
+    parser.add_argument('-fetcherpath', metavar='#PATH_TO_DIR', default='', help=HELP_FETCHER_PATH, type=valid_dir_path)
 
     try:
         parsed = parser.parse_args(args)
@@ -71,14 +74,13 @@ def parse_arglist(args: List[str], config=Config) -> None:
             if parsed.fetcherpath == '':
                 trace('-fetcherpath is required!')
                 raise ArgumentError
-            if parsed.bakpath == '':
-                trace('-bakpath is required!')
-                raise ArgumentError
         config.debug = parsed.debug
         config.dest_base = parsed.path
         config.script_path = parsed.script
         config.ignore_download_mode = parsed.ignore_download_mode
         config.update = parsed.update
+        config.dest_run_base = parsed.runpath
+        config.dest_logs_base = parsed.logspath
         config.dest_bak_base = parsed.bakpath
         config.fetcher_root = parsed.fetcherpath
     except (ArgumentError, TypeError, ValueError, Exception):

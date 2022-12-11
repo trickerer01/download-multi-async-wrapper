@@ -66,7 +66,7 @@ def split_into_args(query: str) -> List[str]:
 
 async def run_cmd(query: str, dt: str, qi: int, begin_msg: str) -> None:
     exec_time = datetime_str_nfull()
-    with open(f'{Config.DEST_LOGS_BASE}log_{dt}_{exec_time}.log', 'at', encoding=UTF8, buffering=True) as log_file:
+    with open(f'{Config.dest_logs_base}log_{dt}_{exec_time}.log', 'at', encoding=UTF8, buffering=True) as log_file:
         trace(begin_msg)
         log_to(begin_msg, log_file)
         trace(f'Executing cmdline {qi:d}: \'{query}\'')
@@ -76,7 +76,7 @@ async def run_cmd(query: str, dt: str, qi: int, begin_msg: str) -> None:
             # return
             pass
         if DOWNLOADERS.index(dt) not in RUXX_INDECIES and (len(query) > MAX_CMD_LEN[running_system()]):
-            run_file_name = f'{Config.DEST_RUN_BASE}run_{dt}_{exec_time}.conf'
+            run_file_name = f'{Config.dest_run_base}run_{dt}_{exec_time}.conf'
             trace(f'Cmdline is too long ({len(query):d}/{MAX_CMD_LEN[running_system()]:d})! Converting to run file: {run_file_name}')
             run_file_abspath = path.abspath(run_file_name)
             cmd_args_new = cmd_args[2:]
@@ -88,7 +88,7 @@ async def run_cmd(query: str, dt: str, qi: int, begin_msg: str) -> None:
         tr, _ = await executor_event_loop.subprocess_exec(lambda: DummyResultProtocol(ef), *cmd_args, stderr=log_file, stdout=log_file)
         await ef
         tr.close()
-    with open(f'{Config.DEST_LOGS_BASE}log_{dt}_{exec_time}.log', 'rt', encoding=UTF8, buffering=True) as log_file:
+    with open(f'{Config.dest_logs_base}log_{dt}_{exec_time}.log', 'rt', encoding=UTF8, buffering=True) as log_file:
         trace(f'\n{"".join(log_file.readlines())}')
 
 

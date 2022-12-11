@@ -16,16 +16,15 @@ MIN_IDS_SEQ_LENGTH = 2
 
 
 class BaseConfig(object):
-    DEST_LOGS_BASE = '../logs/'
-    DEST_RUN_BASE = '../run/'
-
     def __init__(self):
         self.debug = False
-        self.dest_base = '../'
-        self.dest_bak_base = '../'
-        self.script_path = '../queries.txt.list'
+        self.dest_base = './'
+        self.dest_run_base = './'
+        self.dest_logs_base = './'
+        self.dest_bak_base = './'
+        self.script_path = ''
         self.update = False
-        self.fetcher_root = '../../0maxidsfetcher/'
+        self.fetcher_root = ''
         self.ignore_download_mode = False
 
 
@@ -45,6 +44,8 @@ RV_INDEX = DOWNLOADERS.index(DOWNLOADER_RV)
 HELP_DEBUG = 'Run in debug mode (for development)'
 HELP_PATH = 'Path to the folder where all the files / subfolders will be put'
 HELP_SCRIPT_PATH = 'Full path to the script (queries) file'
+HELP_RUN_PATH = 'Path to the folder where cmd run files will be put if needed'
+HELP_LOGS_PATH = 'Path to the folder where logs will be stored'
 HELP_BAK_PATH = 'Path to the folder where script backup will be put before updating'
 HELP_UPDATE = 'Boolean flag to update script file with current max ids fetched from the websites'
 HELP_FETCHER_PATH = 'Path to the folder where max ids fetcher\'s \'main.py\' is located'
