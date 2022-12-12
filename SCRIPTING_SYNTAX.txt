@@ -37,6 +37,7 @@ ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
 -l -m -n                         <-- REMOVE PREVIOUS TAGS GROUP AND EXCLUDE THEM (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
 --dfff                           <-- REMOVE PREVIOUS EXCLUDED SINGLE TAG (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
 -quality 360p                    <-- QUERY ARGUMENT (QUALITY, OVERRIDE) <DOWNLOADER ARGUMENTS>
+                                 <-- YOU CAN ALSO REMOVE PREVIOUS QUALITY '-quality 1080p' by adding '--quality -+1080p' ROW
 -uvp always                      <-- QUERY ARGUMENT (ULISTED VIDEOS DOWNLOAD POLICY) <DOWNLOADER ARGUMENTS>
 # send                           <-- '<cmdline base...> -a -b -c -ggg -h -i -j -k -l -m -n -uvp always'
 # end                            <-- DOWNLOADER QUERIES FINISH MARKER <REQUIRED>

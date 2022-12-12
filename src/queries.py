@@ -114,7 +114,7 @@ def form_queries(config=Config):
                 if all_tags_negative(line.split(' ')):  # line[0] === '-'
                     if line[1] in ['-', '+']:
                         # remove --tag(s) or -+tag(s) from list, convert: --a --b -> [-a, -b] OR -+a -+b -> [a, b]
-                        tags_to_remove = [tag[2 if line[1] == '+' else 1:] for tag in line.split(' ')]
+                        tags_to_remove = [tag[2 if tag[1] == '+' else 1:] for tag in line.split(' ')]
                         for k in reversed(range(len(tags_to_remove))):
                             for j in reversed(range(len(cur_tags_list))):
                                 if cur_tags_list[j] == tags_to_remove[k]:
