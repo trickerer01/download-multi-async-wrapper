@@ -37,6 +37,13 @@ def all_tags_negative(taglist: List[str]) -> bool:
     return all_neg
 
 
+def all_tags_positive(taglist: List[str]) -> bool:
+    all_pos = True
+    for tag in taglist:
+        all_pos &= len(tag) > 0 and tag[0] != '-'
+    return all_pos
+
+
 def normalize_ruxx_tag(tag: str) -> str:
     tag = tag.replace('+', '%2b')
     if tag[0] == '(' and tag[-1] == ')' and tag.find('~') != -1:

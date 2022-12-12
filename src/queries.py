@@ -16,7 +16,7 @@ from defs import DOWNLOADERS, UTF8, Sequence, Config, MIN_IDS_SEQ_LENGTH
 from executor import register_vid_queries, register_img_queries
 from logger import trace
 from sequences import validate_sequences, report_sequences, queries_from_sequences_base, queries_from_sequences, report_finals
-from strings import datetime_str_nfull, bytes_to_lines, all_tags_negative, SLASH, NEWLINE
+from strings import datetime_str_nfull, bytes_to_lines, all_tags_negative, all_tags_positive, SLASH, NEWLINE
 
 queries_file_lines = []  # type: List[str]
 
@@ -135,6 +135,9 @@ def form_queries(config=Config):
                                 break
                         if need_find_previous_or_group is True:
                             trace(f'Info: multiple exclusion at {i + 1:d}, no previous matching \'or\' group found. Line: \'{line}\'')
+                elif not all_tags_positive(line.split(' ')):
+                    param_like = line[0] == '-' and len(line.split(' ')) == 2
+                    trace(f'Warning (W2): mixed positive / negative tags at line {i + 1:d}, {"param" if param_like else "error"}?')
                 cur_tags_list += line.split(' ')
         except Exception:
             trace(f'Error: issue encountered while parsing queries file at line {i + 1:d}!')
