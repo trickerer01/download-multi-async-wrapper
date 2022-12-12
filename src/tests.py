@@ -16,34 +16,52 @@ from queries import read_queries_file, form_queries
 from strings import date_str_md
 
 args_argparse_str1 = (
+    '-script ../tests/queries.list'
+)
+
+args_argparse_str2 = (
+    '--debug '
     '-path ../tests '
     '-script ../tests/queries.list '
-    '-fetcher ../tests '
-    '-bakpath ../tests '
-    '--debug '
+    '--ignore-download-mode '
     '--update '
-    '--ignore-download-mode'
+    '-runpath ../run '
+    '-logspath ../logs '
+    '-bakpath ../bak '
+    '-fetcher ./'
 )
 
 
 class ArgParseTests(TestCase):
     def test_argparse1(self) -> None:
+        import cmdargs
+        cmdargs.IS_IDE = False
         c = BaseConfig()
         parse_arglist(args_argparse_str1.split(), c)
-        self.assertEqual(c.dest_base, '../tests/')
-        self.assertEqual(c.script_path, '../tests/queries.list')
-        self.assertEqual(c.fetcher_root, '../tests/')
-        self.assertEqual(c.dest_bak_base, '../tests/')
-        self.assertTrue(c.debug)
-        self.assertTrue(c.update)
-        self.assertTrue(c.ignore_download_mode)
+        self.assertEqual(
+            f'debug: False, script: ../tests/queries.list, dest: ./, run: ./, logs: ./, bak: ./, '
+            f'update: False, fetcher: , ignore_download_mode: False',
+            str(c)
+        )
         print('test_argparse1 passed')
+
+    def test_argparse2(self) -> None:
+        import cmdargs
+        cmdargs.IS_IDE = False
+        c = BaseConfig()
+        parse_arglist(args_argparse_str2.split(), c)
+        self.assertEqual(
+            f'debug: True, script: ../tests/queries.list, dest: ../tests/, run: ../run/, logs: ../logs/, bak: ../bak/, '
+            f'update: True, fetcher: ./, ignore_download_mode: True',
+            str(c)
+        )
+        print('test_argparse2 passed')
 
 
 class QueriesFormTests(TestCase):
     def test_queries1(self) -> None:
         c = BaseConfig()
-        parse_arglist(args_argparse_str1.split(), c)
+        parse_arglist(args_argparse_str2.split(), c)
         read_queries_file(c)
         form_queries(c)
         self.assertEqual(len(queues_vid[DOWNLOADER_NM]), 1)
@@ -55,20 +73,20 @@ class QueriesFormTests(TestCase):
         self.assertEqual(len(queues_img[DOWNLOADER_RN]), 0)
         self.assertEqual(len(queues_img[DOWNLOADER_RX]), 2)
         self.assertEqual(
-            queues_vid[DOWNLOADER_NM][0],
             f'python3 D:/nm/ids.py -start 1 -end 1 -path "../tests/{date_str_md(False)}/" --dump-tags --verbose -script "'
             'a: -quality 1080p -a -b -c -dfff ggg; '
             'b: -quality 1080p -a -b -c -dfff -ggg -(x,z) (h~i~j~k); '
             'c: -quality 1080p -a -b -c -dfff -ggg -h -i -j -k (l~m~n); '
-            'd: -quality 1080p -a -b -c -ggg -h -i -j -k -l -m -n -quality 360p -uvp always"'
+            'd: -quality 1080p -a -b -c -ggg -h -i -j -k -l -m -n -quality 360p -uvp always"',
+            queues_vid[DOWNLOADER_NM][0]
         )
         self.assertEqual(
-            queues_img[DOWNLOADER_RX][0],
-            f'python3 D:/ruxx/app_gui.py id:>=1 id:<=1 -path "../tests/{date_str_md(True)}/a/" -module rx a'
+            f'python3 D:/ruxx/app_gui.py id:>=1 id:<=1 -path "../tests/{date_str_md(True)}/a/" -module rx a',
+            queues_img[DOWNLOADER_RX][0]
         )
         self.assertEqual(
-            queues_img[DOWNLOADER_RX][1],
-            f'python3 D:/ruxx/app_gui.py id:>=1 id:<=1 -path "../tests/{date_str_md(True)}/b/" -module rx -a b'
+            f'python3 D:/ruxx/app_gui.py id:>=1 id:<=1 -path "../tests/{date_str_md(True)}/b/" -module rx -a b',
+            queues_img[DOWNLOADER_RX][1]
         )
         print('test_queries1 passed')
 

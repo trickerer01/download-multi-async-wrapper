@@ -19,7 +19,7 @@ MIN_IDS_SEQ_LENGTH = 2
 
 
 class BaseConfig(object):
-    def __init__(self):
+    def __init__(self) -> None:
         self.debug = False
         self.dest_base = './'
         self.dest_run_base = './'
@@ -29,6 +29,16 @@ class BaseConfig(object):
         self.update = False
         self.fetcher_root = ''
         self.ignore_download_mode = False
+
+    def __str__(self) -> str:
+        return (
+            f'debug: {self.debug}, script: {self.script_path}, dest: {self.dest_base}, run: {self.dest_run_base}, '
+            f'logs: {self.dest_logs_base}, bak: {self.dest_bak_base}, update: {self.update}, fetcher: {self.fetcher_root}, '
+            f'ignore_download_mode: {self.ignore_download_mode}'
+        )
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
 
 Config = BaseConfig()
