@@ -127,9 +127,9 @@ def form_queries(config=Config):
                         tags_split = [tag[1:] for tag in line.split(' ')]
                         assert all(len(tag) > 0 for tag in tags_split)
                         need_find_previous_or_group = len(tags_split) > 1
+                        tags_rem = '~'.join(tags_split)
                         for j in reversed(range(len(cur_tags_list))):
-                            if cur_tags_list[j][0] == '(' and cur_tags_list[j][-1] == ')' and cur_tags_list[j].find('~') != -1:
-                                assert cur_tags_list[j][1:-1] == '~'.join(tags_split)
+                            if cur_tags_list[j][0] == '(' and cur_tags_list[j][-1] == ')' and cur_tags_list[j][1:-1] == tags_rem:
                                 del cur_tags_list[j]
                                 need_find_previous_or_group = False
                                 break
