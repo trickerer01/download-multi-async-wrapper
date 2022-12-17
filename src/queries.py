@@ -137,7 +137,8 @@ def form_queries(config=Config):
                             trace(f'Info: multiple exclusion at {i + 1:d}, no previous matching \'or\' group found. Line: \'{line}\'')
                 elif not all_tags_positive(line.split(' ')):
                     param_like = line[0] == '-' and len(line.split(' ')) == 2
-                    trace(f'Warning (W2): mixed positive / negative tags at line {i + 1:d}, {"param" if param_like else "error"}?')
+                    trace(f'Warning (W2): mixed positive / negative tags at line {i + 1:d}, '
+                          f'{"param" if param_like else "error"}? Line: \'{line}\'')
                 cur_tags_list += line.split(' ')
         except Exception:
             trace(f'Error: issue encountered while parsing queries file at line {i + 1:d}!')
