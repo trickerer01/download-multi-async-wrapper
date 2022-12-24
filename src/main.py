@@ -36,7 +36,8 @@ def run_main() -> None:
         trace('\nClosing logfile...\n\n', False)
         close_logfile()
     except Exception:
-        trace(f'\nFailure! Exited with exception:\n{str(sys.exc_info()[0])}: {str(sys.exc_info()[1])}\n')
+        import traceback
+        traceback.print_exc()
         sys.exit(-3)
 
 

@@ -88,7 +88,7 @@ async def run_cmd(query: str, dt: str, qi: int, begin_msg: str) -> None:
         tr, _ = await executor_event_loop.subprocess_exec(lambda: DummyResultProtocol(ef), *cmd_args, stderr=log_file, stdout=log_file)
         await ef
         tr.close()
-    with open(f'{Config.dest_logs_base}log_{dt}_{exec_time}.log', 'rt', encoding=UTF8, buffering=True) as log_file:
+    with open(f'{Config.dest_logs_base}log_{dt}_{exec_time}.log', 'rt', encoding=UTF8, buffering=True, errors='replace') as log_file:
         trace(f'\n{"".join(log_file.readlines())}')
 
 

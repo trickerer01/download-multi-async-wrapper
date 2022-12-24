@@ -6,6 +6,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
+from locale import getpreferredencoding
 from typing import TextIO, Optional
 
 from defs import UTF8, Config
@@ -40,7 +41,19 @@ def log_to(msg: str, log_file: TextIO, add_timestamp=True) -> None:
 
 def trace(msg: str, add_timestamp=True) -> None:
     t_msg = f'{timestamped_string(msg, datetime_str_nfull()) if add_timestamp else msg}\n'
-    print(t_msg, end='')
+    try:
+        print(t_msg, end='')
+    except UnicodeError:
+        print(f'message was: {bytearray(map(ord, t_msg))}')
+        try:
+            print(t_msg.encode(UTF8).decode(), end='')
+        except Exception:
+            try:
+                print(t_msg.encode(UTF8).decode(getpreferredencoding()), end='')
+            except Exception:
+                print('<Message was not logged due to UnicodeError>')
+        finally:
+            print('Previous message caused UnicodeError...')
     if logfile:
         logfile.write(t_msg)
 

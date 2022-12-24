@@ -3,6 +3,8 @@
 1venv/
 src/__pycache__/
 logs/*
+run/*
+tests/*
 *.pyc
 *.bak
 src/curr.py
@@ -12,6 +14,9 @@ src/curr.py
 
 # Excludes
 !logs/.dummy
+!run/.dummy
+!tests/.dummy
+!tests/*.list
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
