@@ -42,6 +42,14 @@ ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
 # send                           <-- '<cmdline base...> -a -b -c -ggg -h -i -j -k -l -m -n -uvp always'
 # end                            <-- DOWNLOADER QUERIES FINISH MARKER <REQUIRED>
 
+                                 <-- AT THIS POINT 4 NM QUERIES ARE CREATED WHICH WILL BE THEN COMBINED INTO A SINGLE DOWNLOAD SCRIPT
+                                 <-- 'python -path "D:/Projects/nm/src/ids.py" -dmode touch --dump-tags --verbose -script
+                                     "a: -quality 1080p -a -b -c -dfff ggg;
+                                      b: -quality 1080p -a -b -c -dfff -ggg -(x,z) (h~i~j~k);
+                                      c: -quality 1080p -a -b -c -dfff -ggg -h -i -j -k (l~m~n);
+                                      d: -quality 1080p -a -b -c -ggg -h -i -j -k -l -m -n -quality 360p -uvp always"'
+                                 <-- WHICH DOWNLOADS MATCHING VIDEOS TO 4 DIFFERENT FOLDERS IN A SINGLE PASS
+
 # rv
 # 3050000 3051000
 # path:D:/Projects/rv/src/ids.py
