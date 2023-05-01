@@ -9,10 +9,9 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 from asyncio import new_event_loop, AbstractEventLoop, as_completed, Future, SubprocessProtocol
 from typing import Dict, List, Optional
 
-from defs import UTF8, DOWNLOADERS, MAX_CMD_LEN, RUXX_INDECIES, Config
+from defs import UTF8, DOWNLOADERS, RUXX_INDECIES, Config
 from logger import trace, log_to
 from os import path
-from platform import system as running_system
 from strings import datetime_str_nfull, unquote
 
 
@@ -72,12 +71,13 @@ async def run_cmd(query: str, dt: str, qi: int, begin_msg: str) -> None:
         trace(f'Executing cmdline {qi:d}: \'{query}\'')
         cmd_args = split_into_args(query)
         trace(f'Splitted into: \'{str(cmd_args)}\'')
+        # DEBUG - do not remove
         if DOWNLOADERS.index(dt) not in [3] or qi not in range(1, 10):
             # return
             pass
-        if DOWNLOADERS.index(dt) not in RUXX_INDECIES and (len(query) > MAX_CMD_LEN[running_system()]):
+        if DOWNLOADERS.index(dt) not in RUXX_INDECIES and (len(query) > Config.max_cmd_len):
             run_file_name = f'{Config.dest_run_base}run_{dt}_{exec_time}.conf'
-            trace(f'Cmdline is too long ({len(query):d}/{MAX_CMD_LEN[running_system()]:d})! Converting to run file: {run_file_name}')
+            trace(f'Cmdline is too long ({len(query):d}/{Config.max_cmd_len:d})! Converting to run file: {run_file_name}')
             run_file_abspath = path.abspath(run_file_name)
             cmd_args_new = cmd_args[2:]
             cmd_args = cmd_args[:2] + ['file', '-path', run_file_abspath]
@@ -95,6 +95,11 @@ async def run_cmd(query: str, dt: str, qi: int, begin_msg: str) -> None:
 async def run_dt_cmds(dts: List[str], tys: List[str], queries: List[str]) -> None:
     assert all(dt == dts[0] for dt in dts)
     dt = dts[0]
+
+    if dt not in Config.downloaders:
+        trace(f'\n{dt.upper()} SKIPPED\n')
+        return
+
     qis = [0, 0]
     for qi in range(len(queries)):
         q_idx = 1 - int(tys[qi] == 'vid')
@@ -104,6 +109,10 @@ async def run_dt_cmds(dts: List[str], tys: List[str], queries: List[str]) -> Non
 
 
 async def run_all_cmds() -> None:
+    if Config.no_download is True:
+        trace('\n\nALL DOWNLOADERS SKIPPED DUE TO no_download FLAG!\n')
+        return
+
     for cv in as_completed([run_dt_cmds(dts, tys, queries) for dts, tys, queries in
                             zip([[dt] * (len(queues_vid[dt]) + len(queues_img[dt])) for dt in DOWNLOADERS],
                                 [['vid'] * len(queues_vid[dt]) + ['img'] * len(queues_img[dt]) for dt in DOWNLOADERS],

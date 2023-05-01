@@ -76,7 +76,7 @@ def form_queries(config=Config):
                 raise IOError
             if line[0] == '#':
                 if fullmatch(r'^##[^#].*?$', line):
-                    trace(f'Ignoring commented out line {i + 1:d}: \'{line}\'')
+                    # trace(f'Ignoring commented out line {i + 1:d}: \'{line}\'')
                     continue
                 if fullmatch(r'^.*[: ]-dmode .+?$', line):
                     if config.ignore_download_mode is True:
