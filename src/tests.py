@@ -21,6 +21,7 @@ args_argparse_str1 = (
 
 args_argparse_str2 = (
     '--debug '
+    '-downloaders rv,rx,rn '
     '-path ../tests '
     '-script ../tests/queries.list '
     '--ignore-download-mode '
@@ -39,8 +40,9 @@ class ArgParseTests(TestCase):
         c = BaseConfig()
         parse_arglist(args_argparse_str1.split(), c)
         self.assertEqual(
-            f'debug: False, script: ../tests/queries.list, dest: ./, run: ./, logs: ./, bak: ./, '
-            f'update: False, fetcher: , ignore_download_mode: False',
+            'debug: False, downloaders: [\'nm\', \'rv\', \'rn\', \'rx\'], script: ../tests/queries.list, dest: ./, '
+            'run: ./, logs: ./, bak: ./, update: False, no_download: False, fetcher: , ignore_download_mode: False, '
+            'max_cmd_len: 16000',
             str(c)
         )
         print('test_argparse1 passed')
@@ -51,8 +53,9 @@ class ArgParseTests(TestCase):
         c = BaseConfig()
         parse_arglist(args_argparse_str2.split(), c)
         self.assertEqual(
-            f'debug: True, script: ../tests/queries.list, dest: ../tests/, run: ../run/, logs: ../logs/, bak: ../bak/, '
-            f'update: True, fetcher: ./, ignore_download_mode: True',
+            'debug: True, downloaders: [\'rv\', \'rn\', \'rx\'], script: ../tests/queries.list, dest: ../tests/, '
+            'run: ../run/, logs: ../logs/, bak: ../bak/, update: True, no_download: False, fetcher: ./, ignore_download_mode: True, '
+            'max_cmd_len: 16000',
             str(c)
         )
         print('test_argparse2 passed')
