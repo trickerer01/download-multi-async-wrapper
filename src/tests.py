@@ -76,19 +76,19 @@ class QueriesFormTests(TestCase):
         self.assertEqual(len(queues_img[DOWNLOADER_RN]), 0)
         self.assertEqual(len(queues_img[DOWNLOADER_RX]), 2)
         self.assertEqual(
-            f'python3 D:/nm/ids.py -start 1 -end 1 -path "../tests/{date_str_md(False)}/" --dump-tags --verbose -script "'
+            f'python3 "D:/nm/ids.py" -start 1 -end 1 -path "../tests/{date_str_md(False)}/" --dump-tags --verbose -script "'
             'a: -quality 1080p -a -b -c -dfff ggg; '
             'b: -quality 1080p -a -b -c -dfff -ggg -(x,z) (h~i~j~k); '
             'c: -quality 1080p -a -b -c -dfff -ggg -h -i -j -k (l~m~n); '
-            'd: -quality 1080p -a -b -c -ggg -h -i -j -k -l -m -n -quality 360p -uvp always"',
+            'd: -a -b -c -ggg -h -i -j -k -l -m -n -quality 360p -uvp always"',
             queues_vid[DOWNLOADER_NM][0]
         )
         self.assertEqual(
-            f'python3 D:/ruxx/app_gui.py id:>=1 id:<=1 -path "../tests/{date_str_md(True)}/a/" -module rx a',
+            f'python3 "D:/ruxx/app_gui.py" id:>=1 id:<=1 -path "../tests/{date_str_md(True)}/a/" -module rx a',
             queues_img[DOWNLOADER_RX][0]
         )
         self.assertEqual(
-            f'python3 D:/ruxx/app_gui.py id:>=1 id:<=1 -path "../tests/{date_str_md(True)}/b/" -module rx -a b',
+            f'python3 "D:/ruxx/app_gui.py" id:>=1 id:<=1 -path "../tests/{date_str_md(True)}/b/" -module rx -a b',
             queues_img[DOWNLOADER_RX][1]
         )
         print('test_queries1 passed')

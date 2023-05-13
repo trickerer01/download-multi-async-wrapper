@@ -126,15 +126,19 @@ def form_queries(config=Config):
                     else:
                         tags_split = [tag[1:] for tag in line.split(' ')]
                         assert all(len(tag) > 0 for tag in tags_split)
-                        need_find_previous_or_group = len(tags_split) > 1
+                        need_find_previous_or_group = True
                         tags_rem = '~'.join(tags_split)
+                        start_idx = 1 if len(tags_split) > 1 else 0  # type: int
+                        end_idx = -1 if len(tags_split) > 1 else None  # type: Optional[int]
                         for j in reversed(range(len(cur_tags_list))):
-                            if cur_tags_list[j][0] == '(' and cur_tags_list[j][-1] == ')' and cur_tags_list[j][1:-1] == tags_rem:
+                            taglen = len(cur_tags_list[j])
+                            border_condition = len(tags_split) == 1 or cur_tags_list[j][0:taglen:taglen-1] == '()'
+                            if border_condition and cur_tags_list[j][start_idx:end_idx] == tags_rem:
                                 del cur_tags_list[j]
                                 need_find_previous_or_group = False
                                 break
                         if need_find_previous_or_group is True:
-                            trace(f'Info: multiple exclusion at {i + 1:d}, no previous matching \'or\' group found. Line: \'{line}\'')
+                            trace(f'Info: exclusion(s) at {i + 1:d}, no previous matching tag or \'or\' group found. Line: \'{line}\'')
                 elif not all_tags_positive(line.split(' ')):
                     param_like = line[0] == '-' and len(line.split(' ')) == 2
                     trace(f'Warning (W2): mixed positive / negative tags at line {i + 1:d}, '

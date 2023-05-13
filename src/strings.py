@@ -33,14 +33,14 @@ def timestamped_string(msg: str, timestamp: str) -> str:
 def all_tags_negative(taglist: List[str]) -> bool:
     all_neg = True
     for tag in taglist:
-        all_neg &= len(tag) > 0 and tag[0] == '-'
+        all_neg = all_neg and tag.startswith('-')
     return all_neg
 
 
 def all_tags_positive(taglist: List[str]) -> bool:
     all_pos = True
     for tag in taglist:
-        all_pos &= len(tag) > 0 and tag[0] != '-'
+        all_pos = all_pos and not tag.startswith('-')
     return all_pos
 
 
@@ -60,9 +60,7 @@ def bytes_to_lines(raw: bytes) -> List[str]:
 
 
 def time_now_fmt(fmt: str) -> str:
-    """
-    datetime.now().strftime() wrapper
-    """
+    """datetime.now().strftime() wrapper"""
     return datetime.now().strftime(fmt)
 
 

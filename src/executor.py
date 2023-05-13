@@ -38,9 +38,7 @@ def register_img_queries(queries: Dict[str, List[str]]) -> None:
 
 
 def split_into_args(query: str) -> List[str]:
-    """
-    'a "b c" d "e" f g' -> ['a', 'b c', 'd', 'e', 'f', 'g']
-    """
+    """'a "b c" d "e" f g' -> ['a', 'b c', 'd', 'e', 'f', 'g']"""
     result = []  # type: List[str]
     idx1 = idx2 = idxdq = 0
     while idx2 < len(query):

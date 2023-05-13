@@ -75,7 +75,7 @@ def _get_base_qs(
         {dt: IntPair(sids[dt][:2]) for dt in DOWNLOADERS if sids[dt]} for sids in [sequences_ids_vid, sequences_ids_img]
     )  # type: Dict[str, IntPair]
     base_q_v, base_q_i = ({
-        dt: (f'{python_executable} {spath[dt]} '
+        dt: (f'{python_executable} "{spath[dt]}" '
              f'{RANGE_TEMPLATES[dt].first % srange[dt].first} '
              f'{RANGE_TEMPLATES[dt].second % (srange[dt].second - 1)}')
         for dt in DOWNLOADERS if dt in srange.keys() and dt in spath.keys()

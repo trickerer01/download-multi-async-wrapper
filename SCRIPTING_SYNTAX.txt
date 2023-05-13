@@ -16,14 +16,14 @@ ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
                                      AT LEAST ONE 'TAGS' ARGUMENT IS REQUIRED FOR QUERY TO BE VALID
                                      MIXING OF REQUIRED / EXCLUDED TAGS IS NOT RECOMMENDED: '-a -b -c -dfff ggg'
 # send                           <-- QUERY END MARKER <REQUIRED>
-                                     '<cmdline base...> -a -b -c -dfff ggg'
+                                     '<cmdline base...> -quality 1080p -a -b -c -dfff ggg'
                                      DOWNLOADER ARGUMENTS STILL ACCUMULATE AFTER THIS, SEE BELOW
 # sub:b
 -+ggg                            <-- REMOVE PREVIOUSLY REQUIRED SINGLE TAG (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
 -ggg                             <-- EXCLUDE PREVIOUSLY REQUIRED TAG <DOWNLOADER ARGUMENTS>
 -(x,z)                           <-- EXCLUDED TAGS COMBINATION <DOWNLOADER ARGUMENTS>
 (h~i~j~k)                        <-- REQUIRED 'ANY OF' TAGS GROUP <DOWNLOADER ARGUMENTS>
-# send                           <-- '<cmdline base...> -a -b -c -dfff -ggg -(x,z) (h~i~j~k)'
+# send                           <-- '<cmdline base...> -quality 1080p -a -b -c -dfff -ggg -(x,z) (h~i~j~k)'
 
 # sub:c
 -h -i -j -k                      <-- REMOVE PREVIOUS TAGS GROUP AND EXCLUDE THEM (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
@@ -31,23 +31,24 @@ ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
                                  <-- LOGS WILL MENTION MULTIPLE EXCLUSIONS LIKE THIS WHERE MATCHING 'OR' GROUP WASN'T FOUND
 --(x,z)                          <-- REMOVE PREVIOUSLY EXCLUDED TAGS COMBINATION (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
 (l~m~n)                          <-- REQUIRED 'ANY OF' TAGS GROUP <DOWNLOADER ARGUMENTS>
-# send                           <-- '<cmdline base...> -a -b -c -dfff -ggg -h -i -j -k (l~m~n)'
+# send                           <-- '<cmdline base...> -quality 1080p -a -b -c -dfff -ggg -h -i -j -k (l~m~n)'
 
 # sub:d
+--quality -+1080p                <-- REMOVE PREVIOUS PARAM (QUALITY) QUERY ARGUMENT (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
 -l -m -n                         <-- REMOVE PREVIOUS TAGS GROUP AND EXCLUDE THEM (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
 --dfff                           <-- REMOVE PREVIOUS EXCLUDED SINGLE TAG (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
 -quality 360p                    <-- QUERY ARGUMENT (QUALITY, OVERRIDE) <DOWNLOADER ARGUMENTS>
-                                 <-- YOU CAN ALSO REMOVE PREVIOUS QUALITY '-quality 1080p' by adding '--quality -+1080p' ROW
 -uvp always                      <-- QUERY ARGUMENT (ULISTED VIDEOS DOWNLOAD POLICY) <DOWNLOADER ARGUMENTS>
-# send                           <-- '<cmdline base...> -a -b -c -ggg -h -i -j -k -l -m -n -uvp always'
+# send                           <-- '<cmdline base...> -a -b -c -ggg -h -i -j -k -l -m -n -quality 360p -uvp always'
 # end                            <-- DOWNLOADER QUERIES FINISH MARKER <REQUIRED>
 
                                  <-- AT THIS POINT 4 NM QUERIES ARE CREATED WHICH WILL BE THEN COMBINED INTO A SINGLE DOWNLOAD SCRIPT
-                                 <-- 'python -path "D:/Projects/nm/src/ids.py" -dmode touch --dump-tags --verbose -script
+                                 <-- 'python "D:/Projects/nm/src/ids.py" -path "<PATH>" -start 50000 -end 50999
+                                     -dmode touch --dump-tags --verbose -script
                                      "a: -quality 1080p -a -b -c -dfff ggg;
                                       b: -quality 1080p -a -b -c -dfff -ggg -(x,z) (h~i~j~k);
                                       c: -quality 1080p -a -b -c -dfff -ggg -h -i -j -k (l~m~n);
-                                      d: -quality 1080p -a -b -c -ggg -h -i -j -k -l -m -n -quality 360p -uvp always"'
+                                      d: -a -b -c -ggg -h -i -j -k -l -m -n -quality 360p -uvp always"'
                                  <-- WHICH DOWNLOADS MATCHING VIDEOS TO 4 DIFFERENT FOLDERS IN A SINGLE PASS
 
 # rv
