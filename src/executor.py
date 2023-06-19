@@ -14,6 +14,8 @@ from logger import trace, log_to
 from os import path
 from strings import datetime_str_nfull, unquote
 
+__all__ = ('queues_vid', 'queues_img', 'register_vid_queries', 'register_img_queries', 'execute')
+
 
 class DummyResultProtocol(SubprocessProtocol):
     def __init__(self, fut: Future) -> None:

@@ -18,6 +18,8 @@ from logger import trace
 from sequences import validate_sequences, report_sequences, queries_from_sequences_base, queries_from_sequences, report_finals
 from strings import datetime_str_nfull, bytes_to_lines, all_tags_negative, all_tags_positive, SLASH, NEWLINE
 
+__all__ = ('read_queries_file', 'form_queries', 'update_next_ids')
+
 queries_file_lines = []  # type: List[str]
 
 sequences_ids_vid = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[Sequence]]
@@ -132,7 +134,7 @@ def form_queries(config=Config):
                         end_idx = -1 if len(tags_split) > 1 else None  # type: Optional[int]
                         for j in reversed(range(len(cur_tags_list))):
                             taglen = len(cur_tags_list[j])
-                            border_condition = len(tags_split) == 1 or cur_tags_list[j][0:taglen:taglen-1] == '()'
+                            border_condition = len(tags_split) == 1 or cur_tags_list[j][0:taglen:taglen - 1] == '()'
                             if border_condition and cur_tags_list[j][start_idx:end_idx] == tags_rem:
                                 del cur_tags_list[j]
                                 need_find_previous_or_group = False

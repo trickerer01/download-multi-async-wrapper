@@ -16,6 +16,8 @@ from platform import system as running_system
 from queries import read_queries_file, form_queries, update_next_ids
 from strings import datetime_str_full
 
+__all__ = ()
+
 
 def cleanup() -> None:
     pass

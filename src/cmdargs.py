@@ -17,16 +17,9 @@ from defs import (
 from logger import trace
 from strings import normalize_path, unquote
 
+__all__ = ('parse_arglist',)
+
 parser = None  # type: Optional[ArgumentParser]
-
-
-def valid_positive_nonzero_int(val: str) -> int:
-    try:
-        ival = int(val)
-        assert ival > 0
-        return ival
-    except Exception:
-        raise ArgumentError
 
 
 def valid_dir_path(pathstr: str) -> str:

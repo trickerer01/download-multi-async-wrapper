@@ -15,6 +15,8 @@ from executor import queues_vid, queues_img
 from queries import read_queries_file, form_queries
 from strings import date_str_md
 
+__all__ = ()
+
 args_argparse_str1 = (
     '-script ../tests/queries.list'
 )

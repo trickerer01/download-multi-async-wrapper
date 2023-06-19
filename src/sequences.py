@@ -12,6 +12,8 @@ from defs import DOWNLOADERS, RANGE_TEMPLATES, RUXX_INDECIES, IntPair, Config, S
 from logger import trace
 from strings import normalize_ruxx_tag, path_args, NEWLINE
 
+__all__ = ('validate_sequences', 'report_sequences', 'queries_from_sequences_base', 'queries_from_sequences', 'report_finals')
+
 
 def validate_sequences(sequences_ids_vid: Dict[str, Optional[Sequence]], sequences_ids_img: Dict[str, Optional[Sequence]],
                        sequences_paths_vid: Dict[str, Optional[str]], sequences_paths_img: Dict[str, Optional[str]],
@@ -24,12 +26,12 @@ def validate_sequences(sequences_ids_vid: Dict[str, Optional[Sequence]], sequenc
     for dt in DOWNLOADERS:
         ivlist = list(sequences_ids_vid[dt].ids if sequences_ids_vid[dt] else [])
         for iv in range(len(ivlist)):
-            if iv > 0 and not(ivlist[iv - 1] < ivlist[iv]):
+            if iv > 0 and not (ivlist[iv - 1] < ivlist[iv]):
                 trace(f'Error: {dt} vid ids sequence is corrupted at idx {iv - 1:d}, !({ivlist[iv - 1]:d} < {ivlist[iv]:d})!')
                 raise IOError
         iilist = list(sequences_ids_img[dt].ids if sequences_ids_img[dt] else [])
         for ii in range(len(iilist)):
-            if ii > 0 and not(iilist[ii - 1] < iilist[ii]):
+            if ii > 0 and not (iilist[ii - 1] < iilist[ii]):
                 trace(f'Error: {dt} img ids sequence is corrupted at idx {ii - 1:d}, !({iilist[ii - 1]:d} < {iilist[ii]:d})!')
                 raise IOError
         if (not not sequences_paths_vid[dt]) != (not not sequences_ids_vid[dt]):

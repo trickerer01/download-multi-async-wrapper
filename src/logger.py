@@ -12,12 +12,9 @@ from typing import TextIO, Optional
 from defs import UTF8, Config
 from strings import datetime_str_nfull, timestamped_string
 
+__all__ = ('open_logfile', 'close_logfile', 'log_to', 'trace')
+
 logfile = None  # type: Optional[TextIO]
-
-
-def get_logfile() -> TextIO:
-    assert logfile, 'No logfile present, get_logfile() call is illegal'
-    return logfile
 
 
 def open_logfile(timestamped=True) -> None:
