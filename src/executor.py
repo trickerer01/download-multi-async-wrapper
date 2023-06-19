@@ -72,7 +72,7 @@ async def run_cmd(query: str, dt: str, qi: int, begin_msg: str) -> None:
         cmd_args = split_into_args(query)
         trace(f'Splitted into: \'{str(cmd_args)}\'')
         # DEBUG - do not remove
-        if DOWNLOADERS.index(dt) not in [3] or qi not in range(1, 10):
+        if DOWNLOADERS.index(dt) not in (3,) or qi not in range(1, 10):
             # return
             pass
         if DOWNLOADERS.index(dt) not in RUXX_INDECIES and (len(query) > Config.max_cmd_len):

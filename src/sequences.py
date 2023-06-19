@@ -26,13 +26,13 @@ def validate_sequences(sequences_ids_vid: Dict[str, Optional[Sequence]], sequenc
     for dt in DOWNLOADERS:
         ivlist = list(sequences_ids_vid[dt].ids if sequences_ids_vid[dt] else [])
         for iv in range(len(ivlist)):
-            if iv > 0 and not (ivlist[iv - 1] < ivlist[iv]):
-                trace(f'Error: {dt} vid ids sequence is corrupted at idx {iv - 1:d}, !({ivlist[iv - 1]:d} < {ivlist[iv]:d})!')
+            if iv > 0 and ivlist[iv - 1] >= ivlist[iv]:
+                trace(f'Error: {dt} vid ids sequence is corrupted at idx {iv - 1:d}, {ivlist[iv - 1]:d} >= {ivlist[iv]:d}!')
                 raise IOError
         iilist = list(sequences_ids_img[dt].ids if sequences_ids_img[dt] else [])
         for ii in range(len(iilist)):
-            if ii > 0 and not (iilist[ii - 1] < iilist[ii]):
-                trace(f'Error: {dt} img ids sequence is corrupted at idx {ii - 1:d}, !({iilist[ii - 1]:d} < {iilist[ii]:d})!')
+            if ii > 0 and iilist[ii - 1] >= iilist[ii]:
+                trace(f'Error: {dt} img ids sequence is corrupted at idx {ii - 1:d}, {iilist[ii - 1]:d} >= {iilist[ii]:d}!')
                 raise IOError
         if (not not sequences_paths_vid[dt]) != (not not sequences_ids_vid[dt]):
             trace(f'Error: sequence list existance for vid tags/ids mismatch for {dt}!')
@@ -58,15 +58,15 @@ def report_sequences(sequences_ids_vid: Dict[str, Optional[Sequence]], sequences
                      python_executable: str) -> None:
     trace(f'Python executable: \'{python_executable}\'')
     [trace(f'{len([q for q in seq.values() if q]):d} {name} sequences')
-     for seq, name in zip([sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img],
-                          ['sequences_ids_vid', 'sequences_ids_img', 'sequences_paths_vid', 'sequences_paths_img'])]
+     for seq, name in zip((sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img),
+                          ('sequences_ids_vid', 'sequences_ids_img', 'sequences_paths_vid', 'sequences_paths_img'))]
     [trace(f'{sum(len(q) for q in seq.values() if q):d} {name} sequences')
-     for seq, name in zip([sequences_tags_vid, sequences_tags_img, sequences_subfolders_vid, sequences_subfolders_img],
-                          ['sequences_tags_vid', 'sequences_tags_img', 'sequences_subfolders_vid', 'sequences_subfolders_img'])]
+     for seq, name in zip((sequences_tags_vid, sequences_tags_img, sequences_subfolders_vid, sequences_subfolders_img),
+                          ('sequences_tags_vid', 'sequences_tags_img', 'sequences_subfolders_vid', 'sequences_subfolders_img'))]
     [trace(f'{title}:\n{NEWLINE.join(f"{item[0]}: ({len(item[1]) if item[1] else 0:d}) {str(item[1])}" for item in container.items())}')
-     for title, container in zip(['Vid ids', 'Img ids', 'Vid paths', 'Img paths', 'Vid ctags', 'Img ctags', 'Vid tags', 'Img tags'],
-                                 [sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img,
-                                  sequences_common_vid, sequences_common_img, sequences_tags_vid, sequences_tags_img])]
+     for title, container in zip(('Vid ids', 'Img ids', 'Vid paths', 'Img paths', 'Vid ctags', 'Img ctags', 'Vid tags', 'Img tags'),
+                                 (sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img,
+                                  sequences_common_vid, sequences_common_img, sequences_tags_vid, sequences_tags_img))]
 
 
 def _get_base_qs(
@@ -74,14 +74,14 @@ def _get_base_qs(
         sequences_paths_vid: Dict[str, Optional[str]], sequences_paths_img: Dict[str, Optional[str]],
         python_executable: str) -> Tuple[Dict[str, str], Dict[str, str]]:
     vrange, irange = (
-        {dt: IntPair(sids[dt][:2]) for dt in DOWNLOADERS if sids[dt]} for sids in [sequences_ids_vid, sequences_ids_img]
+        {dt: IntPair(sids[dt][:2]) for dt in DOWNLOADERS if sids[dt]} for sids in (sequences_ids_vid, sequences_ids_img)
     )  # type: Dict[str, IntPair]
     base_q_v, base_q_i = ({
         dt: (f'{python_executable} "{spath[dt]}" '
              f'{RANGE_TEMPLATES[dt].first % srange[dt].first} '
              f'{RANGE_TEMPLATES[dt].second % (srange[dt].second - 1)}')
         for dt in DOWNLOADERS if dt in srange.keys() and dt in spath.keys()
-    } for spath, srange in zip([sequences_paths_vid, sequences_paths_img], [vrange, irange]))  # type: Dict[str, str]
+    } for spath, srange in zip((sequences_paths_vid, sequences_paths_img), (vrange, irange)))  # type: Dict[str, str]
     return base_q_v, base_q_i
 
 
@@ -102,8 +102,8 @@ def queries_from_sequences_base(
               for i, staglist in enumerate(stags[dt]) if len(staglist) > 0])
         for dt in DOWNLOADERS
     } for sbase_q, ssub, ctags, stags, is_vidpath in
-        zip([base_q_v, base_q_i], [sequences_subfolders_vid, sequences_subfolders_img], [sequences_common_vid, sequences_common_img],
-            [sequences_tags_vid, sequences_tags_img], [True, False]))  # type: Dict[str, List[str]]
+        zip((base_q_v, base_q_i), (sequences_subfolders_vid, sequences_subfolders_img), (sequences_common_vid, sequences_common_img),
+            (sequences_tags_vid, sequences_tags_img), (True, False)))  # type: Dict[str, List[str]]
 
     return queries_final_vid, queries_final_img
 
@@ -132,15 +132,15 @@ def queries_from_sequences(sequences_ids_vid: Dict[str, Optional[Sequence]], seq
              )
         for dt in DOWNLOADERS
     } for sbase_q, ssub, ctags, stags, is_vidpath in
-        zip([base_q_v, base_q_i], [sequences_subfolders_vid, sequences_subfolders_img], [sequences_common_vid, sequences_common_img],
-            [sequences_tags_vid, sequences_tags_img], [True, False]))  # type: Dict[str, List[str]]
+        zip((base_q_v, base_q_i), (sequences_subfolders_vid, sequences_subfolders_img), (sequences_common_vid, sequences_common_img),
+            (sequences_tags_vid, sequences_tags_img), (True, False)))  # type: Dict[str, List[str]]
 
     return queries_final_vid, queries_final_img
 
 
 def report_finals(queries_final_vid: Dict[str, List[str]], queries_final_img: Dict[str, List[str]]) -> None:
     [trace(f'\nQueries {ty}:\n{NEWLINE.join(NEWLINE.join(finals) for finals in final_q.values() if len(finals) > 0)}', False)
-     for ty, final_q in zip(['vid', 'img'], [queries_final_vid, queries_final_img])]
+     for ty, final_q in zip(('vid', 'img'), (queries_final_vid, queries_final_img))]
 
 #
 #

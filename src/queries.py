@@ -8,7 +8,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 
 # from subprocess import call as call_subprocess
 from os import chmod, stat
-from re import fullmatch
+from re import compile as re_compile
 from subprocess import check_output
 from typing import List, Dict, Optional, Tuple
 
@@ -19,6 +19,17 @@ from sequences import validate_sequences, report_sequences, queries_from_sequenc
 from strings import datetime_str_nfull, bytes_to_lines, all_tags_negative, all_tags_positive, SLASH, NEWLINE
 
 __all__ = ('read_queries_file', 'form_queries', 'update_next_ids')
+
+re_comment = re_compile(r'^##[^#].*?$')
+re_download_mode = re_compile(r'^.*[: ]-dmode .+?$')
+re_python_exec = re_compile(r'^### PYTHON:.*?$')
+re_downloader_type = re_compile(fr'^# (?:{"|".join(DOWNLOADERS)}).*?$')
+re_ids_list = re_compile(r'^#(?: \d+)+$')
+re_downloader_path = re_compile(r'^# path:[A-Z/~].+?$')
+re_common_arg = re_compile(r'^# common:-.+?$')
+re_sub_begin = re_compile(r'^# sub:[^ ].*?$')
+re_sub_end = re_compile(r'^# send$')
+re_downloader_finilize = re_compile(r'^# end$')
 
 queries_file_lines = []  # type: List[str]
 
@@ -57,7 +68,7 @@ def form_queries(config=Config):
     for i, line in enumerate(queries_file_lines):
         try:
             line = line.strip(' \n\ufeff')  # remove BOM too
-            if line in ['', '### (VIDEOS) ###', '### (IMAGES) ###']:
+            if line in ('', '### (VIDEOS) ###', '### (IMAGES) ###'):
                 if line == '### (VIDEOS) ###':
                     cur_seq_ids = sequences_ids_vid
                     cur_seq_paths = sequences_paths_vid
@@ -73,34 +84,34 @@ def form_queries(config=Config):
                     cur_seq_subs = sequences_subfolders_img
                     cur_tags_list.clear()
                 continue
-            if line[0] not in ['(', '-', '*', '#'] and not line[0].isalpha():
+            if line[0] not in ('(', '-', '*', '#') and not line[0].isalpha():
                 trace(f'Error: corrupted line beginning found at line {i + 1:d}!')
                 raise IOError
             if line[0] == '#':
-                if fullmatch(r'^##[^#].*?$', line):
+                if re_comment.fullmatch(line):
                     # trace(f'Ignoring commented out line {i + 1:d}: \'{line}\'')
                     continue
-                if fullmatch(r'^.*[: ]-dmode .+?$', line):
+                if re_download_mode.fullmatch(line):
                     if config.ignore_download_mode is True:
                         trace(f'Info: \'{line}\' download mode found at line {i + 1:d}. Ignored!')
                         continue
-                if fullmatch(r'^### PYTHON:.*?$', line):
+                if re_python_exec.fullmatch(line):
                     assert python_executable == '', 'Python executable must be declared exactly once!'
                     python_executable = line[line.find(':') + 1:]
-                elif fullmatch(fr'^# (?:{"|".join(DOWNLOADERS)}).*?$', line):
+                elif re_downloader_type.fullmatch(line):
                     cur_downloader_idx = DOWNLOADERS.index(line.split(' ')[1])
-                elif fullmatch(r'^#(?: \d+)+$', line):
+                elif re_ids_list.fullmatch(line):
                     cur_seq_ids[DOWNLOADERS[cur_downloader_idx]] = Sequence([int(num) for num in line.split(' ')[1:]], i + 1)
                     assert len(cur_seq_ids[DOWNLOADERS[cur_downloader_idx]]) >= MIN_IDS_SEQ_LENGTH
-                elif fullmatch(r'^# path:[A-Z/~].+?$', line):
+                elif re_downloader_path.fullmatch(line):
                     cur_seq_paths[DOWNLOADERS[cur_downloader_idx]] = line[line.find(':') + 1:]
-                elif fullmatch(r'^# common:-.+?$', line):
+                elif re_common_arg.fullmatch(line):
                     cur_seq_common[DOWNLOADERS[cur_downloader_idx]] += line[line.find(':') + 1:].split(' ')
-                elif fullmatch(r'^# sub:[^ ].*?$', line):
+                elif re_sub_begin.fullmatch(line):
                     cur_seq_subs[DOWNLOADERS[cur_downloader_idx]].append(line[line.find(':') + 1:])
-                elif fullmatch(r'^# send$', line):
+                elif re_sub_end.fullmatch(line):
                     cur_seq_tags[DOWNLOADERS[cur_downloader_idx]].append(cur_tags_list.copy())
-                elif fullmatch(r'^# end$', line):
+                elif re_downloader_finilize.fullmatch(line):
                     cur_tags_list.clear()
                 else:
                     trace(f'Error: unknown param at line {i + 1:d}!')
@@ -110,11 +121,11 @@ def form_queries(config=Config):
                 if line.find('  ') != -1:
                     trace(f'Error: double space found in tags at line {i + 1:d}!')
                     raise IOError
-                if line[0] not in ['('] and (not line.startswith('-+(')) and line.find('~') != -1:
+                if line[0] not in ('(',) and (not line.startswith('-+(')) and line.find('~') != -1:
                     trace(f'Error: unsupported ungrouped OR symbol at line {i + 1:d}!')
                     raise IOError
                 if all_tags_negative(line.split(' ')):  # line[0] === '-'
-                    if line[1] in ['-', '+']:
+                    if line[1] in ('-', '+'):
                         # remove --tag(s) or -+tag(s) from list, convert: --a --b -> [-a, -b] OR -+a -+b -> [a, b]
                         tags_to_remove = [tag[2 if tag[1] == '+' else 1:] for tag in line.split(' ')]
                         for k in reversed(range(len(tags_to_remove))):
@@ -198,7 +209,7 @@ def update_next_ids() -> None:
     try:
         trace('Fetching max ids...')
         # b'NM: 71773\r\nRN: 526263\r\nRV: 3090582\r\nRX: 6867121\r\n\r\n'
-        fetch_result = check_output(['python3', f'{Config.fetcher_root}main.py', '--silent'])
+        fetch_result = check_output(('python', f'{Config.fetcher_root}main.py', '--silent'))
         trace(f'\nFetch max ids output (bytes): \'{str(fetch_result)}\'')
 
         lines = bytes_to_lines(fetch_result)[:4]
@@ -224,7 +235,7 @@ def update_next_ids() -> None:
 
         trace(f'\nWriting updated queries to \'{queries_file_name}\'...')
         maxnums = {dt: num for dt, num in [(line[:2].lower(), int(line[4:])) for line in lines]}  # type: Dict[str, int]
-        for ty, sequences_ids_type in zip(['vid', 'img'], [sequences_ids_vid, sequences_ids_img]):
+        for ty, sequences_ids_type in zip(('vid', 'img'), (sequences_ids_vid, sequences_ids_img)):
             for i, dtseq in enumerate(sequences_ids_type.items()):  # type: int, Tuple[str, Optional[Sequence]]
                 dt, seq = dtseq
                 line_num = (seq.line_num - 1) if seq else None

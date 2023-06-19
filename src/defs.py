@@ -41,7 +41,7 @@ DOWNLOADER_RX = 'rx'
 
 DOWNLOADERS = [DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RN, DOWNLOADER_RX]
 
-RUXX_INDECIES = [DOWNLOADERS.index(DOWNLOADER_RN), DOWNLOADERS.index(DOWNLOADER_RX)]
+RUXX_INDECIES = (DOWNLOADERS.index(DOWNLOADER_RN), DOWNLOADERS.index(DOWNLOADER_RX))
 RV_INDEX = DOWNLOADERS.index(DOWNLOADER_RV)
 
 
@@ -108,7 +108,7 @@ class Sequence:
 
 
 class Pair(ABC):
-    def __init__(self, vals: Union[list, tuple]) -> None:
+    def __init__(self, vals: tuple) -> None:
         assert len(vals) == 2
         assert isinstance(vals[0], type(vals[1]))
 
@@ -118,32 +118,32 @@ class Pair(ABC):
 
 
 class IntPair(Pair):
-    def __init__(self, vals: Union[List[int], Tuple[int, int]], *_) -> None:
+    def __init__(self, vals: Tuple[int, int], *_) -> None:
         super().__init__(vals)
         assert isinstance(vals[0], int)
-        self.first = vals[0]  # type: int
-        self.second = vals[1]  # type: int
+        self.first = vals[0]
+        self.second = vals[1]
 
     def __str__(self) -> str:
         return f'first: {self.first:d}, second: {self.second:d}'
 
 
 class StrPair(Pair):
-    def __init__(self, vals: Union[List[str], Tuple[str, str]], *_) -> None:
+    def __init__(self, vals: Tuple[str, str], *_) -> None:
         super().__init__(vals)
         assert isinstance(vals[0], str)
-        self.first = vals[0]  # type: str
-        self.second = vals[1]  # type: str
+        self.first = vals[0]
+        self.second = vals[1]
 
     def __str__(self) -> str:
         return f'first: {self.first}, second: {self.second}'
 
 
 RANGE_TEMPLATES = {
-    DOWNLOADER_NM: StrPair(['-start %d', '-end %d']),
-    DOWNLOADER_RV: StrPair(['-start %d', '-end %d']),
-    DOWNLOADER_RN: StrPair(['id>=%d', 'id<=%d']),
-    DOWNLOADER_RX: StrPair(['id:>=%d', 'id:<=%d']),
+    DOWNLOADER_NM: StrPair(('-start %d', '-end %d')),
+    DOWNLOADER_RV: StrPair(('-start %d', '-end %d')),
+    DOWNLOADER_RN: StrPair(('id>=%d', 'id<=%d')),
+    DOWNLOADER_RX: StrPair(('id:>=%d', 'id:<=%d')),
 }
 
 #
