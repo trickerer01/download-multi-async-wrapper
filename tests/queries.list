@@ -14,7 +14,6 @@ ggg
 
 
 # sub:b
--+ggg
 -ggg
 -(x,z)
 (h~i~j~k)
@@ -27,6 +26,7 @@ ggg
 # send
 
 # sub:d
+--quality -+1080p
 -l -m -n
 --dfff
 -quality 360p

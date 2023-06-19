@@ -8,6 +8,7 @@ tests/*
 *.pyc
 *.bak
 src/curr.py
+setup.cfg
 
 # IDE
 /.idea/*
