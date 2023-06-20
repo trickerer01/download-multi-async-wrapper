@@ -12,7 +12,7 @@ from re import compile as re_compile
 from subprocess import check_output
 from typing import List, Dict, Optional, Tuple
 
-from defs import DOWNLOADERS, UTF8, Sequence, Config, MIN_IDS_SEQ_LENGTH
+from defs import DOWNLOADERS, UTF8, IntSequence, Config, MIN_IDS_SEQ_LENGTH
 from executor import register_vid_queries, register_img_queries
 from logger import trace
 from sequences import validate_sequences, report_sequences, queries_from_sequences_base, queries_from_sequences, report_finals
@@ -33,8 +33,8 @@ re_downloader_finilize = re_compile(r'^# end$')
 
 queries_file_lines = []  # type: List[str]
 
-sequences_ids_vid = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[Sequence]]
-sequences_ids_img = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[Sequence]]
+sequences_ids_vid = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[IntSequence]]
+sequences_ids_img = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[IntSequence]]
 
 
 def read_queries_file(config=Config) -> None:
@@ -61,7 +61,7 @@ def form_queries(config=Config):
     cur_seq_common = sequences_common_vid
     cur_seq_tags = sequences_tags_vid
     cur_seq_subs = sequences_subfolders_vid
-    cur_tags_list = []  # type: List[str]
+    cur_tags_list = list()  # type: List[str]
 
     trace('\nAnalyzing queries file strings...')
 
@@ -84,7 +84,7 @@ def form_queries(config=Config):
                     cur_seq_subs = sequences_subfolders_img
                     cur_tags_list.clear()
                 continue
-            if line[0] not in ('(', '-', '*', '#') and not line[0].isalpha():
+            if line[0] not in {'(', '-', '*', '#'} and not line[0].isalpha():
                 trace(f'Error: corrupted line beginning found at line {i + 1:d}!')
                 raise IOError
             if line[0] == '#':
@@ -101,7 +101,7 @@ def form_queries(config=Config):
                 elif re_downloader_type.fullmatch(line):
                     cur_downloader_idx = DOWNLOADERS.index(line.split(' ')[1])
                 elif re_ids_list.fullmatch(line):
-                    cur_seq_ids[DOWNLOADERS[cur_downloader_idx]] = Sequence([int(num) for num in line.split(' ')[1:]], i + 1)
+                    cur_seq_ids[DOWNLOADERS[cur_downloader_idx]] = IntSequence([int(num) for num in line.split(' ')[1:]], i + 1)
                     assert len(cur_seq_ids[DOWNLOADERS[cur_downloader_idx]]) >= MIN_IDS_SEQ_LENGTH
                 elif re_downloader_path.fullmatch(line):
                     cur_seq_paths[DOWNLOADERS[cur_downloader_idx]] = line[line.find(':') + 1:]
@@ -116,7 +116,7 @@ def form_queries(config=Config):
                 else:
                     trace(f'Error: unknown param at line {i + 1:d}!')
                     raise IOError
-            else:  # elif line[0] in ['(', '-', '*'] or line[0].isalpha():
+            else:  # elif line[0] in {'(', '-', '*'} or line[0].isalpha():
                 assert len(cur_seq_ids[DOWNLOADERS[cur_downloader_idx]]) > 0
                 if line.find('  ') != -1:
                     trace(f'Error: double space found in tags at line {i + 1:d}!')
@@ -143,7 +143,7 @@ def form_queries(config=Config):
                         tags_rem = '~'.join(tags_split)
                         start_idx = 1 if len(tags_split) > 1 else 0  # type: int
                         end_idx = -1 if len(tags_split) > 1 else None  # type: Optional[int]
-                        for j in reversed(range(len(cur_tags_list))):
+                        for j in reversed(range(len(cur_tags_list))):  # type: int
                             taglen = len(cur_tags_list[j])
                             border_condition = len(tags_split) == 1 or cur_tags_list[j][0:taglen:taglen - 1] == '()'
                             if border_condition and cur_tags_list[j][start_idx:end_idx] == tags_rem:
@@ -236,7 +236,7 @@ def update_next_ids() -> None:
         trace(f'\nWriting updated queries to \'{queries_file_name}\'...')
         maxnums = {dt: num for dt, num in [(line[:2].lower(), int(line[4:])) for line in lines]}  # type: Dict[str, int]
         for ty, sequences_ids_type in zip(('vid', 'img'), (sequences_ids_vid, sequences_ids_img)):
-            for i, dtseq in enumerate(sequences_ids_type.items()):  # type: int, Tuple[str, Optional[Sequence]]
+            for i, dtseq in enumerate(sequences_ids_type.items()):  # type: int, Tuple[str, Optional[IntSequence]]
                 dt, seq = dtseq
                 line_num = (seq.line_num - 1) if seq else None
                 trace(f'{"W" if line_num else "Not w"}riting {dt} {ty} ids at idx {i:d}, line {line_num + 1 if line_num else -1:d}...')

@@ -22,11 +22,11 @@ OS_WINDOWS = 'Windows'
 OS_LINUX = 'Linux'
 OS_MACOS = 'Darwin'
 
-SUPPORTED_SYSTEMS = [
+SUPPORTED_SYSTEMS = (
     OS_WINDOWS,
     OS_LINUX,
     # OS_MACOS,
-]
+)
 
 MAX_CMD_LEN = {
     OS_WINDOWS: 32000,
@@ -49,7 +49,7 @@ class BaseConfig(object):
     def __init__(self) -> None:
         # arguments
         self.debug = False
-        self.downloaders = []  # type: List[str]
+        self.downloaders = list()  # type: List[str]
         self.dest_base = './'
         self.dest_run_base = './'
         self.dest_logs_base = './'
@@ -89,9 +89,9 @@ HELP_FETCHER_PATH = 'Path to the folder where max ids fetcher\'s \'main.py\' is 
 HELP_IGNORE_DMODE = 'Boolean flag to ignore all \'-dmode\' arguments and always download files in full'
 
 
-class Sequence:
-    def __init__(self, ids: List[int], line_num: int) -> None:
-        self.ids = ids or []  # type: List[int]
+class IntSequence:
+    def __init__(self, ids: Iterable[int], line_num: int) -> None:
+        self.ids = list(ids or [])
         self.line_num = line_num or 0
 
     def __str__(self) -> str:
@@ -108,7 +108,7 @@ class Sequence:
 
 
 class Pair(ABC):
-    def __init__(self, vals: tuple) -> None:
+    def __init__(self, vals: Tuple, *_) -> None:
         assert len(vals) == 2
         assert isinstance(vals[0], type(vals[1]))
 

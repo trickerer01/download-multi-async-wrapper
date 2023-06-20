@@ -7,7 +7,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 
 from asyncio import new_event_loop, AbstractEventLoop, as_completed, Future, SubprocessProtocol
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Mapping, Sequence
 
 from defs import UTF8, DOWNLOADERS, RUXX_INDECIES, Config
 from logger import trace, log_to
@@ -27,15 +27,15 @@ class DummyResultProtocol(SubprocessProtocol):
 
 executor_event_loop = None  # type: Optional[AbstractEventLoop]
 
-queues_vid = {dt: [] for dt in DOWNLOADERS}  # type: Dict[str, List[str]]
-queues_img = {dt: [] for dt in DOWNLOADERS}  # type: Dict[str, List[str]]
+queues_vid = {dt: list() for dt in DOWNLOADERS}  # type: Dict[str, List[str]]
+queues_img = {dt: list() for dt in DOWNLOADERS}  # type: Dict[str, List[str]]
 
 
-def register_vid_queries(queries: Dict[str, List[str]]) -> None:
+def register_vid_queries(queries: Mapping[str, List[str]]) -> None:
     queues_vid.update(queries)
 
 
-def register_img_queries(queries: Dict[str, List[str]]) -> None:
+def register_img_queries(queries: Mapping[str, List[str]]) -> None:
     queues_img.update(queries)
 
 
@@ -72,7 +72,7 @@ async def run_cmd(query: str, dt: str, qi: int, begin_msg: str) -> None:
         cmd_args = split_into_args(query)
         trace(f'Splitted into: \'{str(cmd_args)}\'')
         # DEBUG - do not remove
-        if DOWNLOADERS.index(dt) not in (3,) or qi not in range(1, 10):
+        if DOWNLOADERS.index(dt) not in {3} or qi not in range(1, 10):
             # return
             pass
         if DOWNLOADERS.index(dt) not in RUXX_INDECIES and (len(query) > Config.max_cmd_len):
@@ -92,7 +92,7 @@ async def run_cmd(query: str, dt: str, qi: int, begin_msg: str) -> None:
         trace(f'\n{"".join(log_file.readlines())}')
 
 
-async def run_dt_cmds(dts: List[str], tys: List[str], queries: List[str]) -> None:
+async def run_dt_cmds(dts: Sequence[str], tys: Sequence[str], queries: Sequence[str]) -> None:
     assert all(dt == dts[0] for dt in dts)
     dt = dts[0]
 

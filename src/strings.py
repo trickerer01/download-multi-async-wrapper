@@ -8,7 +8,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 
 from datetime import datetime
-from typing import List
+from typing import List, Iterable
 
 SLASH = '/'
 NEWLINE = '\n'
@@ -30,14 +30,14 @@ def timestamped_string(msg: str, timestamp: str) -> str:
     return msg.replace('\n', f'\n[{timestamp}] ') if msg[0] == '\n' else (f'[{timestamp}] ' + msg.replace('\n', f'\n[{timestamp}] '))
 
 
-def all_tags_negative(taglist: List[str]) -> bool:
+def all_tags_negative(taglist: Iterable[str]) -> bool:
     all_neg = True
     for tag in taglist:
         all_neg = all_neg and tag.startswith('-')
     return all_neg
 
 
-def all_tags_positive(taglist: List[str]) -> bool:
+def all_tags_positive(taglist: Iterable[str]) -> bool:
     all_pos = True
     for tag in taglist:
         all_pos = all_pos and not tag.startswith('-')

@@ -6,19 +6,24 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Mapping, Sequence, TypeVar
 
-from defs import DOWNLOADERS, RANGE_TEMPLATES, RUXX_INDECIES, IntPair, Config, Sequence
+from defs import DOWNLOADERS, RANGE_TEMPLATES, RUXX_INDECIES, IntPair, Config, IntSequence
 from logger import trace
 from strings import normalize_ruxx_tag, path_args, NEWLINE
 
 __all__ = ('validate_sequences', 'report_sequences', 'queries_from_sequences_base', 'queries_from_sequences', 'report_finals')
 
+IntSequenceMap = TypeVar('IntSequenceMap', bound=Mapping[str, Optional[IntSequence]])
+StringMap = TypeVar('StringMap', bound=Mapping[str, Optional[str]])
+StringListMap = TypeVar('StringListMap', bound=Mapping[str, Sequence[str]])
+StringListListMap = TypeVar('StringListListMap', bound=Mapping[str, Sequence[List[str]]])
 
-def validate_sequences(sequences_ids_vid: Dict[str, Optional[Sequence]], sequences_ids_img: Dict[str, Optional[Sequence]],
-                       sequences_paths_vid: Dict[str, Optional[str]], sequences_paths_img: Dict[str, Optional[str]],
-                       sequences_tags_vid: Dict[str, List[List[str]]], sequences_tags_img: Dict[str, List[List[str]]],
-                       sequences_subfolders_vid: Dict[str, List[str]], sequences_subfolders_img: Dict[str, List[str]],
+
+def validate_sequences(sequences_ids_vid: IntSequenceMap, sequences_ids_img: IntSequenceMap,
+                       sequences_paths_vid: StringMap, sequences_paths_img: StringMap,
+                       sequences_tags_vid: StringListListMap, sequences_tags_img: StringListListMap,
+                       sequences_subfolders_vid: StringListMap, sequences_subfolders_img: StringListMap,
                        python_executable: str) -> None:
     if python_executable == '':
         trace('Error: python_executable was not declared!')
@@ -50,11 +55,11 @@ def validate_sequences(sequences_ids_vid: Dict[str, Optional[Sequence]], sequenc
             raise IOError
 
 
-def report_sequences(sequences_ids_vid: Dict[str, Optional[Sequence]], sequences_ids_img: Dict[str, Optional[Sequence]],
-                     sequences_paths_vid: Dict[str, Optional[str]], sequences_paths_img: Dict[str, Optional[str]],
-                     sequences_tags_vid: Dict[str, List[List[str]]], sequences_tags_img: Dict[str, List[List[str]]],
-                     sequences_subfolders_vid: Dict[str, List[str]], sequences_subfolders_img: Dict[str, List[str]],
-                     sequences_common_vid: Dict[str, List[str]], sequences_common_img: Dict[str, List[str]],
+def report_sequences(sequences_ids_vid: IntSequenceMap, sequences_ids_img: IntSequenceMap,
+                     sequences_paths_vid: StringMap, sequences_paths_img: StringMap,
+                     sequences_tags_vid: StringListListMap, sequences_tags_img: StringListListMap,
+                     sequences_subfolders_vid: StringListMap, sequences_subfolders_img: StringListMap,
+                     sequences_common_vid: StringListMap, sequences_common_img: StringListMap,
                      python_executable: str) -> None:
     trace(f'Python executable: \'{python_executable}\'')
     [trace(f'{len([q for q in seq.values() if q]):d} {name} sequences')
@@ -70,8 +75,8 @@ def report_sequences(sequences_ids_vid: Dict[str, Optional[Sequence]], sequences
 
 
 def _get_base_qs(
-        sequences_ids_vid: Dict[str, Optional[Sequence]], sequences_ids_img: Dict[str, Optional[Sequence]],
-        sequences_paths_vid: Dict[str, Optional[str]], sequences_paths_img: Dict[str, Optional[str]],
+        sequences_ids_vid: IntSequenceMap, sequences_ids_img: IntSequenceMap,
+        sequences_paths_vid: StringMap, sequences_paths_img: StringMap,
         python_executable: str) -> Tuple[Dict[str, str], Dict[str, str]]:
     vrange, irange = (
         {dt: IntPair(sids[dt][:2]) for dt in DOWNLOADERS if sids[dt]} for sids in (sequences_ids_vid, sequences_ids_img)
@@ -86,11 +91,11 @@ def _get_base_qs(
 
 
 def queries_from_sequences_base(
-        sequences_ids_vid: Dict[str, Optional[Sequence]], sequences_ids_img: Dict[str, Optional[Sequence]],
-        sequences_paths_vid: Dict[str, Optional[str]], sequences_paths_img: Dict[str, Optional[str]],
-        sequences_tags_vid: Dict[str, List[List[str]]], sequences_tags_img: Dict[str, List[List[str]]],
-        sequences_subfolders_vid: Dict[str, List[str]], sequences_subfolders_img: Dict[str, List[str]],
-        sequences_common_vid: Dict[str, List[str]], sequences_common_img: Dict[str, List[str]],
+        sequences_ids_vid: IntSequenceMap, sequences_ids_img: IntSequenceMap,
+        sequences_paths_vid: StringMap, sequences_paths_img: StringMap,
+        sequences_tags_vid: StringListListMap, sequences_tags_img: StringListListMap,
+        sequences_subfolders_vid: StringListMap, sequences_subfolders_img: StringListMap,
+        sequences_common_vid: StringListMap, sequences_common_img: StringListMap,
         python_executable: str, config=Config) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
 
     base_q_v, base_q_i = _get_base_qs(sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img, python_executable)
@@ -108,13 +113,12 @@ def queries_from_sequences_base(
     return queries_final_vid, queries_final_img
 
 
-def queries_from_sequences(sequences_ids_vid: Dict[str, Optional[Sequence]], sequences_ids_img: Dict[str, Optional[Sequence]],
-                           sequences_paths_vid: Dict[str, Optional[str]], sequences_paths_img: Dict[str, Optional[str]],
-                           sequences_tags_vid: Dict[str, List[List[str]]], sequences_tags_img: Dict[str, List[List[str]]],
-                           sequences_subfolders_vid: Dict[str, List[str]], sequences_subfolders_img: Dict[str, List[str]],
-                           sequences_common_vid: Dict[str, List[str]], sequences_common_img: Dict[str, List[str]],
-                           python_executable: str,
-                           config=Config) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
+def queries_from_sequences(sequences_ids_vid: IntSequenceMap, sequences_ids_img: IntSequenceMap,
+                           sequences_paths_vid: StringMap, sequences_paths_img: StringMap,
+                           sequences_tags_vid: StringListListMap, sequences_tags_img: StringListListMap,
+                           sequences_subfolders_vid: StringListMap, sequences_subfolders_img: StringListMap,
+                           sequences_common_vid: StringListMap, sequences_common_img: StringListMap,
+                           python_executable: str, config=Config) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
 
     base_q_v, base_q_i = _get_base_qs(sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img, python_executable)
 
@@ -138,7 +142,7 @@ def queries_from_sequences(sequences_ids_vid: Dict[str, Optional[Sequence]], seq
     return queries_final_vid, queries_final_img
 
 
-def report_finals(queries_final_vid: Dict[str, List[str]], queries_final_img: Dict[str, List[str]]) -> None:
+def report_finals(queries_final_vid: StringListMap, queries_final_img: StringListMap) -> None:
     [trace(f'\nQueries {ty}:\n{NEWLINE.join(NEWLINE.join(finals) for finals in final_q.values() if len(finals) > 0)}', False)
      for ty, final_q in zip(('vid', 'img'), (queries_final_vid, queries_final_img))]
 
