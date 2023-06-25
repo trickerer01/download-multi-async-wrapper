@@ -6,7 +6,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
-from asyncio import new_event_loop, AbstractEventLoop, as_completed, Future, SubprocessProtocol
+from asyncio import new_event_loop, AbstractEventLoop, as_completed, Future, SubprocessProtocol, sleep
 from typing import Dict, List, Optional, Mapping, Sequence
 
 from defs import UTF8, DOWNLOADERS, RUXX_INDECIES, Config
@@ -97,6 +97,7 @@ async def run_dt_cmds(dts: Sequence[str], tys: Sequence[str], queries: Sequence[
     dt = dts[0]
 
     if dt not in Config.downloaders:
+        await sleep(1.0)  # delay this message so it isn't printed somewhere inbetween initial cmds
         trace(f'\n{dt.upper()} SKIPPED\n')
         return
 
