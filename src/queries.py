@@ -13,9 +13,9 @@ from subprocess import check_output
 from typing import List, Dict, Optional, Tuple
 
 from defs import DOWNLOADERS, UTF8, IntSequence, Config, MIN_IDS_SEQ_LENGTH
-from executor import register_vid_queries, register_img_queries
+from executor import register_queries
 from logger import trace
-from sequences import validate_sequences, report_sequences, queries_from_sequences_base, queries_from_sequences, report_finals
+from sequences import validate_sequences, queries_from_sequences, report_finals  # , report_sequences, queries_from_sequences_base
 from strings import datetime_str_nfull, bytes_to_lines, all_tags_negative, all_tags_positive, SLASH, NEWLINE
 
 __all__ = ('read_queries_file', 'form_queries', 'update_next_ids')
@@ -162,10 +162,10 @@ def form_queries(config=Config):
             raise
 
     trace('Sequences are successfully read\n')
-    report_sequences(sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img,
-                     sequences_tags_vid, sequences_tags_img, sequences_subfolders_vid, sequences_subfolders_img,
-                     sequences_common_vid, sequences_common_img,
-                     python_executable)
+    # report_sequences(sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img,
+    #                  sequences_tags_vid, sequences_tags_img, sequences_subfolders_vid, sequences_subfolders_img,
+    #                  sequences_common_vid, sequences_common_img,
+    #                  python_executable)
     validate_sequences(sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img,
                        sequences_tags_vid, sequences_tags_img, sequences_subfolders_vid, sequences_subfolders_img,
                        python_executable)
@@ -173,13 +173,13 @@ def form_queries(config=Config):
     trace('Sequences are validated. Preparing final lists...')
 
     # base final sequences
-    trace('\nBase:')
-    report_finals(*queries_from_sequences_base(
-        sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img,
-        sequences_tags_vid, sequences_tags_img, sequences_subfolders_vid, sequences_subfolders_img,
-        sequences_common_vid, sequences_common_img,
-        python_executable, config
-    ))
+    # trace('\nBase:')
+    # report_finals(*queries_from_sequences_base(
+    #     sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img,
+    #     sequences_tags_vid, sequences_tags_img, sequences_subfolders_vid, sequences_subfolders_img,
+    #     sequences_common_vid, sequences_common_img,
+    #     python_executable, config
+    # ))
 
     trace('\nOptimized:')
     queries_final_vid, queries_final_img = queries_from_sequences(
@@ -190,9 +190,7 @@ def form_queries(config=Config):
     )
 
     report_finals(queries_final_vid, queries_final_img)
-
-    register_vid_queries(queries_final_vid)
-    register_img_queries(queries_final_img)
+    register_queries(queries_final_vid, queries_final_img)
 
 
 def update_next_ids() -> None:

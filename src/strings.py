@@ -87,7 +87,7 @@ def date_str_md(img: bool) -> str:
     'img_mmdd' for images\n\n
     usable in folder names
     """
-    return f'{"img_" if img else ""}{datetime.today().strftime("%m%d")}'
+    return f'{"img_" if img else ""}{time_now_fmt("%m%d")}'
 
 #
 #

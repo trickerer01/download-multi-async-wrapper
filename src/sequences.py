@@ -20,11 +20,12 @@ StringListMap = TypeVar('StringListMap', bound=Mapping[str, Sequence[str]])
 StringListListMap = TypeVar('StringListListMap', bound=Mapping[str, Sequence[List[str]]])
 
 
-def validate_sequences(sequences_ids_vid: IntSequenceMap, sequences_ids_img: IntSequenceMap,
-                       sequences_paths_vid: StringMap, sequences_paths_img: StringMap,
-                       sequences_tags_vid: StringListListMap, sequences_tags_img: StringListListMap,
-                       sequences_subfolders_vid: StringListMap, sequences_subfolders_img: StringListMap,
-                       python_executable: str) -> None:
+def validate_sequences(
+        sequences_ids_vid: IntSequenceMap, sequences_ids_img: IntSequenceMap,
+        sequences_paths_vid: StringMap, sequences_paths_img: StringMap,
+        sequences_tags_vid: StringListListMap, sequences_tags_img: StringListListMap,
+        sequences_subfolders_vid: StringListMap, sequences_subfolders_img: StringListMap,
+        python_executable: str) -> None:
     if python_executable == '':
         trace('Error: python_executable was not declared!')
         raise IOError
@@ -55,12 +56,13 @@ def validate_sequences(sequences_ids_vid: IntSequenceMap, sequences_ids_img: Int
             raise IOError
 
 
-def report_sequences(sequences_ids_vid: IntSequenceMap, sequences_ids_img: IntSequenceMap,
-                     sequences_paths_vid: StringMap, sequences_paths_img: StringMap,
-                     sequences_tags_vid: StringListListMap, sequences_tags_img: StringListListMap,
-                     sequences_subfolders_vid: StringListMap, sequences_subfolders_img: StringListMap,
-                     sequences_common_vid: StringListMap, sequences_common_img: StringListMap,
-                     python_executable: str) -> None:
+def report_sequences(
+        sequences_ids_vid: IntSequenceMap, sequences_ids_img: IntSequenceMap,
+        sequences_paths_vid: StringMap, sequences_paths_img: StringMap,
+        sequences_tags_vid: StringListListMap, sequences_tags_img: StringListListMap,
+        sequences_subfolders_vid: StringListMap, sequences_subfolders_img: StringListMap,
+        sequences_common_vid: StringListMap, sequences_common_img: StringListMap,
+        python_executable: str) -> None:
     trace(f'Python executable: \'{python_executable}\'')
     [trace(f'{len([q for q in seq.values() if q]):d} {name} sequences')
      for seq, name in zip((sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img),
@@ -97,9 +99,7 @@ def queries_from_sequences_base(
         sequences_subfolders_vid: StringListMap, sequences_subfolders_img: StringListMap,
         sequences_common_vid: StringListMap, sequences_common_img: StringListMap,
         python_executable: str, config=Config) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
-
     base_q_v, base_q_i = _get_base_qs(sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img, python_executable)
-
     queries_final_vid, queries_final_img = ({
         dt: ([f'{sbase_q[dt]} {path_args(config.dest_base, not is_vidpath, ssub[dt][i])} '
               f'{" ".join(normalize_ruxx_tag(tag) if DOWNLOADERS.index(dt) in RUXX_INDECIES else tag for tag in ctags[dt])} '
@@ -109,19 +109,17 @@ def queries_from_sequences_base(
     } for sbase_q, ssub, ctags, stags, is_vidpath in
         zip((base_q_v, base_q_i), (sequences_subfolders_vid, sequences_subfolders_img), (sequences_common_vid, sequences_common_img),
             (sequences_tags_vid, sequences_tags_img), (True, False)))  # type: Dict[str, List[str]]
-
     return queries_final_vid, queries_final_img
 
 
-def queries_from_sequences(sequences_ids_vid: IntSequenceMap, sequences_ids_img: IntSequenceMap,
-                           sequences_paths_vid: StringMap, sequences_paths_img: StringMap,
-                           sequences_tags_vid: StringListListMap, sequences_tags_img: StringListListMap,
-                           sequences_subfolders_vid: StringListMap, sequences_subfolders_img: StringListMap,
-                           sequences_common_vid: StringListMap, sequences_common_img: StringListMap,
-                           python_executable: str, config=Config) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
-
+def queries_from_sequences(
+        sequences_ids_vid: IntSequenceMap, sequences_ids_img: IntSequenceMap,
+        sequences_paths_vid: StringMap, sequences_paths_img: StringMap,
+        sequences_tags_vid: StringListListMap, sequences_tags_img: StringListListMap,
+        sequences_subfolders_vid: StringListMap, sequences_subfolders_img: StringListMap,
+        sequences_common_vid: StringListMap, sequences_common_img: StringListMap,
+        python_executable: str, config=Config) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
     base_q_v, base_q_i = _get_base_qs(sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img, python_executable)
-
     queries_final_vid, queries_final_img = ({
         dt: ([f'{sbase_q[dt]} {path_args(config.dest_base, not is_vidpath, ssub[dt][i])} '
               f'{" ".join(normalize_ruxx_tag(tag) for tag in ctags[dt])} '
@@ -138,7 +136,6 @@ def queries_from_sequences(sequences_ids_vid: IntSequenceMap, sequences_ids_img:
     } for sbase_q, ssub, ctags, stags, is_vidpath in
         zip((base_q_v, base_q_i), (sequences_subfolders_vid, sequences_subfolders_img), (sequences_common_vid, sequences_common_img),
             (sequences_tags_vid, sequences_tags_img), (True, False)))  # type: Dict[str, List[str]]
-
     return queries_final_vid, queries_final_img
 
 

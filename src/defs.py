@@ -9,7 +9,6 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 
 from abc import ABC, abstractmethod
 from os import environ
-# from platform import system as running_system
 from typing import List, Union, Tuple, Iterable
 
 IS_IDE = environ.get('PYCHARM_HOSTED') == '1'
@@ -95,7 +94,7 @@ class IntSequence:
         self.line_num = line_num or 0
 
     def __str__(self) -> str:
-        return f'{str(self.ids)} (found and line {self.line_num:d})'
+        return f'{str(self.ids)} (found at line {self.line_num:d})'
 
     def __len__(self) -> int:
         return len(self.ids)

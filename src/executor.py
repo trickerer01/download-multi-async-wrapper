@@ -14,7 +14,7 @@ from logger import trace, log_to
 from os import path
 from strings import datetime_str_nfull, unquote
 
-__all__ = ('queues_vid', 'queues_img', 'register_vid_queries', 'register_img_queries', 'execute')
+__all__ = ('ques_vid', 'ques_img', 'register_queries', 'execute')
 
 
 class DummyResultProtocol(SubprocessProtocol):
@@ -27,16 +27,13 @@ class DummyResultProtocol(SubprocessProtocol):
 
 executor_event_loop = None  # type: Optional[AbstractEventLoop]
 
-queues_vid = {dt: list() for dt in DOWNLOADERS}  # type: Dict[str, List[str]]
-queues_img = {dt: list() for dt in DOWNLOADERS}  # type: Dict[str, List[str]]
+ques_vid = {dt: list() for dt in DOWNLOADERS}  # type: Dict[str, List[str]]
+ques_img = {dt: list() for dt in DOWNLOADERS}  # type: Dict[str, List[str]]
 
 
-def register_vid_queries(queries: Mapping[str, List[str]]) -> None:
-    queues_vid.update(queries)
-
-
-def register_img_queries(queries: Mapping[str, List[str]]) -> None:
-    queues_img.update(queries)
+def register_queries(queries_v: Mapping[str, List[str]], queries_i: Mapping[str, List[str]]) -> None:
+    ques_vid.update(queries_v)
+    ques_img.update(queries_i)
 
 
 def split_into_args(query: str) -> List[str]:
@@ -59,7 +56,6 @@ def split_into_args(query: str) -> List[str]:
         elif query[idx2] == ' ' and idxdq == 0:
             result.append(unquote(query[idx1:idx2]))
             idx1 = idx2 + 1
-
     return result
 
 
@@ -68,9 +64,9 @@ async def run_cmd(query: str, dt: str, qi: int, begin_msg: str) -> None:
     with open(f'{Config.dest_logs_base}log_{dt}_{exec_time}.log', 'at', encoding=UTF8, buffering=True) as log_file:
         trace(begin_msg)
         log_to(begin_msg, log_file)
-        trace(f'Executing cmdline {qi:d}: \'{query}\'')
+        # trace(f'Executing cmdline {qi:d}: \'{query}\'')
         cmd_args = split_into_args(query)
-        trace(f'Splitted into: \'{str(cmd_args)}\'')
+        # trace(f'Splitted into: \'{str(cmd_args)}\'')
         # DEBUG - do not remove
         if DOWNLOADERS.index(dt) not in {3} or qi not in range(1, 10):
             # return
@@ -81,7 +77,7 @@ async def run_cmd(query: str, dt: str, qi: int, begin_msg: str) -> None:
             run_file_abspath = path.abspath(run_file_name)
             cmd_args_new = cmd_args[2:]
             cmd_args = cmd_args[:2] + ['file', '-path', run_file_abspath]
-            trace(f'New cmd args: \'{str(cmd_args)}\'\nFile cmd args: \'{str(cmd_args_new)}\'')
+            # trace(f'New cmd args: \'{str(cmd_args)}\'\nFile cmd args: \'{str(cmd_args_new)}\'')
             with open(run_file_abspath, 'wt', encoding=UTF8, buffering=True) as run_file:
                 run_file.write('\n'.join(cmd_args_new))
         ef = Future(loop=executor_event_loop)
@@ -115,9 +111,9 @@ async def run_all_cmds() -> None:
         return
 
     for cv in as_completed([run_dt_cmds(dts, tys, queries) for dts, tys, queries in
-                            zip([[dt] * (len(queues_vid[dt]) + len(queues_img[dt])) for dt in DOWNLOADERS],
-                                [['vid'] * len(queues_vid[dt]) + ['img'] * len(queues_img[dt]) for dt in DOWNLOADERS],
-                                [queues_vid[dt] + queues_img[dt] for dt in DOWNLOADERS])], loop=executor_event_loop):
+                            zip([[dt] * (len(ques_vid[dt]) + len(ques_img[dt])) for dt in DOWNLOADERS],
+                                [['vid'] * len(ques_vid[dt]) + ['img'] * len(ques_img[dt]) for dt in DOWNLOADERS],
+                                [ques_vid[dt] + ques_img[dt] for dt in DOWNLOADERS])], loop=executor_event_loop):
         await cv
     trace('ALL DOWNLOADERS FINISHED WORK\n')
 
