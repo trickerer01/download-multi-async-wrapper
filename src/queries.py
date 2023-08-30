@@ -206,7 +206,7 @@ def update_next_ids() -> None:
     trace(f'File: \'{queries_file_name}\', backup file: \'{filename_bak}\'')
     try:
         trace('Fetching max ids...')
-        # b'NM: 71773\r\nRN: 526263\r\nRV: 3090582\r\nRX: 6867121\r\n\r\n'
+        # b'NM: 71773\r\nRN: 526263\r\nRV: 3090582\r\nRX: 6867121\r\nRS: 6326078\r\n\r\n'
         fetch_result = check_output(('python', f'{Config.fetcher_root}main.py', '--silent'))
         trace(f'\nFetch max ids output (bytes): \'{str(fetch_result)}\'')
 
