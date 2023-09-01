@@ -8,18 +8,16 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 
 from argparse import ArgumentParser, ArgumentError
 from os import path
-from typing import Optional, List
+from typing import List
 
 from defs import (
     Config, DOWNLOADERS, IS_IDE, ACTION_STORE_TRUE, HELP_DEBUG, HELP_DOWNLOADERS, HELP_PATH, HELP_SCRIPT_PATH, HELP_RUN_PATH,
-    HELP_LOGS_PATH, HELP_BAK_PATH, HELP_UPDATE, HELP_NO_DOWNLOAD, HELP_FETCHER_PATH, HELP_IGNORE_DMODE,
+    HELP_LOGS_PATH, HELP_BAK_PATH, HELP_UPDATE, HELP_NO_DOWNLOAD, HELP_IGNORE_DMODE,
 )
 from logger import trace
 from strings import normalize_path, unquote
 
 __all__ = ('parse_arglist',)
-
-parser = None  # type: Optional[ArgumentParser]
 
 
 def valid_dir_path(pathstr: str) -> str:
@@ -61,11 +59,8 @@ def valid_downloaders_list(downloaders_str: str) -> List[str]:
 
 
 def parse_arglist(args: List[str], config=Config) -> None:
-    global parser
-
     parser = ArgumentParser(add_help=False)
     parser.add_argument('--help', action='help')
-
     parser.add_argument('--debug', action=ACTION_STORE_TRUE, help=HELP_DEBUG)
     parser.add_argument('-downloaders', metavar='#L,I,S,T', default=DOWNLOADERS, help=HELP_DOWNLOADERS, type=valid_downloaders_list)
     parser.add_argument('-path', metavar='#PATH_TO_DIR', default=normalize_path(path.curdir), help=HELP_PATH, type=valid_dir_path)
@@ -76,14 +71,9 @@ def parse_arglist(args: List[str], config=Config) -> None:
     parser.add_argument('-runpath', metavar='#PATH_TO_DIR', default=None, help=HELP_RUN_PATH, type=valid_dir_path)
     parser.add_argument('-logspath', metavar='#PATH_TO_DIR', default=None, help=HELP_LOGS_PATH, type=valid_dir_path)
     parser.add_argument('-bakpath', metavar='#PATH_TO_DIR', default=None, help=HELP_BAK_PATH, type=valid_dir_path)
-    parser.add_argument('-fetcherpath', metavar='#PATH_TO_DIR', default=None, help=HELP_FETCHER_PATH, type=valid_dir_path)
 
     try:
         parsed = parser.parse_args(args)
-        if parsed.update:
-            if parsed.fetcherpath is None:
-                trace('-fetcherpath is required!')
-                raise ArgumentError
 
         if IS_IDE:
             parsed.runpath = parsed.runpath or '../run'
@@ -100,8 +90,7 @@ def parse_arglist(args: List[str], config=Config) -> None:
         config.dest_run_base = parsed.runpath or config.dest_run_base
         config.dest_logs_base = parsed.logspath or config.dest_logs_base
         config.dest_bak_base = parsed.bakpath or config.dest_bak_base
-        config.fetcher_root = parsed.fetcherpath or config.fetcher_root
-    except (ArgumentError, TypeError, ValueError, Exception):
+    except Exception:
         raise
 
 #

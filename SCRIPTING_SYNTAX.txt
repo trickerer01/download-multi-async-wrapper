@@ -5,7 +5,7 @@
 ### (VIDEOS) ###                 <-- VIDEOS MARKER <REQUIRED>
 # nm                             <-- DOWNLOADER TYPE <REQUIRED>
 # 50000 51000                    <-- AT LEAST TWO IDS FOR RANGE <REQUIRED>
-# path:D:/Projects/nm/src/ids.py <-- PATH TO THE DOWNLOADER PYTHON FILE (IDS, NOT PAGES) <REQUIRED>
+# basepath:D:/Projects/NM        <-- PATH TO THE DOWNLOADER BASE PATH <REQUIRED>
 # common:-dmode touch            <-- ARGUMENTS TO ADD TO EVERY QUERY <OPTIONAL>
 # common:-log trace              <-- ARGUMENTS TO ADD TO EVERY QUERY <OPTIONAL>
 # common:--dump-tags             <-- ARGUMENTS TO ADD TO EVERY QUERY <OPTIONAL>
@@ -53,7 +53,7 @@ ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
 
 # rv
 # 3050000 3051000
-# path:D:/Projects/rv/src/ids.py
+# basepath:D:/Projects/RV
 # common:...
 # sub:...
 ...
@@ -66,7 +66,7 @@ ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
 
 # rn
 # 450000 451000
-# path:D:/Projects/ruxx/src/app_gui.py
+# basepath:D:/Projects/Ruxx
 # common:...
 # sub:...
 ...
@@ -75,7 +75,7 @@ ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
 
 # rx
 # 5050000 5051000
-# path:D:/Projects/ruxx/src/app_gui.py
+# basepath:D:/Projects/Ruxx
 # common:...
 # sub:...
 ...
@@ -85,7 +85,7 @@ ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
 ### (IMAGES) ###                 <-- IMAGES MARKER (RUXX ONLY) <REQUIRED>
 # rx
 # 5050000 5051000
-# path:D:/Projects/ruxx/src/app_gui.py
+# basepath:D:/Projects/Ruxx
 # common:...
 # sub:...
 ...

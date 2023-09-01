@@ -7,10 +7,9 @@ Dependencies:
   - https://github.com/trickerer01/Ruxx
   - https://github.com/trickerer01/RV
   - https://github.com/trickerer01/NM
-  - https://github.com/trickerer01/max-id-fetcher (optional)
 - Libraries: None
 
 See [SCRIPTING_SYNTAX.txt](https://github.com/trickerer01/download-multi-async-wrapper/blob/master/SCRIPTING_SYNTAX.txt) for script composition guidelines and tips  
 Invoke `python main.py --help` to list cmdline arguments
 
-Once you are done with initial script setup you only need to invoke a single cmd command to download the next batch without any need to even update next max id, ever (ideally)
+Once you are done with initial script setup you only need to invoke a single cmd command to download the next batch without any need to even update next max id manually, ever (ideally)

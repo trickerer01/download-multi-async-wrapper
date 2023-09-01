@@ -2,7 +2,7 @@
 ### (VIDEOS) ###
 # nm
 # 1 2
-# path:D:/nm/ids.py
+# basepath:D:/nm/
 # common:-dmode touch
 # common:--dump-tags
 # common:--verbose
@@ -37,7 +37,7 @@ ggg
 ### (IMAGES) ###
 # rx
 # 1 2
-# path:D:/ruxx/app_gui.py
+# basepath:D:/ruxx/
 # common:-dmode 2
 # common:-module rx
 # sub:a

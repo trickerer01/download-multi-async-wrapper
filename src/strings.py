@@ -8,7 +8,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 
 from datetime import datetime
-from typing import List, Iterable
+from typing import Iterable
 
 SLASH = '/'
 NEWLINE = '\n'
@@ -53,10 +53,6 @@ def normalize_ruxx_tag(tag: str) -> str:
 
 def path_args(dest_base: str, img: bool, sub: str) -> str:
     return f'-path "{dest_base}{date_str_md(img)}/{sub}{"/" if len(sub) > 0 else ""}"'
-
-
-def bytes_to_lines(raw: bytes) -> List[str]:
-    return raw.decode().replace('\r\n', '\n').split('\n')
 
 
 def time_now_fmt(fmt: str) -> str:

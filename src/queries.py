@@ -7,16 +7,19 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 
 # from subprocess import call as call_subprocess
-from os import chmod, stat
+from os import chmod, path, stat
 from re import compile as re_compile
 from subprocess import check_output
+from threading import Thread, Lock as ThreadLock
 from typing import List, Dict, Optional, Tuple
 
-from defs import DOWNLOADERS, UTF8, IntSequence, Config, MIN_IDS_SEQ_LENGTH
+from defs import (
+    DOWNLOADERS, UTF8, IntSequence, Config, MIN_IDS_SEQ_LENGTH, PATH_APPEND_DOWNLOAD, PATH_APPEND_UPDATE, RUXX_INDECIES, PROXY_ARG, StrPair
+)
 from executor import register_queries
 from logger import trace
 from sequences import validate_sequences, queries_from_sequences, report_finals  # , report_sequences, queries_from_sequences_base
-from strings import datetime_str_nfull, bytes_to_lines, all_tags_negative, all_tags_positive, SLASH, NEWLINE
+from strings import datetime_str_nfull, all_tags_negative, all_tags_positive, normalize_path, SLASH, NEWLINE
 
 __all__ = ('read_queries_file', 'form_queries', 'update_next_ids')
 
@@ -25,7 +28,7 @@ re_download_mode = re_compile(r'^.*[: ]-dmode .+?$')
 re_python_exec = re_compile(r'^### PYTHON:.*?$')
 re_downloader_type = re_compile(fr'^# (?:{"|".join(DOWNLOADERS)}).*?$')
 re_ids_list = re_compile(r'^#(?: \d+)+$')
-re_downloader_path = re_compile(r'^# path:[A-Z/~].+?$')
+re_downloader_basepath = re_compile(r'^# basepath:[A-Z/~].+?$')
 re_common_arg = re_compile(r'^# common:-.+?$')
 re_sub_begin = re_compile(r'^# sub:[^ ].*?$')
 re_sub_end = re_compile(r'^# send$')
@@ -33,8 +36,13 @@ re_downloader_finilize = re_compile(r'^# end$')
 
 queries_file_lines = []  # type: List[str]
 
+python_executable = ''
+
 sequences_ids_vid = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[IntSequence]]
 sequences_ids_img = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[IntSequence]]
+
+sequences_paths_update = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[str]]
+proxies_update = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[StrPair]]
 
 
 def read_queries_file(config=Config) -> None:
@@ -45,7 +53,7 @@ def read_queries_file(config=Config) -> None:
 
 
 def form_queries(config=Config):
-    python_executable = ''
+    global python_executable
     sequences_paths_vid = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[str]]
     sequences_paths_img = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[str]]
     sequences_common_vid = {dt: [] for dt in DOWNLOADERS}  # type: Dict[str, List[str]]
@@ -103,10 +111,25 @@ def form_queries(config=Config):
                 elif re_ids_list.fullmatch(line):
                     cur_seq_ids[DOWNLOADERS[cur_downloader_idx]] = IntSequence([int(num) for num in line.split(' ')[1:]], i + 1)
                     assert len(cur_seq_ids[DOWNLOADERS[cur_downloader_idx]]) >= MIN_IDS_SEQ_LENGTH
-                elif re_downloader_path.fullmatch(line):
-                    cur_seq_paths[DOWNLOADERS[cur_downloader_idx]] = line[line.find(':') + 1:]
+                elif re_downloader_basepath.fullmatch(line):
+                    basepath = line[line.find(':') + 1:]
+                    basepath_n = normalize_path(basepath)
+                    path_downloader = f'{basepath_n}{PATH_APPEND_DOWNLOAD[DOWNLOADERS[cur_downloader_idx]]}'
+                    path_updater = f'{basepath_n}{PATH_APPEND_UPDATE[DOWNLOADERS[cur_downloader_idx]]}'
+                    if config.test is False:
+                        assert path.isdir(basepath)
+                        assert path.isfile(path_downloader)
+                        if config.update:
+                            assert path.isfile(path_updater)
+                    cur_seq_paths[DOWNLOADERS[cur_downloader_idx]] = path_downloader
+                    sequences_paths_update[DOWNLOADERS[cur_downloader_idx]] = normalize_path(path.abspath(path_updater), False)
                 elif re_common_arg.fullmatch(line):
-                    cur_seq_common[DOWNLOADERS[cur_downloader_idx]] += line[line.find(':') + 1:].split(' ')
+                    common_args = line[line.find(':') + 1:].split(' ')
+                    proxy_idx = common_args.index(PROXY_ARG) if PROXY_ARG in common_args else -1
+                    if proxy_idx >= 0:
+                        assert len(common_args) > proxy_idx + 1
+                        proxies_update[DOWNLOADERS[cur_downloader_idx]] = StrPair((common_args[proxy_idx], common_args[proxy_idx + 1]))
+                    cur_seq_common[DOWNLOADERS[cur_downloader_idx]] += common_args
                 elif re_sub_begin.fullmatch(line):
                     cur_seq_subs[DOWNLOADERS[cur_downloader_idx]].append(line[line.find(':') + 1:])
                 elif re_sub_end.fullmatch(line):
@@ -206,12 +229,29 @@ def update_next_ids() -> None:
     trace(f'File: \'{queries_file_name}\', backup file: \'{filename_bak}\'')
     try:
         trace('Fetching max ids...')
-        # b'NM: 71773\r\nRN: 526263\r\nRV: 3090582\r\nRX: 6867121\r\nRS: 6326078\r\n\r\n'
-        fetch_result = check_output(('python', f'{Config.fetcher_root}main.py', '--silent'))
-        trace(f'\nFetch max ids output (bytes): \'{str(fetch_result)}\'')
+        re_maxid_fetch_result = re_compile(r'^[A-Z]{2}: \d+$')
+        grab_threads = []
+        results = {dt: '' for dt in DOWNLOADERS}  # type: Dict[str, str]
+        rlock = ThreadLock()
 
-        lines = bytes_to_lines(fetch_result)[:4]
-        trace(NEWLINE.join(lines))
+        def get_max_id(dtype: str) -> None:
+            update_file_path = sequences_paths_update[dtype]
+            module_arguments = ['-module', dtype, '-timeout', '30'] if DOWNLOADERS.index(dtype) in RUXX_INDECIES else []  # type: List[str]
+            if dtype in proxies_update and proxies_update[dtype]:
+                module_arguments += [proxies_update[dtype].first, proxies_update[dtype].second]
+            arguments = [python_executable, update_file_path, '-get_maxid'] + module_arguments
+            res = check_output(arguments.copy()).decode().strip()
+            with rlock:
+                results[dtype] = res
+
+        for dt in Config.downloaders:
+            grab_threads.append(Thread(target=get_max_id, args=(dt,)))
+            grab_threads[-1].start()
+        for thread in grab_threads:
+            thread.join()
+        for dt in Config.downloaders:
+            assert re_maxid_fetch_result.fullmatch(results[dt])
+        trace(NEWLINE.join(results[dt] for dt in Config.downloaders))
 
         trace(f'\nSaving backup to \'{filename_bak}\'...')
         bak_fullpath = f'{Config.dest_bak_base}{filename_bak}'
@@ -232,11 +272,11 @@ def update_next_ids() -> None:
             trace('Warning: permissions not updated, manual fix required')
 
         trace(f'\nWriting updated queries to \'{queries_file_name}\'...')
-        maxnums = {dt: num for dt, num in [(line[:2].lower(), int(line[4:])) for line in lines]}  # type: Dict[str, int]
+        maxnums = {dt: int(results[dt][4:]) for dt in Config.downloaders}  # type: Dict[str, int]
         for ty, sequences_ids_type in zip(('vid', 'img'), (sequences_ids_vid, sequences_ids_img)):
             for i, dtseq in enumerate(sequences_ids_type.items()):  # type: int, Tuple[str, Optional[IntSequence]]
                 dt, seq = dtseq
-                line_num = (seq.line_num - 1) if seq else None
+                line_num = (seq.line_num - 1) if seq and dt in maxnums else None
                 trace(f'{"W" if line_num else "Not w"}riting {dt} {ty} ids at idx {i:d}, line {line_num + 1 if line_num else -1:d}...')
                 if line_num:
                     ids_at_line = queries_file_lines[line_num].strip().split(' ')

@@ -15,6 +15,7 @@ IS_IDE = environ.get('PYCHARM_HOSTED') == '1'
 
 UTF8 = 'utf-8'
 ACTION_STORE_TRUE = 'store_true'
+PROXY_ARG = '-proxy'
 MIN_IDS_SEQ_LENGTH = 2
 
 OS_WINDOWS = 'Windows'
@@ -48,6 +49,7 @@ RV_INDEX = DOWNLOADERS.index(DOWNLOADER_RV)
 class BaseConfig(object):
     def __init__(self) -> None:
         # arguments
+        self.test = False
         self.debug = False
         self.downloaders = list()  # type: List[str]
         self.dest_base = './'
@@ -57,7 +59,6 @@ class BaseConfig(object):
         self.script_path = ''
         self.update = False
         self.no_download = False
-        self.fetcher_root = ''
         self.ignore_download_mode = False
         # calculated
         self.max_cmd_len = MAX_CMD_LEN.get(OS_WINDOWS) // 2  # MAX_CMD_LEN.get(running_system())
@@ -66,7 +67,7 @@ class BaseConfig(object):
         return (
             f'debug: {self.debug}, downloaders: {str(self.downloaders)}, script: {self.script_path}, dest: {self.dest_base}, '
             f'run: {self.dest_run_base}, logs: {self.dest_logs_base}, bak: {self.dest_bak_base}, update: {self.update}, '
-            f'no_download: {self.no_download}, fetcher: {self.fetcher_root}, ignore_download_mode: {self.ignore_download_mode}, '
+            f'no_download: {self.no_download}, ignore_download_mode: {self.ignore_download_mode}, '
             f'max_cmd_len: {self.max_cmd_len}'
         )
 
@@ -85,8 +86,31 @@ HELP_LOGS_PATH = 'Path to the folder where logs will be stored'
 HELP_BAK_PATH = 'Path to the folder where script backup will be put before updating'
 HELP_UPDATE = 'Boolean flag to update script file with current max ids fetched from the websites'
 HELP_NO_DOWNLOAD = 'Boolean flag to skip actual download (do not launch downloaders)'
-HELP_FETCHER_PATH = 'Path to the folder where max ids fetcher\'s \'main.py\' is located'
 HELP_IGNORE_DMODE = 'Boolean flag to ignore all \'-dmode\' arguments and always download files in full'
+
+PATH_APPEND_DOWNLOAD_RUXX = 'src/app_gui.py'
+PATH_APPEND_DOWNLOAD_NM = 'src/ids.py'
+PATH_APPEND_DOWNLOAD_RV = PATH_APPEND_DOWNLOAD_NM
+
+PATH_APPEND_UPDATE_RUXX = 'src/app_gui.py'
+PATH_APPEND_UPDATE_NM = 'src/pages.py'
+PATH_APPEND_UPDATE_RV = PATH_APPEND_UPDATE_NM
+
+PATH_APPEND_DOWNLOAD = {
+    DOWNLOADER_NM: PATH_APPEND_DOWNLOAD_NM,
+    DOWNLOADER_RV: PATH_APPEND_DOWNLOAD_RV,
+    DOWNLOADER_RN: PATH_APPEND_DOWNLOAD_RUXX,
+    DOWNLOADER_RX: PATH_APPEND_DOWNLOAD_RUXX,
+    DOWNLOADER_RS: PATH_APPEND_DOWNLOAD_RUXX,
+}
+
+PATH_APPEND_UPDATE = {
+    DOWNLOADER_NM: PATH_APPEND_UPDATE_NM,
+    DOWNLOADER_RV: PATH_APPEND_UPDATE_RV,
+    DOWNLOADER_RN: PATH_APPEND_UPDATE_RUXX,
+    DOWNLOADER_RX: PATH_APPEND_UPDATE_RUXX,
+    DOWNLOADER_RS: PATH_APPEND_UPDATE_RUXX,
+}
 
 
 class IntSequence:
