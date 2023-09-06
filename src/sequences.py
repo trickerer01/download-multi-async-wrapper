@@ -6,9 +6,11 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
-from typing import Dict, List, Tuple, Optional, Mapping, Sequence, TypeVar
+from re import compile as re_compile
+from subprocess import check_output
+from typing import Dict, List, Set, Tuple, Optional, Mapping, Sequence, TypeVar
 
-from defs import DOWNLOADERS, RANGE_TEMPLATES, RUXX_INDECIES, IntPair, Config, IntSequence
+from defs import DOWNLOADERS, RANGE_TEMPLATES, RUXX_INDECIES, APP_NAMES, IntPair, Config, IntSequence
 from logger import trace
 from strings import normalize_ruxx_tag, path_args, NEWLINE
 
@@ -25,8 +27,8 @@ def validate_sequences(
         sequences_paths_vid: StringMap, sequences_paths_img: StringMap,
         sequences_tags_vid: StringListListMap, sequences_tags_img: StringListListMap,
         sequences_subfolders_vid: StringListMap, sequences_subfolders_img: StringListMap,
-        python_executable: str) -> None:
-    if python_executable == '':
+        sequences_paths_update: StringMap, python_executable: str) -> None:
+    if not python_executable:
         trace('Error: python_executable was not declared!')
         raise IOError
     for dt in DOWNLOADERS:
@@ -53,6 +55,47 @@ def validate_sequences(
         len1, len2 = len(sequences_tags_img[dt]), len(sequences_subfolders_img[dt])
         if len1 != len2:
             trace(f'Error: sequence list for img tags/subs mismatch for {dt}: {len1:d} vs {len2:d}!')
+            raise IOError
+    try:
+        trace('Looking for python executable...')
+        re_py_ver = re_compile(r'^[Pp]ython (\d)\.(\d{1,2})\.(\d+)$')
+        out_py = check_output((python_executable, '-V'))
+        out_py_str = out_py.decode().strip()
+        match_py_ver = re_py_ver.fullmatch(out_py_str)
+        assert match_py_ver
+        assert (int(match_py_ver.group(1)), int(match_py_ver.group(2))) >= (3, 7), 'Minimum python version required is 3.7!'
+        trace(f'Found python {".".join(match_py_ver.groups())}')
+    except Exception:
+        trace(f'Error: invalid python executable!')
+        raise IOError
+    checked_downloaders = set()  # type: Set[str]
+    for seq, ch in zip((sequences_paths_vid, sequences_paths_img), ('v', 'i')):
+        for dt in seq:
+            dpath = seq[dt]  # type: Optional[str]
+            if not dpath:
+                continue
+            if dt in checked_downloaders:
+                continue
+            checked_downloaders.add(dt)
+            try:
+                trace(f'Looking for {dt}({ch}) downloader...')
+                out_d = check_output((python_executable, dpath, '--version'))
+                out_d_str = out_d.decode().strip()
+                assert out_d_str.startswith(APP_NAMES[dt]), f'Unexpected output for {dt}({ch}): {out_d_str[:min(len(out_d_str), 20)]}!'
+            except Exception:
+                trace(f'Error: invalid {dt}({ch}) downloader found at: \'{dpath}\'!')
+                raise IOError
+    for dt in sequences_paths_update:
+        upath = sequences_paths_update[dt]  # type: Optional[str]
+        if not upath:
+            continue
+        try:
+            trace(f'Looking for {dt} updater...')
+            out_u = check_output((python_executable, upath, '--version'))
+            out_u_str = out_u.decode().strip()
+            assert out_u_str.startswith(APP_NAMES[dt]), f'Unexpected output for {dt}: {out_u_str[:min(len(out_u_str), 20)]}!'
+        except Exception:
+            trace(f'Error: invalid {dt} updater found at: \'{upath}\'!')
             raise IOError
 
 

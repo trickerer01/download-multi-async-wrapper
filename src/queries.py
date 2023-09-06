@@ -191,7 +191,7 @@ def form_queries(config=Config):
     #                  python_executable)
     validate_sequences(sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img,
                        sequences_tags_vid, sequences_tags_img, sequences_subfolders_vid, sequences_subfolders_img,
-                       python_executable)
+                       sequences_paths_update, python_executable)
 
     trace('Sequences are validated. Preparing final lists...')
 
@@ -259,7 +259,7 @@ def update_next_ids() -> None:
             outfile_bak.writelines(queries_file_lines)
             trace('Saving done')
 
-        trace(f'\nUpdating permissions for \'{filename_bak}\'...')
+        trace(f'\nSetting read-only permissions for \'{filename_bak}\'...')
         perm = 0
         try:
             chmod(bak_fullpath, 0o100444)  # S_IFREG | S_IRUSR | S_IRGRP | S_IROTH
@@ -267,7 +267,7 @@ def update_next_ids() -> None:
             assert (perm & 0o777) == 0o444
             trace('Permissions successfully updated')
         except AssertionError:
-            trace(f'Warning: permissions mismatch \'{"%o" % perm}\' != \'444\', manual fix required')
+            trace(f'Warning: permissions mismatch \'{perm:o}\' != \'444\', manual fix required')
         except Exception:
             trace('Warning: permissions not updated, manual fix required')
 
