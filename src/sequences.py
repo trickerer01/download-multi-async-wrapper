@@ -85,18 +85,19 @@ def validate_sequences(
             except Exception:
                 trace(f'Error: invalid {dt}({ch}) downloader found at: \'{dpath}\'!')
                 raise IOError
-    for dt in sequences_paths_update:
-        upath = sequences_paths_update[dt]  # type: Optional[str]
-        if not upath:
-            continue
-        try:
-            trace(f'Looking for {dt} updater...')
-            out_u = check_output((python_executable, upath, '--version'))
-            out_u_str = out_u.decode().strip()
-            assert out_u_str.startswith(APP_NAMES[dt]), f'Unexpected output for {dt}: {out_u_str[:min(len(out_u_str), 20)]}!'
-        except Exception:
-            trace(f'Error: invalid {dt} updater found at: \'{upath}\'!')
-            raise IOError
+    if Config.update:
+        for dt in sequences_paths_update:
+            upath = sequences_paths_update[dt]  # type: Optional[str]
+            if not upath:
+                continue
+            try:
+                trace(f'Looking for {dt} updater...')
+                out_u = check_output((python_executable, upath, '--version'))
+                out_u_str = out_u.decode().strip()
+                assert out_u_str.startswith(APP_NAMES[dt]), f'Unexpected output for {dt}: {out_u_str[:min(len(out_u_str), 20)]}!'
+            except Exception:
+                trace(f'Error: invalid {dt} updater found at: \'{upath}\'!')
+                raise IOError
 
 
 def report_sequences(
