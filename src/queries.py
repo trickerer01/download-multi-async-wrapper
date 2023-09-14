@@ -36,8 +36,6 @@ re_downloader_finilize = re_compile(r'^# end$')
 
 queries_file_lines = []  # type: List[str]
 
-python_executable = ''
-
 sequences_ids_vid = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[IntSequence]]
 sequences_ids_img = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[IntSequence]]
 
@@ -53,7 +51,6 @@ def read_queries_file(config=Config) -> None:
 
 
 def form_queries(config=Config):
-    global python_executable
     sequences_paths_vid = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[str]]
     sequences_paths_img = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[str]]
     sequences_common_vid = {dt: [] for dt in DOWNLOADERS}  # type: Dict[str, List[str]]
@@ -104,8 +101,8 @@ def form_queries(config=Config):
                         trace(f'Info: \'{line}\' download mode found at line {i + 1:d}. Ignored!')
                         continue
                 if re_python_exec.fullmatch(line):
-                    assert python_executable == '', 'Python executable must be declared exactly once!'
-                    python_executable = line[line.find(':') + 1:]
+                    assert config.python == '', 'Python executable must be declared exactly once!'
+                    config.python = line[line.find(':') + 1:]
                 elif re_downloader_type.fullmatch(line):
                     cur_downloader_idx = DOWNLOADERS.index(line.split(' ')[1])
                 elif re_ids_list.fullmatch(line):
@@ -191,7 +188,7 @@ def form_queries(config=Config):
     #                  python_executable)
     validate_sequences(sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img,
                        sequences_tags_vid, sequences_tags_img, sequences_subfolders_vid, sequences_subfolders_img,
-                       sequences_paths_update, python_executable)
+                       sequences_paths_update, config)
 
     trace('Sequences are validated. Preparing final lists...')
 
@@ -200,16 +197,14 @@ def form_queries(config=Config):
     # report_finals(*queries_from_sequences_base(
     #     sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img,
     #     sequences_tags_vid, sequences_tags_img, sequences_subfolders_vid, sequences_subfolders_img,
-    #     sequences_common_vid, sequences_common_img,
-    #     python_executable, config
+    #     sequences_common_vid, sequences_common_img, config
     # ))
 
     trace('\nOptimized:')
     queries_final_vid, queries_final_img = queries_from_sequences(
         sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img,
         sequences_tags_vid, sequences_tags_img, sequences_subfolders_vid, sequences_subfolders_img,
-        sequences_common_vid, sequences_common_img,
-        python_executable, config
+        sequences_common_vid, sequences_common_img, config
     )
 
     report_finals(queries_final_vid, queries_final_img)
@@ -239,7 +234,7 @@ def update_next_ids() -> None:
             module_arguments = ['-module', dtype, '-timeout', '30'] if DOWNLOADERS.index(dtype) in RUXX_INDECIES else []  # type: List[str]
             if dtype in proxies_update and proxies_update[dtype]:
                 module_arguments += [proxies_update[dtype].first, proxies_update[dtype].second]
-            arguments = [python_executable, update_file_path, '-get_maxid'] + module_arguments
+            arguments = [Config.python, update_file_path, '-get_maxid'] + module_arguments
             res = check_output(arguments.copy()).decode().strip()
             with rlock:
                 results[dtype] = res

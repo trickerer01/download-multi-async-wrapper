@@ -30,7 +30,7 @@ args_argparse_str2 = (
     '--update '
     '-runpath ../run '
     '-logspath ../logs '
-    '-bakpath ../bak '
+    '-bakpath ../bak'
 )
 
 
@@ -38,7 +38,7 @@ class ArgParseTests(TestCase):
     def test_argparse1(self) -> None:
         import cmdargs
         cmdargs.IS_IDE = False
-        c = BaseConfig()
+        c = BaseConfig(test=True)
         parse_arglist(args_argparse_str1.split(), c)
         self.assertEqual(
             'debug: False, downloaders: [\'nm\', \'rv\', \'rn\', \'rx\', \'rs\'], script: ../tests/queries.list, dest: ./, '
@@ -51,7 +51,7 @@ class ArgParseTests(TestCase):
     def test_argparse2(self) -> None:
         import cmdargs
         cmdargs.IS_IDE = False
-        c = BaseConfig()
+        c = BaseConfig(test=True)
         parse_arglist(args_argparse_str2.split(), c)
         self.assertEqual(
             str(c),
@@ -64,11 +64,11 @@ class ArgParseTests(TestCase):
 
 class QueriesFormTests(TestCase):
     def test_queries1(self) -> None:
-        c = BaseConfig()
-        c.test = True
+        c = BaseConfig(test=True)
         parse_arglist(args_argparse_str2.split(), c)
         read_queries_file(c)
         form_queries(c)
+        self.assertEqual('python3', c.python)
         self.assertEqual(1, len(ques_vid[DOWNLOADER_NM]))
         self.assertEqual(0, len(ques_vid[DOWNLOADER_RV]))
         self.assertEqual(0, len(ques_vid[DOWNLOADER_RN]))

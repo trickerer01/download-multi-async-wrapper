@@ -8,7 +8,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 
 from re import compile as re_compile
 from subprocess import check_output
-from typing import Dict, List, Set, Tuple, Optional, Mapping, Sequence, TypeVar
+from typing import Dict, List, Tuple, Optional, Mapping, Sequence, TypeVar
 
 from defs import DOWNLOADERS, RANGE_TEMPLATES, RUXX_INDECIES, APP_NAMES, IntPair, Config, IntSequence
 from logger import trace
@@ -23,18 +23,19 @@ StringListListMap = TypeVar('StringListListMap', bound=Mapping[str, Sequence[Lis
 
 
 def validate_sequences(
-        sequences_ids_vid: IntSequenceMap, sequences_ids_img: IntSequenceMap,
-        sequences_paths_vid: StringMap, sequences_paths_img: StringMap,
-        sequences_tags_vid: StringListListMap, sequences_tags_img: StringListListMap,
-        sequences_subfolders_vid: StringListMap, sequences_subfolders_img: StringListMap,
-        sequences_paths_update: StringMap, python_executable: str) -> None:
-    if not python_executable:
-        trace('Error: python_executable was not declared!')
+    sequences_ids_vid: IntSequenceMap, sequences_ids_img: IntSequenceMap,
+    sequences_paths_vid: StringMap, sequences_paths_img: StringMap,
+    sequences_tags_vid: StringListListMap, sequences_tags_img: StringListListMap,
+    sequences_subfolders_vid: StringListMap, sequences_subfolders_img: StringListMap,
+    sequences_paths_update: StringMap, config=Config
+) -> None:
+    if not config.python:
+        trace('Error: python executable was not declared!')
         raise IOError
     for dt in DOWNLOADERS:
-        ivlist = list(sequences_ids_vid[dt].ids if sequences_ids_vid[dt] else [])
-        for iv in range(len(ivlist)):
-            if iv > 0 and ivlist[iv - 1] >= ivlist[iv]:
+        ivlist = list(sequences_ids_vid[dt].ids if sequences_ids_vid[dt] else [])  # type: List[int]
+        for iv in range(1, len(ivlist)):
+            if ivlist[iv - 1] >= ivlist[iv]:
                 trace(f'Error: {dt} vid ids sequence is corrupted at idx {iv - 1:d}, {ivlist[iv - 1]:d} >= {ivlist[iv]:d}!')
                 raise IOError
         iilist = list(sequences_ids_img[dt].ids if sequences_ids_img[dt] else [])
@@ -59,7 +60,7 @@ def validate_sequences(
     try:
         trace('Looking for python executable...')
         re_py_ver = re_compile(r'^[Pp]ython (\d)\.(\d{1,2})\.(\d+)$')
-        out_py = check_output((python_executable, '-V'))
+        out_py = check_output((config.python, '-V'))
         out_py_str = out_py.decode().strip()
         match_py_ver = re_py_ver.fullmatch(out_py_str)
         assert match_py_ver
@@ -68,46 +69,45 @@ def validate_sequences(
     except Exception:
         trace(f'Error: invalid python executable!')
         raise IOError
-    checked_downloaders = set()  # type: Set[str]
+    if config.test is True:
+        return
+    checked_downloaders = set()
     for seq, ch in zip((sequences_paths_vid, sequences_paths_img), ('v', 'i')):
-        for dt in seq:
-            dpath = seq[dt]  # type: Optional[str]
-            if not dpath:
+        for dtd, dpath in seq.items():  # type: str, Optional[str]
+            if dtd in checked_downloaders or not dpath:
                 continue
-            if dt in checked_downloaders:
-                continue
-            checked_downloaders.add(dt)
+            checked_downloaders.add(dtd)
             try:
-                trace(f'Looking for {dt}({ch}) downloader...')
-                out_d = check_output((python_executable, dpath, '--version'))
+                trace(f'Looking for {dtd}({ch}) downloader...')
+                out_d = check_output((config.python, dpath, '--version'))
                 out_d_str = out_d.decode().strip()
-                assert out_d_str.startswith(APP_NAMES[dt]), f'Unexpected output for {dt}({ch}): {out_d_str[:min(len(out_d_str), 20)]}!'
+                assert out_d_str.startswith(APP_NAMES[dtd]), f'Unexpected output for {dtd}({ch}): {out_d_str[:min(len(out_d_str), 20)]}!'
             except Exception:
-                trace(f'Error: invalid {dt}({ch}) downloader found at: \'{dpath}\'!')
+                trace(f'Error: invalid {dtd}({ch}) downloader found at: \'{dpath}\'!')
                 raise IOError
-    if Config.update:
-        for dt in sequences_paths_update:
-            upath = sequences_paths_update[dt]  # type: Optional[str]
+    if config.update:
+        for dtu, upath in sequences_paths_update.items():  # type: str, Optional[str]
             if not upath:
                 continue
             try:
-                trace(f'Looking for {dt} updater...')
-                out_u = check_output((python_executable, upath, '--version'))
+                trace(f'Looking for {dtu} updater...')
+                out_u = check_output((config.python, upath, '--version'))
                 out_u_str = out_u.decode().strip()
-                assert out_u_str.startswith(APP_NAMES[dt]), f'Unexpected output for {dt}: {out_u_str[:min(len(out_u_str), 20)]}!'
+                assert out_u_str.startswith(APP_NAMES[dtu]), f'Unexpected output for {dtu}: {out_u_str[:min(len(out_u_str), 20)]}!'
             except Exception:
-                trace(f'Error: invalid {dt} updater found at: \'{upath}\'!')
+                trace(f'Error: invalid {dtu} updater found at: \'{upath}\'!')
                 raise IOError
 
 
 def report_sequences(
-        sequences_ids_vid: IntSequenceMap, sequences_ids_img: IntSequenceMap,
-        sequences_paths_vid: StringMap, sequences_paths_img: StringMap,
-        sequences_tags_vid: StringListListMap, sequences_tags_img: StringListListMap,
-        sequences_subfolders_vid: StringListMap, sequences_subfolders_img: StringListMap,
-        sequences_common_vid: StringListMap, sequences_common_img: StringListMap,
-        python_executable: str) -> None:
-    trace(f'Python executable: \'{python_executable}\'')
+    sequences_ids_vid: IntSequenceMap, sequences_ids_img: IntSequenceMap,
+    sequences_paths_vid: StringMap, sequences_paths_img: StringMap,
+    sequences_tags_vid: StringListListMap, sequences_tags_img: StringListListMap,
+    sequences_subfolders_vid: StringListMap, sequences_subfolders_img: StringListMap,
+    sequences_common_vid: StringListMap, sequences_common_img: StringListMap,
+    config=Config
+) -> None:
+    trace(f'Python executable: \'{config.python}\'')
     [trace(f'{len([q for q in seq.values() if q]):d} {name} sequences')
      for seq, name in zip((sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img),
                           ('sequences_ids_vid', 'sequences_ids_img', 'sequences_paths_vid', 'sequences_paths_img'))]
@@ -121,14 +121,15 @@ def report_sequences(
 
 
 def _get_base_qs(
-        sequences_ids_vid: IntSequenceMap, sequences_ids_img: IntSequenceMap,
-        sequences_paths_vid: StringMap, sequences_paths_img: StringMap,
-        python_executable: str) -> Tuple[Dict[str, str], Dict[str, str]]:
+    sequences_ids_vid: IntSequenceMap, sequences_ids_img: IntSequenceMap,
+    sequences_paths_vid: StringMap, sequences_paths_img: StringMap,
+    config=Config
+) -> Tuple[Dict[str, str], Dict[str, str]]:
     vrange, irange = (
         {dt: IntPair(sids[dt][:2]) for dt in DOWNLOADERS if sids[dt]} for sids in (sequences_ids_vid, sequences_ids_img)
     )  # type: Dict[str, IntPair]
     base_q_v, base_q_i = ({
-        dt: (f'{python_executable} "{spath[dt]}" '
+        dt: (f'{config.python} "{spath[dt]}" '
              f'{RANGE_TEMPLATES[dt].first % srange[dt].first} '
              f'{RANGE_TEMPLATES[dt].second % (srange[dt].second - 1)}')
         for dt in DOWNLOADERS if dt in srange.keys() and dt in spath.keys()
@@ -142,8 +143,8 @@ def queries_from_sequences_base(
         sequences_tags_vid: StringListListMap, sequences_tags_img: StringListListMap,
         sequences_subfolders_vid: StringListMap, sequences_subfolders_img: StringListMap,
         sequences_common_vid: StringListMap, sequences_common_img: StringListMap,
-        python_executable: str, config=Config) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
-    base_q_v, base_q_i = _get_base_qs(sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img, python_executable)
+        config=Config) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
+    base_q_v, base_q_i = _get_base_qs(sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img, config)
     queries_final_vid, queries_final_img = ({
         dt: ([f'{sbase_q[dt]} {path_args(config.dest_base, not is_vidpath, ssub[dt][i])} '
               f'{" ".join(normalize_ruxx_tag(tag) if DOWNLOADERS.index(dt) in RUXX_INDECIES else tag for tag in ctags[dt])} '
@@ -157,13 +158,14 @@ def queries_from_sequences_base(
 
 
 def queries_from_sequences(
-        sequences_ids_vid: IntSequenceMap, sequences_ids_img: IntSequenceMap,
-        sequences_paths_vid: StringMap, sequences_paths_img: StringMap,
-        sequences_tags_vid: StringListListMap, sequences_tags_img: StringListListMap,
-        sequences_subfolders_vid: StringListMap, sequences_subfolders_img: StringListMap,
-        sequences_common_vid: StringListMap, sequences_common_img: StringListMap,
-        python_executable: str, config=Config) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
-    base_q_v, base_q_i = _get_base_qs(sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img, python_executable)
+    sequences_ids_vid: IntSequenceMap, sequences_ids_img: IntSequenceMap,
+    sequences_paths_vid: StringMap, sequences_paths_img: StringMap,
+    sequences_tags_vid: StringListListMap, sequences_tags_img: StringListListMap,
+    sequences_subfolders_vid: StringListMap, sequences_subfolders_img: StringListMap,
+    sequences_common_vid: StringListMap, sequences_common_img: StringListMap,
+    config=Config
+) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
+    base_q_v, base_q_i = _get_base_qs(sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img, config)
     queries_final_vid, queries_final_img = ({
         dt: ([f'{sbase_q[dt]} {path_args(config.dest_base, not is_vidpath, ssub[dt][i])} '
               f'{" ".join(normalize_ruxx_tag(tag) for tag in ctags[dt])} '
@@ -184,8 +186,8 @@ def queries_from_sequences(
 
 
 def report_finals(queries_final_vid: StringListMap, queries_final_img: StringListMap) -> None:
-    [trace(f'\nQueries {ty}:\n{NEWLINE.join(NEWLINE.join(finals) for finals in final_q.values() if len(finals) > 0)}', False)
-     for ty, final_q in zip(('vid', 'img'), (queries_final_vid, queries_final_img))]
+    for ty, final_q in zip(('vid', 'img'), (queries_final_vid, queries_final_img)):
+        trace(f'\nQueries {ty}:\n{NEWLINE.join(NEWLINE.join(finals) for finals in final_q.values() if len(finals) > 0)}', False)
 
 #
 #

@@ -56,9 +56,8 @@ APP_NAMES = {
 
 
 class BaseConfig(object):
-    def __init__(self) -> None:
+    def __init__(self, *, test=False) -> None:
         # arguments
-        self.test = False
         self.debug = False
         self.downloaders = list()  # type: List[str]
         self.dest_base = './'
@@ -71,6 +70,8 @@ class BaseConfig(object):
         self.ignore_download_mode = False
         # calculated
         self.max_cmd_len = MAX_CMD_LEN.get(OS_WINDOWS) // 2  # MAX_CMD_LEN.get(running_system())
+        self.python = ''
+        self.test = test
 
     def __str__(self) -> str:
         return (
