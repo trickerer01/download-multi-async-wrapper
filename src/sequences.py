@@ -72,18 +72,18 @@ def validate_sequences(
     if config.test is True:
         return
     checked_downloaders = set()
-    for seq, ch in zip((sequences_paths_vid, sequences_paths_img), ('v', 'i')):
+    for seq in (sequences_paths_vid, sequences_paths_img):
         for dtd, dpath in seq.items():  # type: str, Optional[str]
-            if dtd in checked_downloaders or not dpath:
+            if dtd in checked_downloaders or not dpath or dtd not in config.downloaders:
                 continue
             checked_downloaders.add(dtd)
             try:
-                trace(f'Looking for {dtd}({ch}) downloader...')
+                trace(f'Looking for {dtd} downloader...')
                 out_d = check_output((config.python, dpath, '--version'))
                 out_d_str = out_d.decode().strip()
-                assert out_d_str.startswith(APP_NAMES[dtd]), f'Unexpected output for {dtd}({ch}): {out_d_str[:min(len(out_d_str), 20)]}!'
+                assert out_d_str.startswith(APP_NAMES[dtd]), f'Unexpected output for {dtd}: {out_d_str[:min(len(out_d_str), 20)]}!'
             except Exception:
-                trace(f'Error: invalid {dtd}({ch}) downloader found at: \'{dpath}\'!')
+                trace(f'Error: invalid {dtd} downloader found at: \'{dpath}\'!')
                 raise IOError
     if config.update:
         for dtu, upath in sequences_paths_update.items():  # type: str, Optional[str]

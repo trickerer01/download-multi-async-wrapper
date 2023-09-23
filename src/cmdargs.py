@@ -59,18 +59,19 @@ def valid_downloaders_list(downloaders_str: str) -> List[str]:
 
 
 def parse_arglist(args: List[str], config=Config) -> None:
+    ncdir = normalize_path(path.curdir)
     parser = ArgumentParser(add_help=False)
     parser.add_argument('--help', action='help')
     parser.add_argument('--debug', action=ACTION_STORE_TRUE, help=HELP_DEBUG)
     parser.add_argument('-downloaders', metavar='#L,I,S,T', default=DOWNLOADERS, help=HELP_DOWNLOADERS, type=valid_downloaders_list)
-    parser.add_argument('-path', metavar='#PATH_TO_DIR', default=normalize_path(path.curdir), help=HELP_PATH, type=valid_dir_path)
+    parser.add_argument('-path', metavar='#PATH_TO_DIR', default=ncdir, help=HELP_PATH, type=valid_dir_path)
     parser.add_argument('-script', metavar='#PATH_TO_FILE', required=True, help=HELP_SCRIPT_PATH, type=valid_file_path)
     parser.add_argument('--ignore-download-mode', action=ACTION_STORE_TRUE, help=HELP_IGNORE_DMODE)
     parser.add_argument('--update', action=ACTION_STORE_TRUE, help=HELP_UPDATE)
     parser.add_argument('--no-download', action=ACTION_STORE_TRUE, help=HELP_NO_DOWNLOAD)
-    parser.add_argument('-runpath', metavar='#PATH_TO_DIR', default=None, help=HELP_RUN_PATH, type=valid_dir_path)
-    parser.add_argument('-logspath', metavar='#PATH_TO_DIR', default=None, help=HELP_LOGS_PATH, type=valid_dir_path)
-    parser.add_argument('-bakpath', metavar='#PATH_TO_DIR', default=None, help=HELP_BAK_PATH, type=valid_dir_path)
+    parser.add_argument('-runpath', metavar='#PATH_TO_DIR', default=ncdir, help=HELP_RUN_PATH, type=valid_dir_path)
+    parser.add_argument('-logspath', metavar='#PATH_TO_DIR', default=ncdir, help=HELP_LOGS_PATH, type=valid_dir_path)
+    parser.add_argument('-bakpath', metavar='#PATH_TO_DIR', default=ncdir, help=HELP_BAK_PATH, type=valid_dir_path)
 
     try:
         parsed = parser.parse_args(args)
@@ -87,9 +88,9 @@ def parse_arglist(args: List[str], config=Config) -> None:
         config.ignore_download_mode = parsed.ignore_download_mode
         config.update = parsed.update
         config.no_download = parsed.no_download
-        config.dest_run_base = parsed.runpath or config.dest_run_base
-        config.dest_logs_base = parsed.logspath or config.dest_logs_base
-        config.dest_bak_base = parsed.bakpath or config.dest_bak_base
+        config.dest_run_base = parsed.runpath
+        config.dest_logs_base = parsed.logspath
+        config.dest_bak_base = parsed.bakpath
     except Exception:
         raise
 
