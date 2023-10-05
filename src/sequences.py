@@ -72,8 +72,8 @@ def validate_sequences(
     if config.test is True:
         return
     checked_downloaders = set()
-    for seq in (sequences_paths_vid, sequences_paths_img):
-        for dtd, dpath in seq.items():  # type: str, Optional[str]
+    if not config.no_download:
+        for dtd, dpath in (list(sequences_paths_vid.items()) + list(sequences_paths_img.items())):  # type: str, Optional[str]
             if dtd in checked_downloaders or not dpath or dtd not in config.downloaders:
                 continue
             checked_downloaders.add(dtd)
