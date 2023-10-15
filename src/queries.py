@@ -237,7 +237,7 @@ def update_next_ids() -> None:
             arguments = [Config.python, update_file_path, '-get_maxid'] + module_arguments
             res = check_output(arguments.copy()).decode().strip()
             with rlock:
-                results[dtype] = res
+                results[dtype] = res[res.rfind('\n') + 1:]
 
         for dt in Config.downloaders:
             grab_threads.append(Thread(target=get_max_id, args=(dt,)))
