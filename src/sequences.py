@@ -81,6 +81,7 @@ def validate_sequences(
                 trace(f'Looking for {dtd} downloader...')
                 out_d = check_output((config.python, dpath, '--version'))
                 out_d_str = out_d.decode().strip()
+                out_d_str = out_d_str[out_d_str.rfind('\n') + 1:]
                 assert out_d_str.startswith(APP_NAMES[dtd]), f'Unexpected output for {dtd}: {out_d_str[:min(len(out_d_str), 20)]}!'
             except Exception:
                 trace(f'Error: invalid {dtd} downloader found at: \'{dpath}\'!')
@@ -93,6 +94,7 @@ def validate_sequences(
                 trace(f'Looking for {dtu} updater...')
                 out_u = check_output((config.python, upath, '--version'))
                 out_u_str = out_u.decode().strip()
+                out_u_str = out_u_str[out_u_str.rfind('\n') + 1:]
                 assert out_u_str.startswith(APP_NAMES[dtu]), f'Unexpected output for {dtu}: {out_u_str[:min(len(out_u_str), 20)]}!'
             except Exception:
                 trace(f'Error: invalid {dtu} updater found at: \'{upath}\'!')
