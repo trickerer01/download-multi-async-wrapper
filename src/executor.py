@@ -9,7 +9,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 from asyncio import new_event_loop, AbstractEventLoop, as_completed, Future, SubprocessProtocol, sleep
 from typing import Dict, List, Optional, Mapping, Sequence
 
-from defs import UTF8, DOWNLOADERS, RUXX_INDECIES, Config
+from defs import UTF8, DOWNLOADERS, RUN_FILE_DOWNLOADERS, Config
 from logger import trace, log_to
 from os import path
 from strings import datetime_str_nfull, unquote
@@ -59,36 +59,34 @@ def split_into_args(query: str) -> List[str]:
     return result
 
 
-async def run_cmd(query: str, dt: str, qi: int, begin_msg: str) -> None:
+async def run_cmd(query: str, dt: str, qn: int, qt: str, qtn: int) -> None:
     exec_time = datetime_str_nfull()
-    with open(f'{Config.dest_logs_base}log_{dt}_{exec_time}.log', 'at', encoding=UTF8, buffering=True) as log_file:
+    begin_msg = f'\nExecuting {dt} {qt} query {qtn:d}:\n{query}'
+    log_file_name = f'{Config.dest_logs_base}log_{dt}{qn:02d}_{qt}{qtn:02d}_{exec_time}.log'
+    with open(log_file_name, 'at', encoding=UTF8) as log_file:
         trace(begin_msg)
         log_to(begin_msg, log_file)
-        # trace(f'Executing cmdline {qi:d}: \'{query}\'')
         cmd_args = split_into_args(query)
-        # trace(f'Splitted into: \'{str(cmd_args)}\'')
         # DEBUG - do not remove
-        if DOWNLOADERS.index(dt) not in {3} or qi not in range(1, 10):
-            # return
-            pass
-        if DOWNLOADERS.index(dt) not in RUXX_INDECIES and (len(query) > Config.max_cmd_len):
+        # if DOWNLOADERS.index(dt) not in {0} or qn not in range(1, 2):
+        #     return
+        if dt in RUN_FILE_DOWNLOADERS and len(query) > Config.max_cmd_len:
             run_file_name = f'{Config.dest_run_base}run_{dt}_{exec_time}.conf'
             trace(f'Cmdline is too long ({len(query):d}/{Config.max_cmd_len:d})! Converting to run file: {run_file_name}')
             run_file_abspath = path.abspath(run_file_name)
             cmd_args_new = cmd_args[2:]
             cmd_args = cmd_args[:2] + ['file', '-path', run_file_abspath]
-            # trace(f'New cmd args: \'{str(cmd_args)}\'\nFile cmd args: \'{str(cmd_args_new)}\'')
-            with open(run_file_abspath, 'wt', encoding=UTF8, buffering=True) as run_file:
+            with open(run_file_abspath, 'wt', encoding=UTF8) as run_file:
                 run_file.write('\n'.join(cmd_args_new))
         ef = Future(loop=executor_event_loop)
         tr, _ = await executor_event_loop.subprocess_exec(lambda: DummyResultProtocol(ef), *cmd_args, stderr=log_file, stdout=log_file)
         await ef
         tr.close()
-    with open(f'{Config.dest_logs_base}log_{dt}_{exec_time}.log', 'rt', encoding=UTF8, buffering=True, errors='replace') as log_file:
-        trace(f'\n{"".join(log_file.readlines())}')
+    with open(log_file_name, 'rt', encoding=UTF8, errors='replace') as completed_log_file:
+        trace(f'\n{"".join(completed_log_file.readlines())}')
 
 
-async def run_dt_cmds(dts: Sequence[str], tys: Sequence[str], queries: Sequence[str]) -> None:
+async def run_dt_cmds(dts: Sequence[str], qts: Sequence[str], queries: Sequence[str]) -> None:
     assert all(dt == dts[0] for dt in dts)
     dt = dts[0]
 
@@ -97,11 +95,11 @@ async def run_dt_cmds(dts: Sequence[str], tys: Sequence[str], queries: Sequence[
         trace(f'\n{dt.upper()} SKIPPED\n')
         return
 
-    qis = [0, 0]
+    qns = [0, 0]
     for qi in range(len(queries)):
-        q_idx = 1 - int(tys[qi] == 'vid')
-        qis[q_idx] += 1
-        await run_cmd(queries[qi], dt, qi, f'\nExecuting {dt} {tys[qi]} query {qis[q_idx]:d}:\n{queries[qi]}')
+        q_idx = 1 - int(qts[qi] == 'vid')
+        qns[q_idx] += 1
+        await run_cmd(queries[qi], dt, qi + 1, qts[qi], qns[q_idx])
     trace(f'{dt.upper()} COMPLETED\n')
 
 
@@ -110,7 +108,7 @@ async def run_all_cmds() -> None:
         trace('\n\nALL DOWNLOADERS SKIPPED DUE TO no_download FLAG!\n')
         return
 
-    for cv in as_completed([run_dt_cmds(dts, tys, queries) for dts, tys, queries in
+    for cv in as_completed([run_dt_cmds(dts, qts, queries) for dts, qts, queries in
                             zip([[dt] * (len(ques_vid[dt]) + len(ques_img[dt])) for dt in DOWNLOADERS],
                                 [['vid'] * len(ques_vid[dt]) + ['img'] * len(ques_img[dt]) for dt in DOWNLOADERS],
                                 [ques_vid[dt] + ques_img[dt] for dt in DOWNLOADERS])], loop=executor_event_loop):

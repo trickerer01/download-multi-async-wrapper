@@ -10,7 +10,7 @@ from re import compile as re_compile
 from subprocess import check_output
 from typing import Dict, List, Tuple, Optional, Mapping, Sequence, TypeVar
 
-from defs import DOWNLOADERS, RANGE_TEMPLATES, RUXX_INDECIES, APP_NAMES, IntPair, Config, IntSequence
+from defs import DOWNLOADERS, RANGE_TEMPLATES, RUXX_DOWNLOADERS, APP_NAMES, IntPair, Config, IntSequence
 from logger import trace
 from strings import normalize_ruxx_tag, path_args, NEWLINE
 
@@ -149,8 +149,8 @@ def queries_from_sequences_base(
     base_q_v, base_q_i = _get_base_qs(sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img, config)
     queries_final_vid, queries_final_img = ({
         dt: ([f'{sbase_q[dt]} {path_args(config.dest_base, not is_vidpath, ssub[dt][i])} '
-              f'{" ".join(normalize_ruxx_tag(tag) if DOWNLOADERS.index(dt) in RUXX_INDECIES else tag for tag in ctags[dt])} '
-              f'{" ".join(normalize_ruxx_tag(tag) if DOWNLOADERS.index(dt) in RUXX_INDECIES else tag for tag in staglist)}'
+              f'{" ".join(normalize_ruxx_tag(tag) if dt in RUXX_DOWNLOADERS else tag for tag in ctags[dt])} '
+              f'{" ".join(normalize_ruxx_tag(tag) if dt in RUXX_DOWNLOADERS else tag for tag in staglist)}'
               for i, staglist in enumerate(stags[dt]) if len(staglist) > 0])
         for dt in DOWNLOADERS
     } for sbase_q, ssub, ctags, stags, is_vidpath in
@@ -173,7 +173,7 @@ def queries_from_sequences(
               f'{" ".join(normalize_ruxx_tag(tag) for tag in ctags[dt])} '
               f'{" ".join(normalize_ruxx_tag(tag) for tag in staglist)}'
               for i, staglist in enumerate(stags[dt]) if len(staglist) > 0]
-             ) if DOWNLOADERS.index(dt) in RUXX_INDECIES else
+             ) if dt in RUXX_DOWNLOADERS else
             ([f'{sbase_q[dt]} {path_args(config.dest_base, not is_vidpath, "")} '
               f'{" ".join(ctags[dt])} '
               f'-script "'

@@ -14,7 +14,8 @@ from threading import Thread, Lock as ThreadLock
 from typing import List, Dict, Optional, Tuple
 
 from defs import (
-    DOWNLOADERS, UTF8, IntSequence, Config, MIN_IDS_SEQ_LENGTH, PATH_APPEND_DOWNLOAD, PATH_APPEND_UPDATE, RUXX_INDECIES, PROXY_ARG, StrPair
+    UTF8, IntSequence, Config, DOWNLOADERS, MIN_IDS_SEQ_LENGTH, PATH_APPEND_DOWNLOAD, PATH_APPEND_UPDATE, RUXX_DOWNLOADERS, PROXY_ARG,
+    StrPair,
 )
 from executor import register_queries
 from logger import trace
@@ -231,7 +232,7 @@ def update_next_ids() -> None:
 
         def get_max_id(dtype: str) -> None:
             update_file_path = sequences_paths_update[dtype]
-            module_arguments = ['-module', dtype, '-timeout', '30'] if DOWNLOADERS.index(dtype) in RUXX_INDECIES else []  # type: List[str]
+            module_arguments = ['-module', dtype, '-timeout', '30'] if dtype in RUXX_DOWNLOADERS else []  # type: List[str]
             if dtype in proxies_update and proxies_update[dtype]:
                 module_arguments += [proxies_update[dtype].first, proxies_update[dtype].second]
             arguments = [Config.python, update_file_path, '-get_maxid'] + module_arguments
