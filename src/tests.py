@@ -6,12 +6,12 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
-from sys import exit as sysexit
-from unittest import main as run_tests, TestCase
+from unittest import TestCase
 
 from cmdargs import parse_arglist
 from defs import DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RN, DOWNLOADER_RX, DOWNLOADER_RS, BaseConfig
 from executor import ques_vid, ques_img
+from main import main_sync
 from queries import read_queries_file, form_queries
 from strings import date_str_md
 
@@ -25,7 +25,7 @@ args_argparse_str2 = (
     '--debug '
     '-downloaders rv,rx,rn,rs '
     '-path ../tests '
-    '-script ../tests/queries.list '
+    '-script "../tests/queries.list" '
     '--ignore-download-mode '
     '--update '
     '-runpath ../run '
@@ -36,8 +36,6 @@ args_argparse_str2 = (
 
 class ArgParseTests(TestCase):
     def test_argparse1(self) -> None:
-        import cmdargs
-        cmdargs.IS_IDE = False
         c = BaseConfig(test=True)
         parse_arglist(args_argparse_str1.split(), c)
         self.assertEqual(
@@ -46,11 +44,9 @@ class ArgParseTests(TestCase):
             'max_cmd_len: 16000',
             str(c)
         )
-        print('test_argparse1 passed')
+        print(f'{self._testMethodName} passed')
 
     def test_argparse2(self) -> None:
-        import cmdargs
-        cmdargs.IS_IDE = False
         c = BaseConfig(test=True)
         parse_arglist(args_argparse_str2.split(), c)
         self.assertEqual(
@@ -59,7 +55,7 @@ class ArgParseTests(TestCase):
             'run: ../run/, logs: ../logs/, bak: ../bak/, update: True, no_download: False, ignore_download_mode: True, '
             'max_cmd_len: 16000'
         )
-        print('test_argparse2 passed')
+        print(f'{self._testMethodName} passed')
 
 
 class QueriesFormTests(TestCase):
@@ -89,24 +85,33 @@ class QueriesFormTests(TestCase):
         )
         self.assertEqual(
             ques_img[DOWNLOADER_RX][0],
-            f'python3 "D:/ruxx/src/app_gui.py" id:>=1 id:<=1 -path "../tests/{date_str_md(True)}/a/" -module rx a'
+            f'python3 "D:/ruxx/src/ruxx.py" id:>=1 id:<=1 -path "../tests/{date_str_md(True)}/a/" -module rx a'
         )
         self.assertEqual(
             ques_img[DOWNLOADER_RX][1],
-            f'python3 "D:/ruxx/src/app_gui.py" id:>=1 id:<=1 -path "../tests/{date_str_md(True)}/b/" -module rx -a b'
+            f'python3 "D:/ruxx/src/ruxx.py" id:>=1 id:<=1 -path "../tests/{date_str_md(True)}/b/" -module rx -a b (+c+~+d+)'
         )
-        print('test_queries1 passed')
+        print(f'{self._testMethodName} passed')
 
 
-def run_all_tests() -> None:
-    res = run_tests(module='tests', exit=False)
-    if not res.result.wasSuccessful():
-        print('Fail')
-        sysexit()
+class RunTests(TestCase):
+    def test_main1(self) -> None:
+        c = BaseConfig(test=True)
+        main_sync(('-script', '"../tests/queries.list"', '-logspath', '../logs/archive',
+                   '--debug', '--no-download', '-downloaders', 'rx,nm,rn,rs'), c)
+        print(f'{self._testMethodName} passed')
 
+    def test_main2(self) -> None:
+        c = BaseConfig(test=True)
+        main_sync(('-script', '"../tests/queries.list"', '-logspath', '../logs/archive',
+                   '--debug', '-downloaders', 'rx,nm,rn,rs'), c)
+        print(f'{self._testMethodName} passed')
 
-if __name__ == '__main__':
-    run_all_tests()
+    def test_main3(self) -> None:
+        c = BaseConfig(test=True)
+        main_sync(('-script', '"../tests/queries.list"', '-logspath', '../logs/archive',
+                   '-downloaders', 'rx,nm,rn,rs'), c)
+        print(f'{self._testMethodName} passed')
 
 #
 #

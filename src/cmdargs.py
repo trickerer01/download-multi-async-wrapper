@@ -8,11 +8,11 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 
 from argparse import ArgumentParser, ArgumentError
 from os import path
-from typing import List
+from typing import List, Sequence
 
 from defs import (
-    Config, DOWNLOADERS, IS_IDE, ACTION_STORE_TRUE, HELP_DEBUG, HELP_DOWNLOADERS, HELP_PATH, HELP_SCRIPT_PATH, HELP_RUN_PATH,
-    HELP_LOGS_PATH, HELP_BAK_PATH, HELP_UPDATE, HELP_NO_DOWNLOAD, HELP_IGNORE_DMODE,
+    Config, DOWNLOADERS, ACTION_STORE_TRUE, HELP_DEBUG, HELP_DOWNLOADERS, HELP_PATH, HELP_SCRIPT_PATH, HELP_RUN_PATH, HELP_LOGS_PATH,
+    HELP_BAK_PATH, HELP_UPDATE, HELP_NO_DOWNLOAD, HELP_IGNORE_DMODE,
 )
 from logger import trace
 from strings import normalize_path, unquote
@@ -58,7 +58,7 @@ def valid_downloaders_list(downloaders_str: str) -> List[str]:
         raise ArgumentError
 
 
-def parse_arglist(args: List[str], config=Config) -> None:
+def parse_arglist(args: Sequence[str], config=Config) -> None:
     ncdir = normalize_path(path.curdir)
     parser = ArgumentParser(add_help=False)
     parser.add_argument('--help', action='help')
@@ -73,26 +73,19 @@ def parse_arglist(args: List[str], config=Config) -> None:
     parser.add_argument('-logspath', metavar='#PATH_TO_DIR', default=ncdir, help=HELP_LOGS_PATH, type=valid_dir_path)
     parser.add_argument('-bakpath', metavar='#PATH_TO_DIR', default=ncdir, help=HELP_BAK_PATH, type=valid_dir_path)
 
-    try:
-        parsed = parser.parse_args(args)
-
-        if IS_IDE:
-            parsed.runpath = parsed.runpath or '../run'
-            parsed.logspath = parsed.logspath or '../logs'
-            parsed.bakpath = parsed.bakpath or '../bak'
-
-        config.debug = parsed.debug
-        config.downloaders = parsed.downloaders
-        config.dest_base = parsed.path
-        config.script_path = parsed.script
-        config.ignore_download_mode = parsed.ignore_download_mode
-        config.update = parsed.update
-        config.no_download = parsed.no_download
-        config.dest_run_base = parsed.runpath
-        config.dest_logs_base = parsed.logspath
-        config.dest_bak_base = parsed.bakpath
-    except Exception:
-        raise
+    parsed = parser.parse_args(args)
+    Config.debug = config.debug = parsed.debug
+    Config.downloaders = config.downloaders = parsed.downloaders
+    Config.dest_base = config.dest_base = parsed.path
+    Config.script_path = config.script_path = parsed.script
+    Config.ignore_download_mode = config.ignore_download_mode = parsed.ignore_download_mode
+    Config.update = config.update = parsed.update
+    Config.no_download = config.no_download = parsed.no_download
+    Config.dest_run_base = config.dest_run_base = parsed.runpath
+    Config.dest_logs_base = config.dest_logs_base = parsed.logspath
+    Config.dest_bak_base = config.dest_bak_base = parsed.bakpath
+    Config.test = config.test
+    Config.console_log = config.console_log
 
 #
 #

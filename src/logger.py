@@ -17,16 +17,19 @@ __all__ = ('open_logfile', 'close_logfile', 'log_to', 'trace')
 logfile = None  # type: Optional[TextIO]
 
 
-def open_logfile(timestamped=True) -> None:
+def open_logfile(timestamped=True, config=Config) -> None:
     global logfile
     log_basename = f'log_{datetime_str_nfull()}.log' if timestamped else 'log.log'
-    logfile = open(f'{Config.dest_logs_base}{log_basename}', 'at', encoding=UTF8, buffering=True)
+    logfile = open(f'{config.dest_logs_base}{log_basename}', 'at', encoding=UTF8, buffering=True)
 
 
-def close_logfile() -> None:
+def close_logfile(config=Config) -> None:
     global logfile
     if logfile:
         logfile.close()
+        if config.test:
+            from os import remove
+            remove(logfile.name)
         logfile = None
 
 
@@ -39,16 +42,13 @@ def log_to(msg: str, log_file: TextIO, add_timestamp=True) -> None:
 def trace(msg: str, add_timestamp=True) -> None:
     t_msg = f'{timestamped_string(msg, datetime_str_nfull()) if add_timestamp else msg}\n'
     try:
-        print(t_msg, end='')
+        if Config.console_log:
+            print(t_msg, end='')
     except UnicodeError:
-        print(f'message was: {bytearray(map(ord, t_msg))}')
         try:
-            print(t_msg.encode(UTF8).decode(), end='')
+            print(t_msg.encode(UTF8).decode(getpreferredencoding()), end='')
         except Exception:
-            try:
-                print(t_msg.encode(UTF8).decode(getpreferredencoding()), end='')
-            except Exception:
-                print('<Message was not logged due to UnicodeError>')
+            print('<Message was not logged due to UnicodeError>')
         finally:
             print('Previous message caused UnicodeError...')
     if logfile:

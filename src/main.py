@@ -15,32 +15,32 @@ from logger import open_logfile, close_logfile, trace
 from platform import system as running_system
 from queries import read_queries_file, form_queries, update_next_ids
 from strings import datetime_str_full
+from typing import Sequence
 
-__all__ = ()
-
-
-def cleanup() -> None:
-    pass
+__all__ = ('main_sync',)
 
 
-def run_main() -> None:
+def main_sync(args: Sequence[str], config=Config) -> None:
     try:
-        parse_arglist(sys.argv[1:])
-        open_logfile(not Config.debug)
+        parse_arglist(args, config)
+        open_logfile(not config.debug, config)
         trace('Logfile opened...', False)
         trace(f'\n# Started at {datetime_str_full()} #')
-        read_queries_file()
-        form_queries()
+        read_queries_file(config)
+        form_queries(config)
         execute()
         update_next_ids()
-        cleanup()
         trace(f'\n# Finished at {datetime_str_full()} #')
         trace('\nClosing logfile...\n\n', False)
-        close_logfile()
+        close_logfile(config)
     except Exception:
         import traceback
         traceback.print_exc()
         sys.exit(-3)
+
+
+def run_main() -> None:
+    main_sync(sys.argv[1:])
 
 
 if __name__ == '__main__':

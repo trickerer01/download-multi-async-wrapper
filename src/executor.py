@@ -87,6 +87,8 @@ async def run_cmd(query: str, dt: str, qn: int, qt: str, qtn: int) -> None:
 
 
 async def run_dt_cmds(dts: Sequence[str], qts: Sequence[str], queries: Sequence[str]) -> None:
+    if not queries:
+        return
     assert all(dt == dts[0] for dt in dts)
     dt = dts[0]
 
@@ -99,6 +101,8 @@ async def run_dt_cmds(dts: Sequence[str], qts: Sequence[str], queries: Sequence[
     for qi in range(len(queries)):
         q_idx = 1 - int(qts[qi] == 'vid')
         qns[q_idx] += 1
+        if Config.test:
+            continue
         await run_cmd(queries[qi], dt, qi + 1, qts[qi], qns[q_idx])
     trace(f'{dt.upper()} COMPLETED\n')
 
@@ -111,7 +115,7 @@ async def run_all_cmds() -> None:
     for cv in as_completed([run_dt_cmds(dts, qts, queries) for dts, qts, queries in
                             zip([[dt] * (len(ques_vid[dt]) + len(ques_img[dt])) for dt in DOWNLOADERS],
                                 [['vid'] * len(ques_vid[dt]) + ['img'] * len(ques_img[dt]) for dt in DOWNLOADERS],
-                                [ques_vid[dt] + ques_img[dt] for dt in DOWNLOADERS])], loop=executor_event_loop):
+                                [ques_vid[dt] + ques_img[dt] for dt in DOWNLOADERS])]):
         await cv
     trace('ALL DOWNLOADERS FINISHED WORK\n')
 

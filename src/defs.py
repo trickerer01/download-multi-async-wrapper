@@ -11,7 +11,6 @@ from abc import ABC, abstractmethod
 from os import environ
 from typing import List, Union, Tuple, Iterable
 
-IS_IDE = environ.get('PYCHARM_HOSTED') == '1'
 
 UTF8 = 'utf-8'
 ACTION_STORE_TRUE = 'store_true'
@@ -55,7 +54,7 @@ APP_NAMES = {
 
 
 class BaseConfig(object):
-    def __init__(self, *, test=False) -> None:
+    def __init__(self, *, test=False, console_log=False) -> None:
         # arguments
         self.debug = False
         self.downloaders = list()  # type: List[str]
@@ -70,7 +69,9 @@ class BaseConfig(object):
         # calculated
         self.max_cmd_len = MAX_CMD_LEN.get(OS_WINDOWS) // 2  # MAX_CMD_LEN.get(running_system())
         self.python = ''
+        # non-cmd params
         self.test = test
+        self.console_log = not (test and not console_log)
 
     def __str__(self) -> str:
         return (
