@@ -44,14 +44,14 @@ sequences_paths_update = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Opt
 proxies_update = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[StrPair]]
 
 
-def read_queries_file(config=Config) -> None:
+def read_queries_file() -> None:
     global queries_file_lines
 
-    with open(config.script_path, 'rt', encoding=UTF8) as qfile:
+    with open(Config.script_path, 'rt', encoding=UTF8) as qfile:
         queries_file_lines = qfile.readlines()
 
 
-def form_queries(config=Config):
+def form_queries():
     sequences_paths_vid = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[str]]
     sequences_paths_img = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[str]]
     sequences_common_vid = {dt: [] for dt in DOWNLOADERS}  # type: Dict[str, List[str]]
@@ -98,12 +98,12 @@ def form_queries(config=Config):
                     # trace(f'Ignoring commented out line {i + 1:d}: \'{line}\'')
                     continue
                 if re_download_mode.fullmatch(line):
-                    if config.ignore_download_mode is True:
+                    if Config.ignore_download_mode is True:
                         trace(f'Info: \'{line}\' download mode found at line {i + 1:d}. Ignored!')
                         continue
                 if re_python_exec.fullmatch(line):
-                    assert config.python == '', 'Python executable must be declared exactly once!'
-                    config.python = line[line.find(':') + 1:]
+                    assert Config.python == '', 'Python executable must be declared exactly once!'
+                    Config.python = line[line.find(':') + 1:]
                 elif re_downloader_type.fullmatch(line):
                     cur_downloader_idx = DOWNLOADERS.index(line.split(' ')[1])
                 elif re_ids_list.fullmatch(line):
@@ -114,10 +114,10 @@ def form_queries(config=Config):
                     basepath_n = normalize_path(basepath)
                     path_downloader = f'{basepath_n}{PATH_APPEND_DOWNLOAD[DOWNLOADERS[cur_downloader_idx]]}'
                     path_updater = f'{basepath_n}{PATH_APPEND_UPDATE[DOWNLOADERS[cur_downloader_idx]]}'
-                    if config.test is False:
+                    if Config.test is False:
                         assert path.isdir(basepath)
                         assert path.isfile(path_downloader)
-                        if config.update:
+                        if Config.update:
                             assert path.isfile(path_updater)
                     cur_seq_paths[DOWNLOADERS[cur_downloader_idx]] = path_downloader
                     sequences_paths_update[DOWNLOADERS[cur_downloader_idx]] = normalize_path(path.abspath(path_updater), False)
@@ -189,7 +189,7 @@ def form_queries(config=Config):
     #                  python_executable)
     validate_sequences(sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img,
                        sequences_tags_vid, sequences_tags_img, sequences_subfolders_vid, sequences_subfolders_img,
-                       sequences_paths_update, config)
+                       sequences_paths_update)
 
     trace('Sequences are validated. Preparing final lists...')
 
@@ -198,14 +198,14 @@ def form_queries(config=Config):
     # report_finals(*queries_from_sequences_base(
     #     sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img,
     #     sequences_tags_vid, sequences_tags_img, sequences_subfolders_vid, sequences_subfolders_img,
-    #     sequences_common_vid, sequences_common_img, config
+    #     sequences_common_vid, sequences_common_img
     # ))
 
     trace('\nOptimized:')
     queries_final_vid, queries_final_img = queries_from_sequences(
         sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img,
         sequences_tags_vid, sequences_tags_img, sequences_subfolders_vid, sequences_subfolders_img,
-        sequences_common_vid, sequences_common_img, config
+        sequences_common_vid, sequences_common_img
     )
 
     report_finals(queries_final_vid, queries_final_img)

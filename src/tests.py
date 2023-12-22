@@ -9,7 +9,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 from unittest import TestCase
 
 from cmdargs import parse_arglist
-from defs import DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RN, DOWNLOADER_RX, DOWNLOADER_RS, BaseConfig
+from defs import DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RN, DOWNLOADER_RX, DOWNLOADER_RS, Config
 from executor import ques_vid, ques_img
 from main import main_sync
 from queries import read_queries_file, form_queries
@@ -34,37 +34,44 @@ args_argparse_str2 = (
 )
 
 
+def set_up_test(log=False) -> None:
+    # noinspection PyProtectedMember
+    Config._reset()
+    Config.test = True
+    Config.console_log = log
+
+
 class ArgParseTests(TestCase):
     def test_argparse1(self) -> None:
-        c = BaseConfig(test=True)
-        parse_arglist(args_argparse_str1.split(), c)
+        set_up_test()
+        parse_arglist(args_argparse_str1.split())
         self.assertEqual(
             'debug: False, downloaders: [\'nm\', \'rv\', \'rn\', \'rx\', \'rs\'], script: ../tests/queries.list, dest: ./, '
             'run: ./, logs: ./, bak: ./, update: False, no_download: False, ignore_download_mode: False, '
             'max_cmd_len: 16000',
-            str(c)
+            str(Config)
         )
         print(f'{self._testMethodName} passed')
 
     def test_argparse2(self) -> None:
-        c = BaseConfig(test=True)
-        parse_arglist(args_argparse_str2.split(), c)
+        set_up_test()
+        parse_arglist(args_argparse_str2.split())
         self.assertEqual(
-            str(c),
             'debug: True, downloaders: [\'rv\', \'rn\', \'rx\', \'rs\'], script: ../tests/queries.list, dest: ../tests/, '
             'run: ../run/, logs: ../logs/, bak: ../bak/, update: True, no_download: False, ignore_download_mode: True, '
-            'max_cmd_len: 16000'
+            'max_cmd_len: 16000',
+            str(Config)
         )
         print(f'{self._testMethodName} passed')
 
 
 class QueriesFormTests(TestCase):
     def test_queries1(self) -> None:
-        c = BaseConfig(test=True)
-        parse_arglist(args_argparse_str2.split(), c)
-        read_queries_file(c)
-        form_queries(c)
-        self.assertEqual('python3', c.python)
+        set_up_test()
+        parse_arglist(args_argparse_str2.split())
+        read_queries_file()
+        form_queries()
+        self.assertEqual('python3', Config.python)
         self.assertEqual(1, len(ques_vid[DOWNLOADER_NM]))
         self.assertEqual(0, len(ques_vid[DOWNLOADER_RV]))
         self.assertEqual(0, len(ques_vid[DOWNLOADER_RN]))
@@ -96,21 +103,21 @@ class QueriesFormTests(TestCase):
 
 class RunTests(TestCase):
     def test_main1(self) -> None:
-        c = BaseConfig(test=True)
+        set_up_test()
         main_sync(('-script', '"../tests/queries.list"', '-logspath', '../logs/archive',
-                   '--debug', '--no-download', '-downloaders', 'rx,nm,rn,rs'), c)
+                   '--debug', '--no-download', '-downloaders', 'rx,nm,rn,rs'))
         print(f'{self._testMethodName} passed')
 
     def test_main2(self) -> None:
-        c = BaseConfig(test=True)
+        set_up_test()
         main_sync(('-script', '"../tests/queries.list"', '-logspath', '../logs/archive',
-                   '--debug', '-downloaders', 'rx,nm,rn,rs'), c)
+                   '--debug', '-downloaders', 'rx,nm,rn,rs'))
         print(f'{self._testMethodName} passed')
 
     def test_main3(self) -> None:
-        c = BaseConfig(test=True)
+        set_up_test()
         main_sync(('-script', '"../tests/queries.list"', '-logspath', '../logs/archive',
-                   '-downloaders', 'rx,nm,rn,rs'), c)
+                   '-downloaders', 'rx,nm,rn,rs'))
         print(f'{self._testMethodName} passed')
 
 #

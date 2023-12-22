@@ -8,7 +8,6 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 
 from abc import ABC, abstractmethod
-from os import environ
 from typing import List, Union, Tuple, Iterable
 
 
@@ -72,6 +71,9 @@ class BaseConfig(object):
         # non-cmd params
         self.test = test
         self.console_log = not (test and not console_log)
+
+    def _reset(self) -> None:
+        self.__init__(test=self.test, console_log=self.console_log)
 
     def __str__(self) -> str:
         return (

@@ -17,17 +17,17 @@ __all__ = ('open_logfile', 'close_logfile', 'log_to', 'trace')
 logfile = None  # type: Optional[TextIO]
 
 
-def open_logfile(timestamped=True, config=Config) -> None:
+def open_logfile() -> None:
     global logfile
-    log_basename = f'log_{datetime_str_nfull()}.log' if timestamped else 'log.log'
-    logfile = open(f'{config.dest_logs_base}{log_basename}', 'at', encoding=UTF8, buffering=True)
+    log_basename = f'log_{datetime_str_nfull()}.log' if not Config.debug else 'log.log'
+    logfile = open(f'{Config.dest_logs_base}{log_basename}', 'at', encoding=UTF8, buffering=True)
 
 
-def close_logfile(config=Config) -> None:
+def close_logfile() -> None:
     global logfile
     if logfile:
         logfile.close()
-        if config.test:
+        if Config.test:
             from os import remove
             remove(logfile.name)
         logfile = None

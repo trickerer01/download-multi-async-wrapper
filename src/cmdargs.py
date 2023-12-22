@@ -58,7 +58,7 @@ def valid_downloaders_list(downloaders_str: str) -> List[str]:
         raise ArgumentError
 
 
-def parse_arglist(args: Sequence[str], config=Config) -> None:
+def parse_arglist(args: Sequence[str]) -> None:
     ncdir = normalize_path(path.curdir)
     parser = ArgumentParser(add_help=False)
     parser.add_argument('--help', action='help')
@@ -74,18 +74,16 @@ def parse_arglist(args: Sequence[str], config=Config) -> None:
     parser.add_argument('-bakpath', metavar='#PATH_TO_DIR', default=ncdir, help=HELP_BAK_PATH, type=valid_dir_path)
 
     parsed = parser.parse_args(args)
-    Config.debug = config.debug = parsed.debug
-    Config.downloaders = config.downloaders = parsed.downloaders
-    Config.dest_base = config.dest_base = parsed.path
-    Config.script_path = config.script_path = parsed.script
-    Config.ignore_download_mode = config.ignore_download_mode = parsed.ignore_download_mode
-    Config.update = config.update = parsed.update
-    Config.no_download = config.no_download = parsed.no_download
-    Config.dest_run_base = config.dest_run_base = parsed.runpath
-    Config.dest_logs_base = config.dest_logs_base = parsed.logspath
-    Config.dest_bak_base = config.dest_bak_base = parsed.bakpath
-    Config.test = config.test
-    Config.console_log = config.console_log
+    Config.debug = parsed.debug
+    Config.downloaders = parsed.downloaders
+    Config.dest_base = parsed.path
+    Config.script_path = parsed.script
+    Config.ignore_download_mode = parsed.ignore_download_mode
+    Config.update = parsed.update
+    Config.no_download = parsed.no_download
+    Config.dest_run_base = parsed.runpath
+    Config.dest_logs_base = parsed.logspath
+    Config.dest_bak_base = parsed.bakpath
 
 #
 #

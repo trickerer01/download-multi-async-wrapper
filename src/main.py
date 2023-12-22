@@ -9,7 +9,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 import sys
 
 from cmdargs import parse_arglist
-from defs import Config, SUPPORTED_SYSTEMS
+from defs import SUPPORTED_SYSTEMS
 from executor import execute
 from logger import open_logfile, close_logfile, trace
 from platform import system as running_system
@@ -20,33 +20,29 @@ from typing import Sequence
 __all__ = ('main_sync',)
 
 
-def main_sync(args: Sequence[str], config=Config) -> None:
+def main_sync(args: Sequence[str]) -> None:
     try:
-        parse_arglist(args, config)
-        open_logfile(not config.debug, config)
+        parse_arglist(args)
+        open_logfile()
         trace('Logfile opened...', False)
         trace(f'\n# Started at {datetime_str_full()} #')
-        read_queries_file(config)
-        form_queries(config)
+        read_queries_file()
+        form_queries()
         execute()
         update_next_ids()
         trace(f'\n# Finished at {datetime_str_full()} #')
         trace('\nClosing logfile...\n\n', False)
-        close_logfile(config)
+        close_logfile()
     except Exception:
         import traceback
         traceback.print_exc()
         sys.exit(-3)
 
 
-def run_main() -> None:
-    main_sync(sys.argv[1:])
-
-
 if __name__ == '__main__':
     assert sys.version_info >= (3, 7), 'Minimum python version required is 3.7!'
     assert running_system() in SUPPORTED_SYSTEMS
-    run_main()
+    main_sync(sys.argv[1:])
     sys.exit(0)
 
 #
