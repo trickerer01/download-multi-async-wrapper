@@ -236,7 +236,7 @@ def update_next_ids() -> None:
             if dtype in proxies_update and proxies_update[dtype]:
                 module_arguments += [proxies_update[dtype].first, proxies_update[dtype].second]
             arguments = [Config.python, update_file_path, '-get_maxid'] + module_arguments
-            res = check_output(arguments.copy()).decode().strip()
+            res = check_output(arguments.copy()).decode(errors='replace').strip()
             with rlock:
                 results[dtype] = res[res.rfind('\n') + 1:]
 
@@ -251,7 +251,7 @@ def update_next_ids() -> None:
 
         trace(f'\nSaving backup to \'{filename_bak}\'...')
         bak_fullpath = f'{Config.dest_bak_base}{filename_bak}'
-        with open(bak_fullpath, 'wt', encoding=UTF8, buffering=True) as outfile_bak:
+        with open(bak_fullpath, 'wt', encoding=UTF8, buffering=1) as outfile_bak:
             outfile_bak.writelines(queries_file_lines)
             trace('Saving done')
 
@@ -279,7 +279,7 @@ def update_next_ids() -> None:
                     queries_file_lines[line_num] = ' '.join([ids_at_line[0]] + ids_at_line[2:] + [f'{maxnums[dt]:d}\n'])
                     trace(f'Writing {dt} {ty} ids done')
             trace(f'Writing {ty} ids done')
-        with open(Config.script_path, 'wt', encoding=UTF8, buffering=True) as outfile:
+        with open(Config.script_path, 'wt', encoding=UTF8, buffering=1) as outfile:
             outfile.writelines(queries_file_lines)
         trace('Writing done')
     except Exception:

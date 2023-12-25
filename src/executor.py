@@ -63,7 +63,7 @@ async def run_cmd(query: str, dt: str, qn: int, qt: str, qtn: int) -> None:
     exec_time = datetime_str_nfull()
     begin_msg = f'\nExecuting {dt} {qt} query {qtn:d}:\n{query}'
     log_file_name = f'{Config.dest_logs_base}log_{dt}{qn:02d}_{qt}{qtn:02d}_{exec_time}.log'
-    with open(log_file_name, 'at', encoding=UTF8) as log_file:
+    with open(log_file_name, 'at', encoding=UTF8, buffering=1) as log_file:
         trace(begin_msg)
         log_to(begin_msg, log_file)
         cmd_args = split_into_args(query)
@@ -76,13 +76,13 @@ async def run_cmd(query: str, dt: str, qn: int, qt: str, qtn: int) -> None:
             run_file_abspath = path.abspath(run_file_name)
             cmd_args_new = cmd_args[2:]
             cmd_args = cmd_args[:2] + ['file', '-path', run_file_abspath]
-            with open(run_file_abspath, 'wt', encoding=UTF8) as run_file:
+            with open(run_file_abspath, 'wt', encoding=UTF8, buffering=1) as run_file:
                 run_file.write('\n'.join(cmd_args_new))
         ef = Future(loop=executor_event_loop)
         tr, _ = await executor_event_loop.subprocess_exec(lambda: DummyResultProtocol(ef), *cmd_args, stderr=log_file, stdout=log_file)
         await ef
         tr.close()
-    with open(log_file_name, 'rt', encoding=UTF8, errors='replace') as completed_log_file:
+    with open(log_file_name, 'rt', encoding=UTF8, errors='replace', buffering=1) as completed_log_file:
         trace(f'\n{"".join(completed_log_file.readlines())}')
 
 

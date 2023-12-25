@@ -20,7 +20,7 @@ logfile = None  # type: Optional[TextIO]
 def open_logfile() -> None:
     global logfile
     log_basename = f'log_{datetime_str_nfull()}.log' if not Config.debug else 'log.log'
-    logfile = open(f'{Config.dest_logs_base}{log_basename}', 'at', encoding=UTF8, buffering=True)
+    logfile = open(f'{Config.dest_logs_base}{log_basename}', 'at', encoding=UTF8, buffering=1)
 
 
 def close_logfile() -> None:
@@ -46,11 +46,9 @@ def trace(msg: str, add_timestamp=True) -> None:
             print(t_msg, end='')
     except UnicodeError:
         try:
-            print(t_msg.encode(UTF8).decode(getpreferredencoding()), end='')
+            print(t_msg.encode(UTF8, errors='backslashreplace').decode(getpreferredencoding(), errors='backslashreplace'), end='')
         except Exception:
             print('<Message was not logged due to UnicodeError>')
-        finally:
-            print('Previous message caused UnicodeError...')
     if logfile:
         logfile.write(t_msg)
 
