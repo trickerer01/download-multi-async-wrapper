@@ -89,8 +89,9 @@ async def run_cmd(query: str, dt: str, qn: int, qt: str, qtn: int) -> None:
 async def run_dt_cmds(dts: Sequence[str], qts: Sequence[str], queries: Sequence[str]) -> None:
     if not queries:
         return
-    assert all(dt == dts[0] for dt in dts)
+
     dt = dts[0]
+    assert all(_ == dt for _ in dts)
 
     if dt not in Config.downloaders:
         await sleep(1.0)  # delay this message so it isn't printed somewhere inbetween initial cmds
