@@ -144,35 +144,27 @@ class IntSequence:
 
 
 class Pair(ABC):
-    def __init__(self, vals: Tuple, *_) -> None:
-        assert len(vals) == 2
-        assert isinstance(vals[0], type(vals[1]))
-
     @abstractmethod
+    def __init__(self, vals: Tuple, mytype: type) -> None:
+        assert len(vals) == 2
+        assert isinstance(vals[0], mytype)
+        assert isinstance(vals[0], type(vals[1]))
+        self.first = vals[0]
+        self.second = vals[1]
+        self._fmt = {int: 'd', bool: 'd', float: '.2f', oct: 'o'}.get(type(self.first), '')
+
     def __str__(self) -> str:
-        ...
+        return f'first: {self.first:{self._fmt}}, second: {self.second:{self._fmt}}'
 
 
 class IntPair(Pair):
-    def __init__(self, vals: Tuple[int, int], *_) -> None:
-        super().__init__(vals)
-        assert isinstance(vals[0], int)
-        self.first = vals[0]
-        self.second = vals[1]
-
-    def __str__(self) -> str:
-        return f'first: {self.first:d}, second: {self.second:d}'
+    def __init__(self, vals: Tuple[int, int]) -> None:
+        super().__init__(vals, mytype=int)
 
 
 class StrPair(Pair):
-    def __init__(self, vals: Tuple[str, str], *_) -> None:
-        super().__init__(vals)
-        assert isinstance(vals[0], str)
-        self.first = vals[0]
-        self.second = vals[1]
-
-    def __str__(self) -> str:
-        return f'first: {self.first}, second: {self.second}'
+    def __init__(self, vals: Tuple[str, str]) -> None:
+        super().__init__(vals, mytype=str)
 
 
 RANGE_TEMPLATES = {

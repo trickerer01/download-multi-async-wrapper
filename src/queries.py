@@ -139,14 +139,14 @@ def form_queries():
                     raise IOError
             else:  # elif line[0] in {'(', '-', '*'} or line[0].isalpha():
                 assert len(cur_seq_ids[DOWNLOADERS[cur_downloader_idx]]) > 0
-                if line.find('  ') != -1:
+                if '  ' in line:
                     trace(f'Error: double space found in tags at line {i + 1:d}!')
                     raise IOError
-                if line[0] not in ('(',) and (not line.startswith('-+(')) and line.find('~') != -1:
+                if line[0] != '(' and not line.startswith('-+(') and '~' in line:
                     trace(f'Error: unsupported ungrouped OR symbol at line {i + 1:d}!')
                     raise IOError
                 if all_tags_negative(line.split(' ')):  # line[0] === '-'
-                    if line[1] in ('-', '+'):
+                    if line[1] in '-+':
                         # remove --tag(s) or -+tag(s) from list, convert: --a --b -> [-a, -b] OR -+a -+b -> [a, b]
                         tags_to_remove = [tag[2 if tag[1] == '+' else 1:] for tag in line.split(' ')]
                         for k in reversed(range(len(tags_to_remove))):
@@ -159,14 +159,14 @@ def form_queries():
                         continue
                     else:
                         tags_split = [tag[1:] for tag in line.split(' ')]
+                        split_len = len(tags_split)
                         assert all(len(tag) > 0 for tag in tags_split)
                         need_find_previous_or_group = True
                         tags_rem = '~'.join(tags_split)
-                        start_idx = 1 if len(tags_split) > 1 else 0  # type: int
-                        end_idx = -1 if len(tags_split) > 1 else None  # type: Optional[int]
+                        start_idx = 1 if split_len > 1 else 0  # type: int
+                        end_idx = -1 if split_len > 1 else None  # type: Optional[int]
                         for j in reversed(range(len(cur_tags_list))):  # type: int
-                            taglen = len(cur_tags_list[j])
-                            border_condition = len(tags_split) == 1 or cur_tags_list[j][0:taglen:taglen - 1] == '()'
+                            border_condition = split_len == 1 or cur_tags_list[j][:: len(cur_tags_list[j]) - 1] == '()'
                             if border_condition and cur_tags_list[j][start_idx:end_idx] == tags_rem:
                                 del cur_tags_list[j]
                                 need_find_previous_or_group = False

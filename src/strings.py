@@ -46,7 +46,7 @@ def all_tags_positive(taglist: Iterable[str]) -> bool:
 
 def normalize_ruxx_tag(tag: str) -> str:
     tag = tag.replace('+', '%2b')
-    if tag[0] == '(' and tag[-1] == ')' and tag.find('~') != -1:
+    if tag[::len(tag) - 1 or 1] == '()' and '~' in tag:
         tag = f'(+{"+~+".join(part for part in tag[1:-1].split("~"))}+)'
     return tag
 

@@ -83,20 +83,20 @@ class QueriesFormTests(TestCase):
         self.assertEqual(2, len(ques_img[DOWNLOADER_RX]))
         self.assertEqual(0, len(ques_img[DOWNLOADER_RS]))
         self.assertEqual(
-            ques_vid[DOWNLOADER_NM][0],
             f'python3 "D:/nm/src/ids.py" -start 1 -end 1 -path "../tests/{date_str_md(False)}/" --dump-tags --verbose -script "'
             'a: -quality 1080p -a -b -c -dfff ggg; '
             'b: -quality 1080p -a -b -c -dfff -ggg -(x,z) (h~i~j~k); '
             'c: -quality 1080p -a -b -c -dfff -ggg -h -i -j -k (l~m~n); '
-            'd: -a -b -c -ggg -h -i -j -k -l -m -n -quality 360p -uvp always"'
+            'd: -a -b -c -ggg -h -i -j -k -l -m -n -quality 360p -uvp always"',
+            ques_vid[DOWNLOADER_NM][0]
         )
         self.assertEqual(
-            ques_img[DOWNLOADER_RX][0],
-            f'python3 "D:/ruxx/src/ruxx.py" id:>=1 id:<=1 -path "../tests/{date_str_md(True)}/a/" -module rx a'
+            f'python3 "D:/ruxx/src/ruxx.py" id:>=1 id:<=1 -path "../tests/{date_str_md(True)}/a/" -module rx a',
+            ques_img[DOWNLOADER_RX][0]
         )
         self.assertEqual(
-            ques_img[DOWNLOADER_RX][1],
-            f'python3 "D:/ruxx/src/ruxx.py" id:>=1 id:<=1 -path "../tests/{date_str_md(True)}/b/" -module rx -a b (+c+~+d+)'
+            f'python3 "D:/ruxx/src/ruxx.py" id:>=1 id:<=1 -path "../tests/{date_str_md(True)}/b/" -module rx -a b (+c+~+d+)',
+            ques_img[DOWNLOADER_RX][1]
         )
         print(f'{self._testMethodName} passed')
 

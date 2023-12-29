@@ -20,7 +20,8 @@ from typing import Sequence
 __all__ = ('main_sync',)
 
 
-def main_sync(args: Sequence[str]) -> None:
+def main_sync(args: Sequence[str]) -> int:
+    result = 0
     try:
         parse_arglist(args)
         open_logfile()
@@ -31,19 +32,20 @@ def main_sync(args: Sequence[str]) -> None:
         execute()
         update_next_ids()
         trace(f'\n# Finished at {datetime_str_full()} #')
-        trace('\nClosing logfile...\n\n', False)
-        close_logfile()
     except Exception:
         import traceback
         traceback.print_exc()
-        sys.exit(-3)
+        result = -3
+    finally:
+        trace('\nClosing logfile...\n\n', False)
+        close_logfile()
+        return result
 
 
 if __name__ == '__main__':
     assert sys.version_info >= (3, 7), 'Minimum python version required is 3.7!'
     assert running_system() in SUPPORTED_SYSTEMS
-    main_sync(sys.argv[1:])
-    sys.exit(0)
+    sys.exit(main_sync(sys.argv[1:]))
 
 #
 #
