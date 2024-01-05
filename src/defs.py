@@ -8,8 +8,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 
 from abc import ABC, abstractmethod
-from typing import List, Union, Tuple, Iterable
-
+from typing import List, Union, Tuple, Iterable, TypeVar
 
 UTF8 = 'utf-8'
 ACTION_STORE_TRUE = 'store_true'
@@ -66,7 +65,7 @@ class BaseConfig(object):
         self.no_download = False
         self.ignore_download_mode = False
         # calculated
-        self.max_cmd_len = MAX_CMD_LEN.get(OS_WINDOWS) // 2  # MAX_CMD_LEN.get(running_system())
+        self.max_cmd_len = MAX_CMD_LEN[OS_WINDOWS] // 2  # MAX_CMD_LEN.get(running_system())
         self.python = ''
         # non-cmd params
         self.test = test
@@ -144,27 +143,35 @@ class IntSequence:
 
 
 class Pair(ABC):
+    PT = TypeVar('PT')
+
     @abstractmethod
-    def __init__(self, vals: Tuple, mytype: type) -> None:
-        assert len(vals) == 2
-        assert isinstance(vals[0], mytype)
-        assert isinstance(vals[0], type(vals[1]))
-        self.first = vals[0]
-        self.second = vals[1]
-        self._fmt = {int: 'd', bool: 'd', float: '.2f', oct: 'o'}.get(type(self.first), '')
+    def __init__(self, vals: Tuple[PT, PT]) -> None:
+        self._first, self._second = vals
+        self._fmt = {int: 'd', bool: 'd', float: '.2f', oct: 'o'}.get(type(self._first), '')
+
+    @property
+    def first(self) -> PT:
+        return self._first
+
+    @property
+    def second(self) -> PT:
+        return self._second
 
     def __str__(self) -> str:
-        return f'first: {self.first:{self._fmt}}, second: {self.second:{self._fmt}}'
+        return f'first: {self._first:{self._fmt}}, second: {self._second:{self._fmt}}'
+
+    __repr__ = __str__
 
 
 class IntPair(Pair):
     def __init__(self, vals: Tuple[int, int]) -> None:
-        super().__init__(vals, mytype=int)
+        super().__init__(vals)
 
 
 class StrPair(Pair):
     def __init__(self, vals: Tuple[str, str]) -> None:
-        super().__init__(vals, mytype=str)
+        super().__init__(vals)
 
 
 RANGE_TEMPLATES = {
