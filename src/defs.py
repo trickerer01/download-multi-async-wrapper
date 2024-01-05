@@ -99,11 +99,11 @@ HELP_UPDATE = 'Boolean flag to update script file with current max ids fetched f
 HELP_NO_DOWNLOAD = 'Boolean flag to skip actual download (do not launch downloaders)'
 HELP_IGNORE_DMODE = 'Boolean flag to ignore all \'-dmode\' arguments and always download files in full'
 
-PATH_APPEND_DOWNLOAD_RUXX = 'src/ruxx.py'
+PATH_APPEND_DOWNLOAD_RUXX = 'src/ruxx_cmd.py'
 PATH_APPEND_DOWNLOAD_NM = 'src/ids.py'
 PATH_APPEND_DOWNLOAD_RV = PATH_APPEND_DOWNLOAD_NM
 
-PATH_APPEND_UPDATE_RUXX = 'src/ruxx.py'
+PATH_APPEND_UPDATE_RUXX = 'src/ruxx_cmd.py'
 PATH_APPEND_UPDATE_NM = 'src/pages.py'
 PATH_APPEND_UPDATE_RV = PATH_APPEND_UPDATE_NM
 
