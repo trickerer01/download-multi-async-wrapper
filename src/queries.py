@@ -90,7 +90,7 @@ def form_queries():
                     cur_seq_subs = sequences_subfolders_img
                     cur_tags_list.clear()
                 continue
-            if line[0] not in {'(', '-', '*', '#'} and not line[0].isalpha():
+            if line[0] not in '(-*#' and not line[0].isalpha():
                 trace(f'Error: corrupted line beginning found at line {i + 1:d}!')
                 raise IOError
             if line[0] == '#':
@@ -137,7 +137,7 @@ def form_queries():
                 else:
                     trace(f'Error: unknown param at line {i + 1:d}!')
                     raise IOError
-            else:  # elif line[0] in {'(', '-', '*'} or line[0].isalpha():
+            else:  # elif line[0] in '(-*' or line[0].isalpha():
                 assert len(cur_seq_ids[DOWNLOADERS[cur_downloader_idx]]) > 0
                 if '  ' in line:
                     trace(f'Error: double space found in tags at line {i + 1:d}!')
@@ -214,6 +214,7 @@ def form_queries():
 
 def update_next_ids() -> None:
     if Config.update is False:
+        trace('\nNext ids update SKIPPED due to no --update flag!')
         return
 
     # save backup and write a new one

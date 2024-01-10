@@ -41,10 +41,12 @@ DOWNLOADERS = [DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RN, DOWNLOADER_RX, DOWNL
 RUXX_DOWNLOADERS = (DOWNLOADER_RN, DOWNLOADER_RX, DOWNLOADER_RS)
 RUN_FILE_DOWNLOADERS = (DOWNLOADER_NM, DOWNLOADER_RV)
 
+APP_NAME_NM = DOWNLOADER_NM.upper(),
+APP_NAME_RV = DOWNLOADER_RV.upper(),
 APP_NAME_RUXX = 'Ruxx'
 APP_NAMES = {
-    DOWNLOADER_NM: DOWNLOADER_NM.upper(),
-    DOWNLOADER_RV: DOWNLOADER_RV.upper(),
+    DOWNLOADER_NM: APP_NAME_NM,
+    DOWNLOADER_RV: APP_NAME_RV,
     DOWNLOADER_RN: APP_NAME_RUXX,
     DOWNLOADER_RX: APP_NAME_RUXX,
     DOWNLOADER_RS: APP_NAME_RUXX,
@@ -82,8 +84,7 @@ class BaseConfig(object):
             f'max_cmd_len: {self.max_cmd_len}'
         )
 
-    def __repr__(self) -> str:
-        return self.__str__()
+    __repr__ = __str__
 
 
 Config = BaseConfig()

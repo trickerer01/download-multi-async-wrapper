@@ -91,11 +91,11 @@ class QueriesFormTests(TestCase):
             ques_vid[DOWNLOADER_NM][0]
         )
         self.assertEqual(
-            f'python3 "D:/ruxx/src/ruxx.py" id:>=1 id:<=1 -path "../tests/{date_str_md(True)}/a/" -module rx a',
+            f'python3 "D:/ruxx/src/ruxx_cmd.py" id:>=1 id:<=1 -path "../tests/{date_str_md(True)}/a/" -module rx a',
             ques_img[DOWNLOADER_RX][0]
         )
         self.assertEqual(
-            f'python3 "D:/ruxx/src/ruxx.py" id:>=1 id:<=1 -path "../tests/{date_str_md(True)}/b/" -module rx -a b (+c+~+d+)',
+            f'python3 "D:/ruxx/src/ruxx_cmd.py" id:>=1 id:<=1 -path "../tests/{date_str_md(True)}/b/" -module rx -a b (+c+~+d+)',
             ques_img[DOWNLOADER_RX][1]
         )
         print(f'{self._testMethodName} passed')

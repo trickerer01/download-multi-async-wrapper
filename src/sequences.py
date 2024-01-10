@@ -71,12 +71,12 @@ def validate_sequences(
         raise IOError
     if Config.test is True:
         return
-    checked_downloaders = set()
+    checked_paths = set()
     if not Config.no_download:
         for dtd, dpath in (list(sequences_paths_vid.items()) + list(sequences_paths_img.items())):  # type: str, Optional[str]
-            if dtd in checked_downloaders or not dpath or dtd not in Config.downloaders:
+            if not dpath or dpath in checked_paths or dtd not in Config.downloaders:
                 continue
-            checked_downloaders.add(dtd)
+            checked_paths.add(dpath)
             try:
                 trace(f'Looking for {dtd} downloader...')
                 out_d = check_output((Config.python, dpath, '--version'))
@@ -88,8 +88,9 @@ def validate_sequences(
                 raise IOError
     if Config.update:
         for dtu, upath in sequences_paths_update.items():  # type: str, Optional[str]
-            if not upath:
+            if not upath or upath in checked_paths:
                 continue
+            checked_paths.add(upath)
             try:
                 trace(f'Looking for {dtu} updater...')
                 out_u = check_output((Config.python, upath, '--version'))
