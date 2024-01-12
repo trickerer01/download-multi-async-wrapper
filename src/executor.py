@@ -7,11 +7,11 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 
 from asyncio import new_event_loop, AbstractEventLoop, as_completed, Future, SubprocessProtocol, sleep
+from os import path
 from typing import Dict, List, Optional, Mapping, Sequence
 
 from defs import UTF8, DOWNLOADERS, RUN_FILE_DOWNLOADERS, Config
 from logger import trace, log_to
-from os import path
 from strings import datetime_str_nfull, unquote
 
 __all__ = ('ques_vid', 'ques_img', 'register_queries', 'execute')
