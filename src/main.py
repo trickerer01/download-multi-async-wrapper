@@ -7,7 +7,6 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 
 import sys
-
 from cmdargs import parse_arglist
 from defs import SUPPORTED_SYSTEMS
 from executor import execute

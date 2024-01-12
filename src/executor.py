@@ -38,7 +38,7 @@ def register_queries(queries_v: Mapping[str, List[str]], queries_i: Mapping[str,
 
 def split_into_args(query: str) -> List[str]:
     """'a "b c" d "e" f g' -> ['a', 'b c', 'd', 'e', 'f', 'g']"""
-    result = []  # type: List[str]
+    result = []
     idx1 = idx2 = idxdq = 0
     while idx2 < len(query):
         idx2 += 1
@@ -75,7 +75,7 @@ async def run_cmd(query: str, dt: str, qn: int, qt: str, qtn: int) -> None:
             trace(f'Cmdline is too long ({len(query):d}/{Config.max_cmd_len:d})! Converting to run file: {run_file_name}')
             run_file_abspath = path.abspath(run_file_name)
             cmd_args_new = cmd_args[2:]
-            cmd_args = cmd_args[:2] + ['file', '-path', run_file_abspath]
+            cmd_args[2:] = ['file', '-path', run_file_abspath]
             with open(run_file_abspath, 'wt', encoding=UTF8, buffering=1) as run_file:
                 run_file.write('\n'.join(cmd_args_new))
         ef = Future(loop=executor_event_loop)
