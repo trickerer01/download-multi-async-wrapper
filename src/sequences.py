@@ -74,7 +74,10 @@ def validate_sequences(
     checked_paths = set()
     if not Config.no_download:
         for dtd, dpath in (list(sequences_paths_vid.items()) + list(sequences_paths_img.items())):  # type: str, Optional[str]
-            if not dpath or dpath in checked_paths or dtd not in Config.downloaders:
+            if not dpath or dtd not in Config.downloaders:
+                continue
+            if dpath in checked_paths:
+                trace(f'{dtd} downloader path is already checked!')
                 continue
             checked_paths.add(dpath)
             try:
@@ -88,7 +91,10 @@ def validate_sequences(
                 raise IOError
     if Config.update:
         for dtu, upath in sequences_paths_update.items():  # type: str, Optional[str]
-            if not upath or upath in checked_paths:
+            if not upath:
+                continue
+            if upath in checked_paths:
+                trace(f'{dtu} updater path is already checked!')
                 continue
             checked_paths.add(upath)
             try:
