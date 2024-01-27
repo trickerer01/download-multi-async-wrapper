@@ -9,7 +9,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 from unittest import TestCase
 
 from cmdargs import parse_arglist
-from defs import DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RN, DOWNLOADER_RX, DOWNLOADER_RS, Config
+from defs import Config, DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RN, DOWNLOADER_RX, DOWNLOADER_RS
 from executor import ques_vid, ques_img
 from main import main_sync
 from queries import read_queries_file, form_queries

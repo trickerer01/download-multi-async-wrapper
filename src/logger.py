@@ -9,7 +9,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 from locale import getpreferredencoding
 from typing import TextIO, Optional
 
-from defs import UTF8, Config
+from defs import Config, UTF8
 from strings import datetime_str_nfull, timestamped_string
 
 __all__ = ('open_logfile', 'close_logfile', 'log_to', 'trace')

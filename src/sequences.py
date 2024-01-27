@@ -10,9 +10,9 @@ from re import compile as re_compile
 from subprocess import check_output
 from typing import Dict, List, Tuple, Optional, Mapping, Sequence, TypeVar
 
-from defs import DOWNLOADERS, RANGE_TEMPLATES, RUXX_DOWNLOADERS, APP_NAMES, IntPair, Config, IntSequence
+from defs import IntPair, Config, IntSequence, DOWNLOADERS, RANGE_TEMPLATES, RUXX_DOWNLOADERS, APP_NAMES
 from logger import trace
-from strings import normalize_ruxx_tag, path_args, NEWLINE
+from strings import NEWLINE, normalize_ruxx_tag, path_args
 
 __all__ = ('validate_sequences', 'queries_from_sequences', 'report_finals')
 

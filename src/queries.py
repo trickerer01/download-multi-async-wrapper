@@ -14,13 +14,13 @@ from threading import Thread, Lock as ThreadLock
 from typing import List, Dict, Optional, Tuple
 
 from defs import (
-    UTF8, IntSequence, Config, DOWNLOADERS, MIN_IDS_SEQ_LENGTH, PATH_APPEND_DOWNLOAD, PATH_APPEND_UPDATE, RUXX_DOWNLOADERS, PROXY_ARG,
-    StrPair,
+    IntSequence, Config, StrPair, UTF8, DOWNLOADERS, MIN_IDS_SEQ_LENGTH, PATH_APPEND_DOWNLOAD, PATH_APPEND_UPDATE, RUXX_DOWNLOADERS,
+    PROXY_ARG,
 )
 from executor import register_queries
 from logger import trace
 from sequences import validate_sequences, queries_from_sequences, report_finals  # , report_sequences, queries_from_sequences_base
-from strings import datetime_str_nfull, all_tags_negative, all_tags_positive, normalize_path, SLASH, NEWLINE
+from strings import SLASH, NEWLINE, datetime_str_nfull, all_tags_negative, all_tags_positive, normalize_path
 
 __all__ = ('read_queries_file', 'form_queries', 'update_next_ids')
 
