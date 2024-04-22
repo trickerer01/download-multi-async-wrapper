@@ -11,7 +11,7 @@ from os import chmod, path, stat
 from re import compile as re_compile
 from subprocess import check_output
 from threading import Thread, Lock as ThreadLock
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional, Tuple, Iterable
 
 from defs import (
     IntSequence, Config, StrPair, UTF8, DOWNLOADERS, MIN_IDS_SEQ_LENGTH, PATH_APPEND_DOWNLOAD, PATH_APPEND_UPDATE, RUXX_DOWNLOADERS,
@@ -44,6 +44,45 @@ sequences_paths_update = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Opt
 proxies_update = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[StrPair]]
 
 
+def fetch_maxids(dts: Iterable[str]) -> Dict[str, str]:
+    try:
+        trace('Fetching max ids...')
+        re_maxid_fetch_result = re_compile(r'^[A-Z]{2}: \d+$')
+        grab_threads = []
+        results = {dt: '' for dt in dts if sequences_paths_update[dt] is not None}  # type: Dict[str, str]
+        rlock = ThreadLock()
+
+        def get_max_id(dtype: str) -> None:
+            update_file_path = sequences_paths_update[dtype]
+            module_arguments = ['-module', dtype, '-timeout', '30'] if dtype in RUXX_DOWNLOADERS else ([''] * 0)
+            if dtype in proxies_update and proxies_update[dtype]:
+                module_arguments += [proxies_update[dtype].first, proxies_update[dtype].second]
+            arguments = [Config.python, update_file_path, '-get_maxid'] + module_arguments
+            res = check_output(arguments.copy()).decode(errors='replace').strip()
+            with rlock:
+                results[dtype] = res[res.rfind('\n') + 1:]
+
+        for dt in results:
+            grab_threads.append(Thread(target=get_max_id, args=(dt,)))
+            grab_threads[-1].start()
+        for thread in grab_threads:
+            thread.join()
+        res_errors = list()
+        for dt in results:
+            try:
+                assert re_maxid_fetch_result.fullmatch(results[dt])
+            except Exception:
+                res_errors.append(f'Error in fetch \'{dt}\' max id result!')
+                continue
+        assert len(res_errors) == 0
+
+        trace(NEWLINE.join(results[dt] for dt in results))
+        return results
+    except Exception:
+        trace(f'\nError: failed to fetch next ids!\n')
+        raise
+
+
 def read_queries_file() -> None:
     global queries_file_lines
 
@@ -68,6 +107,8 @@ def form_queries():
     cur_seq_tags = sequences_tags_vid
     cur_seq_subs = sequences_subfolders_vid
     cur_tags_list = list()  # type: List[str]
+
+    autoupdate_seqs = dict()  # type: Dict[str, List[IntSequence]]
 
     trace('\nAnalyzing queries file strings...')
 
@@ -107,8 +148,14 @@ def form_queries():
                 elif re_downloader_type.fullmatch(line):
                     cur_downloader_idx = DOWNLOADERS.index(line.split(' ')[1])
                 elif re_ids_list.fullmatch(line):
-                    cur_seq_ids[DOWNLOADERS[cur_downloader_idx]] = IntSequence([int(num) for num in line.split(' ')[1:]], i + 1)
-                    assert len(cur_seq_ids[DOWNLOADERS[cur_downloader_idx]]) >= MIN_IDS_SEQ_LENGTH
+                    cdt = DOWNLOADERS[cur_downloader_idx]
+                    idseq = IntSequence([int(num) for num in line.split(' ')[1:]], i + 1)
+                    cur_seq_ids[cdt] = idseq
+                    if len(idseq) < MIN_IDS_SEQ_LENGTH:
+                        trace(f'{cdt} at line {i + 1:d} provides a single id hence requires maxid autoupdate')
+                        if cdt not in autoupdate_seqs:
+                            autoupdate_seqs[cdt] = list()
+                        autoupdate_seqs[cdt].append(idseq)
                 elif re_downloader_basepath.fullmatch(line):
                     basepath = line[line.find(':') + 1:]
                     basepath_n = normalize_path(basepath)
@@ -182,6 +229,23 @@ def form_queries():
             trace(f'Error: issue encountered while parsing queries file at line {i + 1:d}!')
             raise
 
+    if autoupdate_seqs:
+        trace(f'Running max ID autoupdates...')
+        unsolved_idseqs_vid = [''] * 0
+        unsolved_idseqs_img = [''] * 0
+        maxids = fetch_maxids(dt for dt in autoupdate_seqs)
+        for dt in autoupdate_seqs:
+            for idseq in autoupdate_seqs[dt]:
+                update_str_base = f'{dt} id sequence autoupdated from {str(idseq.ids)} to '
+                idseq.ids.append(int(maxids[dt][4:]))
+                trace(f'{update_str_base}{str(idseq.ids)}')
+        for typ, idseq, usiseq in zip(('vid', 'img'), (sequences_ids_vid, sequences_ids_img), (unsolved_idseqs_vid, unsolved_idseqs_img)):
+            for dt in idseq:
+                if idseq[dt] is not None and len(idseq[dt]) < MIN_IDS_SEQ_LENGTH:
+                    usiseq.append(f'{dt}')
+                    trace(f'{dt} {typ} sequence is not fixed! \'{str(idseq[dt])}\'')
+        assert all(len(usiseq) == 0 for usiseq in (unsolved_idseqs_vid, unsolved_idseqs_img))
+
     trace('Sequences are successfully read\n')
     # report_sequences(sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img,
     #                  sequences_tags_vid, sequences_tags_img, sequences_subfolders_vid, sequences_subfolders_img,
@@ -225,31 +289,7 @@ def update_next_ids() -> None:
     filename_bak = f'{queries_file_name}_bak_{datetime_str_nfull()}.list'
     trace(f'File: \'{queries_file_name}\', backup file: \'{filename_bak}\'')
     try:
-        trace('Fetching max ids...')
-        re_maxid_fetch_result = re_compile(r'^[A-Z]{2}: \d+$')
-        grab_threads = []
-        results = {dt: '' for dt in DOWNLOADERS}  # type: Dict[str, str]
-        rlock = ThreadLock()
-
-        def get_max_id(dtype: str) -> None:
-            update_file_path = sequences_paths_update[dtype]
-            module_arguments = ['-module', dtype, '-timeout', '30'] if dtype in RUXX_DOWNLOADERS else []  # type: List[str]
-            if dtype in proxies_update and proxies_update[dtype]:
-                module_arguments += [proxies_update[dtype].first, proxies_update[dtype].second]
-            arguments = [Config.python, update_file_path, '-get_maxid'] + module_arguments
-            res = check_output(arguments.copy()).decode(errors='replace').strip()
-            with rlock:
-                results[dtype] = res[res.rfind('\n') + 1:]
-
-        for dt in Config.downloaders:
-            grab_threads.append(Thread(target=get_max_id, args=(dt,)))
-            grab_threads[-1].start()
-        for thread in grab_threads:
-            thread.join()
-        for dt in Config.downloaders:
-            assert re_maxid_fetch_result.fullmatch(results[dt])
-        trace(NEWLINE.join(results[dt] for dt in Config.downloaders))
-
+        results = fetch_maxids(Config.downloaders)
         trace(f'\nSaving backup to \'{filename_bak}\'...')
         bak_fullpath = f'{Config.dest_bak_base}{filename_bak}'
         with open(bak_fullpath, 'wt', encoding=UTF8, buffering=1) as outfile_bak:
@@ -269,7 +309,7 @@ def update_next_ids() -> None:
             trace('Warning: permissions not updated, manual fix required')
 
         trace(f'\nWriting updated queries to \'{queries_file_name}\'...')
-        maxnums = {dt: int(results[dt][4:]) for dt in Config.downloaders}  # type: Dict[str, int]
+        maxnums = {dt: int(results[dt][4:]) for dt in results}  # type: Dict[str, int]
         for ty, sequences_ids_type in zip(('vid', 'img'), (sequences_ids_vid, sequences_ids_img)):
             for i, dtseq in enumerate(sequences_ids_type.items()):  # type: int, Tuple[str, Optional[IntSequence]]
                 dt, seq = dtseq
