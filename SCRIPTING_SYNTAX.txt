@@ -4,6 +4,7 @@
 ### PYTHON:python3               <-- PATH TO PYTHON EXECUTABLE (NORMALLY PRESENT IN PATH) <REQUIRED>
 ### (VIDEOS) ###                 <-- VIDEOS MARKER <REQUIRED>
 # nm                             <-- DOWNLOADER TYPE <REQUIRED>
+# p10 s1                         <-- SWITCH TO PAGES SCAN INSTEAD OF IDS (PAGES NUMBER, STARTING PAGE) <OPTIONAL>
 # 50000 51000                    <-- AT LEAST ONE OR TWO IDS FOR RANGE <REQUIRED>
                                      A SIGNLE ID MEANS FROM THIS AND UP (TILL CURRENT MAX ID)
 # basepath:D:/Projects/NM        <-- PATH TO THE DOWNLOADER BASE PATH <REQUIRED>

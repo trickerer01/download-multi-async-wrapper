@@ -40,6 +40,7 @@ DOWNLOADER_RS = 'rs'
 DOWNLOADERS = [DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RN, DOWNLOADER_RX, DOWNLOADER_RS]
 RUXX_DOWNLOADERS = (DOWNLOADER_RN, DOWNLOADER_RX, DOWNLOADER_RS)
 RUN_FILE_DOWNLOADERS = (DOWNLOADER_NM, DOWNLOADER_RV)
+PAGE_DOWNLOADERS = (DOWNLOADER_NM, DOWNLOADER_RV)
 
 APP_NAME_NM = DOWNLOADER_NM.upper(),
 APP_NAME_RV = DOWNLOADER_RV.upper(),
@@ -65,6 +66,7 @@ class BaseConfig(object):
         self.script_path = ''
         self.update = False
         self.no_download = False
+        self.no_date_path = False
         self.ignore_download_mode = False
         # calculated
         self.max_cmd_len = MAX_CMD_LEN[OS_WINDOWS] // 2  # MAX_CMD_LEN.get(running_system())
@@ -98,19 +100,29 @@ HELP_LOGS_PATH = 'Path to the folder where logs will be stored'
 HELP_BAK_PATH = 'Path to the folder where script backup will be put before updating'
 HELP_UPDATE = 'Boolean flag to update script file with current max ids fetched from the websites'
 HELP_NO_DOWNLOAD = 'Boolean flag to skip actual download (do not launch downloaders)'
+HELP_NO_DATE_PATH = 'Do not append date string to base download path'
 HELP_IGNORE_DMODE = 'Boolean flag to ignore all \'-dmode\' arguments and always download files in full'
 
 PATH_APPEND_DOWNLOAD_RUXX = 'src/ruxx_cmd.py'
-PATH_APPEND_DOWNLOAD_NM = 'src/ids.py'
-PATH_APPEND_DOWNLOAD_RV = PATH_APPEND_DOWNLOAD_NM
+PATH_APPEND_DOWNLOAD_NM_IDS = 'src/ids.py'
+PATH_APPEND_DOWNLOAD_RV_IDS = PATH_APPEND_DOWNLOAD_NM_IDS
+PATH_APPEND_DOWNLOAD_NM_PAGES = 'src/pages.py'
+PATH_APPEND_DOWNLOAD_RV_PAGES = PATH_APPEND_DOWNLOAD_NM_PAGES
 
 PATH_APPEND_UPDATE_RUXX = 'src/ruxx_cmd.py'
 PATH_APPEND_UPDATE_NM = 'src/pages.py'
 PATH_APPEND_UPDATE_RV = PATH_APPEND_UPDATE_NM
 
-PATH_APPEND_DOWNLOAD = {
-    DOWNLOADER_NM: PATH_APPEND_DOWNLOAD_NM,
-    DOWNLOADER_RV: PATH_APPEND_DOWNLOAD_RV,
+PATH_APPEND_DOWNLOAD_IDS = {
+    DOWNLOADER_NM: PATH_APPEND_DOWNLOAD_NM_IDS,
+    DOWNLOADER_RV: PATH_APPEND_DOWNLOAD_RV_IDS,
+    DOWNLOADER_RN: PATH_APPEND_DOWNLOAD_RUXX,
+    DOWNLOADER_RX: PATH_APPEND_DOWNLOAD_RUXX,
+    DOWNLOADER_RS: PATH_APPEND_DOWNLOAD_RUXX,
+}
+PATH_APPEND_DOWNLOAD_PAGES = {
+    DOWNLOADER_NM: PATH_APPEND_DOWNLOAD_NM_PAGES,
+    DOWNLOADER_RV: PATH_APPEND_DOWNLOAD_RV_PAGES,
     DOWNLOADER_RN: PATH_APPEND_DOWNLOAD_RUXX,
     DOWNLOADER_RX: PATH_APPEND_DOWNLOAD_RUXX,
     DOWNLOADER_RS: PATH_APPEND_DOWNLOAD_RUXX,
@@ -126,21 +138,21 @@ PATH_APPEND_UPDATE = {
 
 
 class IntSequence:
-    def __init__(self, ids: Iterable[int], line_num: int) -> None:
-        self.ids = list(ids or [])
+    def __init__(self, ints: Iterable[int], line_num: int) -> None:
+        self.ints = list(ints or [])
         self.line_num = line_num or 0
 
     def __str__(self) -> str:
-        return f'{str(self.ids)} (found at line {self.line_num:d})'
+        return f'{str(self.ints)} (found at line {self.line_num:d})'
 
     def __len__(self) -> int:
-        return len(self.ids)
+        return len(self.ints)
 
     def __getitem__(self, item: Union[int, slice]) -> Union[int, List[int]]:
-        return self.ids.__getitem__(item)
+        return self.ints.__getitem__(item)
 
     def __setitem__(self, key: Union[int, slice], value: Union[int, Iterable[int]]) -> None:
-        self.ids.__setitem__(key, value)
+        self.ints.__setitem__(key, value)
 
 
 class Pair(ABC):
@@ -175,13 +187,21 @@ class StrPair(Pair):
         super().__init__(vals)
 
 
-RANGE_TEMPLATES = {
+RANGE_TEMPLATE_IDS = {
     DOWNLOADER_NM: StrPair(('-start %d', '-end %d')),
     DOWNLOADER_RV: StrPair(('-start %d', '-end %d')),
     DOWNLOADER_RN: StrPair(('id>=%d', 'id<=%d')),
     DOWNLOADER_RX: StrPair(('id:>=%d', 'id:<=%d')),
     DOWNLOADER_RS: StrPair(('id:>=%d', 'id:<=%d')),
 }
+
+RANGE_TEMPLATE_PAGES = {
+    DOWNLOADER_NM: StrPair(('-pages %d', '-start %d')),
+    DOWNLOADER_RV: StrPair(('-pages %d', '-start %d')),
+}
+
+STOP_ID_TEMPLATE = '-stop_id %d'
+BEGIN_ID_TEMPLATE = '-begin_id %d'
 
 #
 #

@@ -51,8 +51,8 @@ def normalize_ruxx_tag(tag: str) -> str:
     return tag
 
 
-def path_args(dest_base: str, img: bool, sub: str) -> str:
-    return f'-path "{dest_base}{date_str_md(img)}/{sub}{"/" if len(sub) > 0 else ""}"'
+def path_args(dest_base: str, img: bool, sub: str, datepath: bool) -> str:
+    return f'-path "{dest_base}{f"{date_str_md(img)}/" if datepath else ""}{sub}{"/" if sub else ""}"'
 
 
 def time_now_fmt(fmt: str) -> str:
