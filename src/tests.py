@@ -9,7 +9,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 from unittest import TestCase
 
 from cmdargs import parse_arglist
-from defs import Config, DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RN, DOWNLOADER_RX, DOWNLOADER_RS
+from defs import Config, DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RC, DOWNLOADER_RN, DOWNLOADER_RX, DOWNLOADER_RS
 from executor import ques_vid, ques_img
 from main import main_sync
 from queries import read_queries_file, form_queries
@@ -74,11 +74,13 @@ class QueriesFormTests(TestCase):
         self.assertEqual('python3', Config.python)
         self.assertEqual(1, len(ques_vid[DOWNLOADER_NM]))
         self.assertEqual(0, len(ques_vid[DOWNLOADER_RV]))
+        self.assertEqual(0, len(ques_vid[DOWNLOADER_RC]))
         self.assertEqual(0, len(ques_vid[DOWNLOADER_RN]))
         self.assertEqual(0, len(ques_vid[DOWNLOADER_RX]))
         self.assertEqual(0, len(ques_vid[DOWNLOADER_RS]))
         self.assertEqual(0, len(ques_img[DOWNLOADER_NM]))
         self.assertEqual(0, len(ques_img[DOWNLOADER_RV]))
+        self.assertEqual(0, len(ques_img[DOWNLOADER_RC]))
         self.assertEqual(0, len(ques_img[DOWNLOADER_RN]))
         self.assertEqual(2, len(ques_img[DOWNLOADER_RX]))
         self.assertEqual(0, len(ques_img[DOWNLOADER_RS]))

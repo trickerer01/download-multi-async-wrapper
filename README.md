@@ -7,6 +7,7 @@ Dependencies:
   - https://github.com/trickerer01/Ruxx
   - https://github.com/trickerer01/RV
   - https://github.com/trickerer01/NM
+  - https://github.com/trickerer01/RC
 - Libraries: None
 
 See [SCRIPTING_SYNTAX.txt](https://github.com/trickerer01/download-multi-async-wrapper/blob/master/SCRIPTING_SYNTAX.txt) for script composition guidelines and tips  

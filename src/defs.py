@@ -31,23 +31,77 @@ MAX_CMD_LEN = {
     OS_MACOS: 65000,
 }
 
+
+class IntSequence:
+    def __init__(self, ints: Iterable[int], line_num: int) -> None:
+        self.ints = list(ints or [])
+        self.line_num = line_num or 0
+
+    def __str__(self) -> str:
+        return f'{str(self.ints)} (found at line {self.line_num:d})'
+
+    def __len__(self) -> int:
+        return len(self.ints)
+
+    def __getitem__(self, item: Union[int, slice]) -> Union[int, List[int]]:
+        return self.ints.__getitem__(item)
+
+    def __setitem__(self, key: Union[int, slice], value: Union[int, Iterable[int]]) -> None:
+        self.ints.__setitem__(key, value)
+
+
+class Pair(ABC):
+    PT = TypeVar('PT')
+
+    @abstractmethod
+    def __init__(self, vals: Tuple[PT, PT]) -> None:
+        self._first, self._second = vals
+        self._fmt = {int: 'd', bool: 'd', float: '.2f', oct: 'o'}.get(type(self._first), '')
+
+    @property
+    def first(self) -> PT:
+        return self._first
+
+    @property
+    def second(self) -> PT:
+        return self._second
+
+    def __str__(self) -> str:
+        return f'first: {self._first:{self._fmt}}, second: {self._second:{self._fmt}}'
+
+    __repr__ = __str__
+
+
+class IntPair(Pair):
+    def __init__(self, vals: Tuple[int, int]) -> None:
+        super().__init__(vals)
+
+
+class StrPair(Pair):
+    def __init__(self, vals: Tuple[str, str]) -> None:
+        super().__init__(vals)
+
+
 DOWNLOADER_NM = 'nm'
 DOWNLOADER_RV = 'rv'
+DOWNLOADER_RC = 'rc'
 DOWNLOADER_RN = 'rn'
 DOWNLOADER_RX = 'rx'
 DOWNLOADER_RS = 'rs'
 
-DOWNLOADERS = [DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RN, DOWNLOADER_RX, DOWNLOADER_RS]
+DOWNLOADERS = [DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RC, DOWNLOADER_RN, DOWNLOADER_RX, DOWNLOADER_RS]
 RUXX_DOWNLOADERS = (DOWNLOADER_RN, DOWNLOADER_RX, DOWNLOADER_RS)
-RUN_FILE_DOWNLOADERS = (DOWNLOADER_NM, DOWNLOADER_RV)
-PAGE_DOWNLOADERS = (DOWNLOADER_NM, DOWNLOADER_RV)
+RUN_FILE_DOWNLOADERS = (DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RC)
+PAGE_DOWNLOADERS = (DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RC)
 
 APP_NAME_NM = DOWNLOADER_NM.upper(),
 APP_NAME_RV = DOWNLOADER_RV.upper(),
+APP_NAME_RC = DOWNLOADER_RC.upper(),
 APP_NAME_RUXX = 'Ruxx'
 APP_NAMES = {
     DOWNLOADER_NM: APP_NAME_NM,
     DOWNLOADER_RV: APP_NAME_RV,
+    DOWNLOADER_RC: APP_NAME_RC,
     DOWNLOADER_RN: APP_NAME_RUXX,
     DOWNLOADER_RX: APP_NAME_RUXX,
     DOWNLOADER_RS: APP_NAME_RUXX,
@@ -106,16 +160,20 @@ HELP_IGNORE_DMODE = 'Boolean flag to ignore all \'-dmode\' arguments and always 
 PATH_APPEND_DOWNLOAD_RUXX = 'src/ruxx_cmd.py'
 PATH_APPEND_DOWNLOAD_NM_IDS = 'src/ids.py'
 PATH_APPEND_DOWNLOAD_RV_IDS = PATH_APPEND_DOWNLOAD_NM_IDS
+PATH_APPEND_DOWNLOAD_RC_IDS = PATH_APPEND_DOWNLOAD_NM_IDS
 PATH_APPEND_DOWNLOAD_NM_PAGES = 'src/pages.py'
 PATH_APPEND_DOWNLOAD_RV_PAGES = PATH_APPEND_DOWNLOAD_NM_PAGES
+PATH_APPEND_DOWNLOAD_RC_PAGES = PATH_APPEND_DOWNLOAD_NM_PAGES
 
 PATH_APPEND_UPDATE_RUXX = 'src/ruxx_cmd.py'
 PATH_APPEND_UPDATE_NM = 'src/pages.py'
 PATH_APPEND_UPDATE_RV = PATH_APPEND_UPDATE_NM
+PATH_APPEND_UPDATE_RC = PATH_APPEND_UPDATE_NM
 
 PATH_APPEND_DOWNLOAD_IDS = {
     DOWNLOADER_NM: PATH_APPEND_DOWNLOAD_NM_IDS,
     DOWNLOADER_RV: PATH_APPEND_DOWNLOAD_RV_IDS,
+    DOWNLOADER_RC: PATH_APPEND_DOWNLOAD_RC_IDS,
     DOWNLOADER_RN: PATH_APPEND_DOWNLOAD_RUXX,
     DOWNLOADER_RX: PATH_APPEND_DOWNLOAD_RUXX,
     DOWNLOADER_RS: PATH_APPEND_DOWNLOAD_RUXX,
@@ -123,6 +181,7 @@ PATH_APPEND_DOWNLOAD_IDS = {
 PATH_APPEND_DOWNLOAD_PAGES = {
     DOWNLOADER_NM: PATH_APPEND_DOWNLOAD_NM_PAGES,
     DOWNLOADER_RV: PATH_APPEND_DOWNLOAD_RV_PAGES,
+    DOWNLOADER_RC: PATH_APPEND_DOWNLOAD_RC_PAGES,
     DOWNLOADER_RN: PATH_APPEND_DOWNLOAD_RUXX,
     DOWNLOADER_RX: PATH_APPEND_DOWNLOAD_RUXX,
     DOWNLOADER_RS: PATH_APPEND_DOWNLOAD_RUXX,
@@ -131,65 +190,16 @@ PATH_APPEND_DOWNLOAD_PAGES = {
 PATH_APPEND_UPDATE = {
     DOWNLOADER_NM: PATH_APPEND_UPDATE_NM,
     DOWNLOADER_RV: PATH_APPEND_UPDATE_RV,
+    DOWNLOADER_RC: PATH_APPEND_UPDATE_RC,
     DOWNLOADER_RN: PATH_APPEND_UPDATE_RUXX,
     DOWNLOADER_RX: PATH_APPEND_UPDATE_RUXX,
     DOWNLOADER_RS: PATH_APPEND_UPDATE_RUXX,
 }
 
-
-class IntSequence:
-    def __init__(self, ints: Iterable[int], line_num: int) -> None:
-        self.ints = list(ints or [])
-        self.line_num = line_num or 0
-
-    def __str__(self) -> str:
-        return f'{str(self.ints)} (found at line {self.line_num:d})'
-
-    def __len__(self) -> int:
-        return len(self.ints)
-
-    def __getitem__(self, item: Union[int, slice]) -> Union[int, List[int]]:
-        return self.ints.__getitem__(item)
-
-    def __setitem__(self, key: Union[int, slice], value: Union[int, Iterable[int]]) -> None:
-        self.ints.__setitem__(key, value)
-
-
-class Pair(ABC):
-    PT = TypeVar('PT')
-
-    @abstractmethod
-    def __init__(self, vals: Tuple[PT, PT]) -> None:
-        self._first, self._second = vals
-        self._fmt = {int: 'd', bool: 'd', float: '.2f', oct: 'o'}.get(type(self._first), '')
-
-    @property
-    def first(self) -> PT:
-        return self._first
-
-    @property
-    def second(self) -> PT:
-        return self._second
-
-    def __str__(self) -> str:
-        return f'first: {self._first:{self._fmt}}, second: {self._second:{self._fmt}}'
-
-    __repr__ = __str__
-
-
-class IntPair(Pair):
-    def __init__(self, vals: Tuple[int, int]) -> None:
-        super().__init__(vals)
-
-
-class StrPair(Pair):
-    def __init__(self, vals: Tuple[str, str]) -> None:
-        super().__init__(vals)
-
-
 RANGE_TEMPLATE_IDS = {
     DOWNLOADER_NM: StrPair(('-start %d', '-end %d')),
     DOWNLOADER_RV: StrPair(('-start %d', '-end %d')),
+    DOWNLOADER_RC: StrPair(('-start %d', '-end %d')),
     DOWNLOADER_RN: StrPair(('id>=%d', 'id<=%d')),
     DOWNLOADER_RX: StrPair(('id:>=%d', 'id:<=%d')),
     DOWNLOADER_RS: StrPair(('id:>=%d', 'id:<=%d')),
@@ -198,6 +208,7 @@ RANGE_TEMPLATE_IDS = {
 RANGE_TEMPLATE_PAGES = {
     DOWNLOADER_NM: StrPair(('-pages %d', '-start %d')),
     DOWNLOADER_RV: StrPair(('-pages %d', '-start %d')),
+    DOWNLOADER_RC: StrPair(('-pages %d', '-start %d')),
 }
 
 STOP_ID_TEMPLATE = '-stop_id %d'
