@@ -7,14 +7,15 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 
 import sys
+from platform import system as running_system
+from typing import Sequence
+
 from cmdargs import parse_arglist
 from defs import SUPPORTED_SYSTEMS
 from executor import execute
 from logger import open_logfile, close_logfile, trace
-from platform import system as running_system
 from queries import read_queries_file, form_queries, update_next_ids
 from strings import datetime_str_full
-from typing import Sequence
 
 __all__ = ('main_sync',)
 
