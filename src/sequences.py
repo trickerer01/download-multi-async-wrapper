@@ -111,26 +111,6 @@ def validate_sequences(
                 raise IOError
 
 
-# def report_sequences(
-#     sequences_ids_vid: IntSequenceMap, sequences_ids_img: IntSequenceMap,
-#     sequences_paths_vid: StringMap, sequences_paths_img: StringMap,
-#     sequences_tags_vid: StringListListMap, sequences_tags_img: StringListListMap,
-#     sequences_subfolders_vid: StringListMap, sequences_subfolders_img: StringListMap,
-#     sequences_common_vid: StringListMap, sequences_common_img: StringListMap
-# ) -> None:
-#     trace(f'Python executable: \'{config.python}\'')
-#     [trace(f'{len([q for q in seq.values() if q]):d} {name} sequences')
-#      for seq, name in zip((sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img),
-#                           ('sequences_ids_vid', 'sequences_ids_img', 'sequences_paths_vid', 'sequences_paths_img'))]
-#     [trace(f'{sum(len(q) for q in seq.values() if q):d} {name} sequences')
-#      for seq, name in zip((sequences_tags_vid, sequences_tags_img, sequences_subfolders_vid, sequences_subfolders_img),
-#                           ('sequences_tags_vid', 'sequences_tags_img', 'sequences_subfolders_vid', 'sequences_subfolders_img'))]
-#     [trace(f'{title}:\n{NEWLINE.join(f"{item[0]}: ({len(item[1]) if item[1] else 0:d}) {str(item[1])}" for item in container.items())}')
-#      for title, container in zip(('Vid ids', 'Img ids', 'Vid paths', 'Img paths', 'Vid ctags', 'Img ctags', 'Vid tags', 'Img tags'),
-#                                  (sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img,
-#                                   sequences_common_vid, sequences_common_img, sequences_tags_vid, sequences_tags_img))]
-
-
 def _get_base_qs(
     sequences_ids_vid: IntSequenceMap, sequences_ids_img: IntSequenceMap,
     sequences_pages_vid: IntSequenceMap, sequences_pages_img: IntSequenceMap,
@@ -167,26 +147,6 @@ def _get_base_qs(
     return base_q_v, base_q_i
 
 
-# def queries_from_sequences_base(
-#         sequences_ids_vid: IntSequenceMap, sequences_ids_img: IntSequenceMap,
-#         sequences_paths_vid: StringMap, sequences_paths_img: StringMap,
-#         sequences_tags_vid: StringListListMap, sequences_tags_img: StringListListMap,
-#         sequences_subfolders_vid: StringListMap, sequences_subfolders_img: StringListMap,
-#         sequences_common_vid: StringListMap, sequences_common_img: StringListMap
-# ) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
-#     base_q_v, base_q_i = _get_base_qs(sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img, config)
-#     queries_final_vid, queries_final_img = ({
-#         dt: ([f'{sbase_q[dt]} {path_args(config.dest_base, not is_vidpath, ssub[dt][i])} '
-#               f'{" ".join(normalize_ruxx_tag(tag) if dt in RUXX_DOWNLOADERS else tag for tag in ctags[dt])} '
-#               f'{" ".join(normalize_ruxx_tag(tag) if dt in RUXX_DOWNLOADERS else tag for tag in staglist)}'
-#               for i, staglist in enumerate(stags[dt]) if len(staglist) > 0])
-#         for dt in DOWNLOADERS
-#     } for sbase_q, ssub, ctags, stags, is_vidpath in
-#         zip((base_q_v, base_q_i), (sequences_subfolders_vid, sequences_subfolders_img), (sequences_common_vid, sequences_common_img),
-#             (sequences_tags_vid, sequences_tags_img), (True, False)))  # type: Dict[str, List[str]]
-#     return queries_final_vid, queries_final_img
-
-
 def queries_from_sequences(
     sequences_ids_vid: IntSequenceMap, sequences_ids_img: IntSequenceMap,
     sequences_pages_vid: IntSequenceMap, sequences_pages_img: IntSequenceMap,
@@ -201,13 +161,13 @@ def queries_from_sequences(
         dt: ([f'{sbase_q[dt]} {path_args(Config.dest_base, not is_vidpath, ssub[dt][i], not Config.no_date_path)} '
               f'{" ".join(normalize_ruxx_tag(tag) if dt in RUXX_DOWNLOADERS else tag for tag in ctags[dt])} '
               f'{" ".join(normalize_ruxx_tag(tag) if dt in RUXX_DOWNLOADERS else tag for tag in staglist)}'
-              for i, staglist in enumerate(stags[dt]) if len(staglist) > 0]
+              for i, staglist in enumerate(stags[dt]) if staglist]
              ) if dt in RUXX_DOWNLOADERS or any(any(sarg.startswith('-search') for sarg in slist) for slist in stags[dt]) else
             ([f'{sbase_q[dt]} {path_args(Config.dest_base, not is_vidpath, "", not Config.no_date_path)} '
               f'{" ".join(ctags[dt])} '
               f'-script "'
               f'{"; ".join(" ".join([f"{ssub[dt][i]}:"] + staglist) for i, staglist in enumerate(stags[dt]))}'
-              f'"'] if len(stags[dt]) > 0 else []
+              f'"'] if stags[dt] else []
              )
         for dt in DOWNLOADERS
     } for sbase_q, ssub, ctags, stags, is_vidpath in
@@ -218,7 +178,7 @@ def queries_from_sequences(
 
 def report_finals(queries_final_vid: StringListMap, queries_final_img: StringListMap) -> None:
     for ty, final_q in zip(('vid', 'img'), (queries_final_vid, queries_final_img)):
-        trace(f'\nQueries {ty}:\n{NEWLINE.join(NEWLINE.join(finals) for finals in final_q.values() if len(finals) > 0)}', False)
+        trace(f'\nQueries {ty}:\n{NEWLINE.join(NEWLINE.join(finals) for finals in final_q.values() if finals)}', False)
 
 #
 #

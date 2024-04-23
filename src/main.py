@@ -20,7 +20,7 @@ from strings import datetime_str_full
 __all__ = ('main_sync',)
 
 
-def main_sync(args: Sequence[str]) -> int:
+def run_main(args: Sequence[str]) -> int:
     result = 0
     try:
         parse_arglist(args)
@@ -42,9 +42,13 @@ def main_sync(args: Sequence[str]) -> int:
         return result
 
 
-if __name__ == '__main__':
+def main_sync(args: Sequence[str]) -> int:
     assert sys.version_info >= (3, 7), 'Minimum python version required is 3.7!'
-    assert running_system() in SUPPORTED_SYSTEMS
+    assert running_system() in SUPPORTED_SYSTEMS, f'Unsupported system \'{running_system()}\''
+    return run_main(args)
+
+
+if __name__ == '__main__':
     sys.exit(main_sync(sys.argv[1:]))
 
 #

@@ -175,7 +175,7 @@ def form_queries():
                     assert cdt in PAGE_DOWNLOADERS, f'{cdt} doesn\'t support pages search!\n\tat line {i + 1}: {line}'
                     idseq = cur_seq_ids[cdt]
                     if idseq:
-                        assert len(idseq), f'{cdt} defines pages range but has ids range of {len(idseq)} > 2!\n\tat line {i + 1}: {line}'
+                        assert len(idseq) <= 2, f'{cdt} defines pages but has ids range of {len(idseq)} > 2!\n\tat line {i + 1}: {line}'
                     pageseq = IntSequence([int(num[1:]) for num in line.split(' ')[1:]], i + 1)
                     cur_seq_pages[cdt] = pageseq
                     if len(pageseq) < MIN_IDS_SEQ_LENGTH:
@@ -275,26 +275,12 @@ def form_queries():
         assert all(len(usiseq) == 0 for usiseq in (unsolved_idseqs_vid, unsolved_idseqs_img))
 
     trace('Sequences are successfully read\n')
-    # report_sequences(sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img,
-    #                  sequences_tags_vid, sequences_tags_img, sequences_subfolders_vid, sequences_subfolders_img,
-    #                  sequences_common_vid, sequences_common_img,
-    #                  python_executable)
     validate_sequences(sequences_ids_vid, sequences_ids_img, sequences_pages_vid, sequences_pages_img,
                        sequences_paths_vid, sequences_paths_img, sequences_tags_vid, sequences_tags_img,
                        sequences_subfolders_vid, sequences_subfolders_img,
                        sequences_paths_update)
 
-    trace('Sequences are validated. Finalizing...')
-
-    # base final sequences
-    # trace('\nBase:')
-    # report_finals(*queries_from_sequences_base(
-    #     sequences_ids_vid, sequences_ids_img, sequences_paths_vid, sequences_paths_img,
-    #     sequences_tags_vid, sequences_tags_img, sequences_subfolders_vid, sequences_subfolders_img,
-    #     sequences_common_vid, sequences_common_img
-    # ))
-
-    trace('\nOptimized:')
+    trace('Sequences are validated. Finalizing...\n')
     queries_final_vid, queries_final_img = queries_from_sequences(
         sequences_ids_vid, sequences_ids_img, sequences_pages_vid, sequences_pages_img,
         sequences_paths_vid, sequences_paths_img, sequences_tags_vid, sequences_tags_img,
