@@ -46,7 +46,7 @@ class ArgParseTests(TestCase):
         set_up_test()
         parse_arglist(args_argparse_str1.split())
         self.assertEqual(
-            'debug: False, downloaders: [\'nm\', \'rv\', \'rn\', \'rx\', \'rs\'], script: ../tests/queries.list, dest: ./, '
+            'debug: False, downloaders: [\'nm\', \'rv\', \'rc\', \'rn\', \'rx\', \'rs\'], script: ../tests/queries.list, dest: ./, '
             'run: ./, logs: ./, bak: ./, update: False, no_download: False, ignore_download_mode: False, '
             'max_cmd_len: 16000',
             str(Config)
