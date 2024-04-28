@@ -274,13 +274,13 @@ def form_queries():
                     trace(f'{dt} {typ} sequence is not fixed! \'{str(idseq[dt])}\'')
         assert all(len(usiseq) == 0 for usiseq in (unsolved_idseqs_vid, unsolved_idseqs_img))
 
-    trace('Sequences are successfully read\n')
+    trace('Sequences parsed successfully\n')
     validate_sequences(sequences_ids_vid, sequences_ids_img, sequences_pages_vid, sequences_pages_img,
                        sequences_paths_vid, sequences_paths_img, sequences_tags_vid, sequences_tags_img,
                        sequences_subfolders_vid, sequences_subfolders_img,
                        sequences_paths_update)
 
-    trace('Sequences are validated. Finalizing...\n')
+    trace('Sequences validated. Finalizing...\n')
     queries_final_vid, queries_final_img = queries_from_sequences(
         sequences_ids_vid, sequences_ids_img, sequences_pages_vid, sequences_pages_img,
         sequences_paths_vid, sequences_paths_img, sequences_tags_vid, sequences_tags_img,
