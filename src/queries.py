@@ -97,6 +97,14 @@ def read_queries_file() -> None:
 
 
 def form_queries():
+    def cur_dl() -> str:
+        try:
+            assert 0 <= cur_downloader_idx < len(DOWNLOADERS)
+            return DOWNLOADERS[cur_downloader_idx]
+        except AssertionError:
+            trace(f'\nat line {i + 1:d}: current downloader isn\'t selected!')
+            raise
+
     sequences_paths_vid = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[str]]
     sequences_paths_img = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[str]]
     sequences_common_vid = {dt: [] for dt in DOWNLOADERS}  # type: Dict[str, List[str]]
@@ -106,7 +114,7 @@ def form_queries():
     sequences_subfolders_vid = {dt: [] for dt in DOWNLOADERS}  # type: Dict[str, List[str]]
     sequences_subfolders_img = {dt: [] for dt in DOWNLOADERS}  # type: Dict[str, List[str]]
 
-    cur_downloader_idx = 0
+    cur_downloader_idx = -1
     cur_seq_ids = sequences_ids_vid
     cur_seq_pages = sequences_ids_vid
     cur_seq_paths = sequences_paths_vid
@@ -157,7 +165,7 @@ def form_queries():
                 elif re_downloader_type.fullmatch(line):
                     cur_downloader_idx = DOWNLOADERS.index(line.split(' ')[1])
                 elif re_ids_list.fullmatch(line):
-                    cdt = DOWNLOADERS[cur_downloader_idx]
+                    cdt = cur_dl()
                     idseq = IntSequence([int(num) for num in line.split(' ')[1:]], i + 1)
                     if cur_seq_pages[cdt]:
                         assert len(idseq) <= 2, f'{cdt} has pages but defines ids range of {len(idseq)} > 2!\n\tat line {i + 1}: {line}'
@@ -171,7 +179,7 @@ def form_queries():
                         else:
                             idseq.ints.append(2**31 - 1)
                 elif re_pages_list.fullmatch(line):
-                    cdt = DOWNLOADERS[cur_downloader_idx]
+                    cdt = cur_dl()
                     assert cdt in PAGE_DOWNLOADERS, f'{cdt} doesn\'t support pages search!\n\tat line {i + 1}: {line}'
                     idseq = cur_seq_ids[cdt]
                     if idseq:
@@ -181,7 +189,7 @@ def form_queries():
                     if len(pageseq) < MIN_IDS_SEQ_LENGTH:
                         pageseq.ints.append(1)
                 elif re_downloader_basepath.fullmatch(line):
-                    cdt = DOWNLOADERS[cur_downloader_idx]
+                    cdt = cur_dl()
                     basepath = line[line.find(':') + 1:]
                     basepath_n = normalize_path(basepath)
                     path_append = PATH_APPEND_DOWNLOAD_PAGES if cur_seq_pages[cdt] else PATH_APPEND_DOWNLOAD_IDS
@@ -192,26 +200,26 @@ def form_queries():
                         assert path.isfile(path_downloader)
                         if Config.update:
                             assert path.isfile(path_updater)
-                    cur_seq_paths[DOWNLOADERS[cur_downloader_idx]] = path_downloader
-                    sequences_paths_update[DOWNLOADERS[cur_downloader_idx]] = normalize_path(path.abspath(path_updater), False)
+                    cur_seq_paths[cur_dl()] = path_downloader
+                    sequences_paths_update[cur_dl()] = normalize_path(path.abspath(path_updater), False)
                 elif re_common_arg.fullmatch(line):
                     common_args = line[line.find(':') + 1:].split(' ')
                     proxy_idx = common_args.index(PROXY_ARG) if PROXY_ARG in common_args else -1
                     if proxy_idx >= 0:
                         assert len(common_args) > proxy_idx + 1
-                        proxies_update[DOWNLOADERS[cur_downloader_idx]] = StrPair((common_args[proxy_idx], common_args[proxy_idx + 1]))
-                    cur_seq_common[DOWNLOADERS[cur_downloader_idx]] += common_args
+                        proxies_update[cur_dl()] = StrPair((common_args[proxy_idx], common_args[proxy_idx + 1]))
+                    cur_seq_common[cur_dl()] += common_args
                 elif re_sub_begin.fullmatch(line):
-                    cur_seq_subs[DOWNLOADERS[cur_downloader_idx]].append(line[line.find(':') + 1:])
+                    cur_seq_subs[cur_dl()].append(line[line.find(':') + 1:])
                 elif re_sub_end.fullmatch(line):
-                    cur_seq_tags[DOWNLOADERS[cur_downloader_idx]].append(cur_tags_list.copy())
+                    cur_seq_tags[cur_dl()].append(cur_tags_list.copy())
                 elif re_downloader_finilize.fullmatch(line):
                     cur_tags_list.clear()
                 else:
                     trace(f'Error: unknown param at line {i + 1:d}!')
                     raise IOError
             else:  # elif line[0] in '(-*' or line[0].isalpha():
-                assert cur_seq_ids[DOWNLOADERS[cur_downloader_idx]] or cur_seq_pages[DOWNLOADERS[cur_downloader_idx]]
+                assert cur_seq_ids[cur_dl()] or cur_seq_pages[cur_dl()]
                 if '  ' in line:
                     trace(f'Error: double space found in tags at line {i + 1:d}!')
                     raise IOError
