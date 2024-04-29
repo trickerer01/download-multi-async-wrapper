@@ -14,7 +14,7 @@ from defs import Config, UTF8, DOWNLOADERS, RUN_FILE_DOWNLOADERS
 from logger import trace, log_to
 from strings import datetime_str_nfull, unquote
 
-__all__ = ('ques', 'register_queries', 'execute')
+__all__ = ('queries_all', 'register_queries', 'execute')
 
 
 class DummyResultProtocol(SubprocessProtocol):
@@ -27,7 +27,7 @@ class DummyResultProtocol(SubprocessProtocol):
 
 executor_event_loop = None  # type: Optional[AbstractEventLoop]
 
-ques = list()  # type: List[Tuple[str, Dict[str, List[str]]]]
+queries_all = list()  # type: List[Tuple[str, Dict[str, List[str]]]]
 
 
 def sum_lists(lists) -> list:
@@ -37,7 +37,7 @@ def sum_lists(lists) -> list:
 
 
 def register_queries(queries: Dict[str, Dict[str, List[str]]], cat_names: List[str]) -> None:
-    [ques.append((cat, queries[cat])) for cat in cat_names]
+    [queries_all.append((cat, queries[cat])) for cat in cat_names]
 
 
 def split_into_args(query: str) -> List[str]:
@@ -66,7 +66,7 @@ def split_into_args(query: str) -> List[str]:
 async def run_cmd(query: str, dt: str, qn: int, qt: str, qtn: int) -> None:
     exec_time = datetime_str_nfull()
     begin_msg = f'\nExecuting {dt} {qt} query {qtn:d}:\n{query}'
-    log_file_name = f'{Config.dest_logs_base}log_{dt}{qn:02d}_{qt}{qtn:02d}_{exec_time}.log'
+    log_file_name = f'{Config.dest_logs_base}log_{dt}{qn:03d}_{qt}{qtn:03d}_{exec_time}.log'
     with open(log_file_name, 'at', encoding=UTF8, buffering=1) as log_file:
         trace(begin_msg)
         log_to(begin_msg, log_file)
@@ -75,7 +75,7 @@ async def run_cmd(query: str, dt: str, qn: int, qt: str, qtn: int) -> None:
         # if DOWNLOADERS.index(dt) not in {0} or qn not in range(1, 2):
         #     return
         if dt in RUN_FILE_DOWNLOADERS and len(query) > Config.max_cmd_len:
-            run_file_name = f'{Config.dest_run_base}run_{dt}_{exec_time}.conf'
+            run_file_name = f'{Config.dest_run_base}run_{dt}{qn:03d}_{qt}{qtn:03d}_{exec_time}.conf'
             trace(f'Cmdline is too long ({len(query):d}/{Config.max_cmd_len:d})! Converting to run file: {run_file_name}')
             run_file_abspath = path.abspath(run_file_name)
             cmd_args_new = cmd_args[2:]
@@ -118,9 +118,9 @@ async def run_all_cmds() -> None:
         return
 
     for cv in as_completed([run_dt_cmds(dts, qts, queries) for dts, qts, queries in
-                            zip([[dt] * sum(len(cq[dt]) for _, cq in ques) for dt in DOWNLOADERS],
-                                [sum_lists([ty] * len(cq[dt]) for ty, cq in ques) for dt in DOWNLOADERS],
-                                [sum_lists(cques[dt] for ty, cques in ques) for dt in DOWNLOADERS])]):
+                            zip([[dt] * sum(len(cques[dt]) for _, cques in queries_all) for dt in DOWNLOADERS],
+                                [sum_lists([ty] * len(cques[dt]) for ty, cques in queries_all) for dt in DOWNLOADERS],
+                                [sum_lists(cques[dt] for ty, cques in queries_all) for dt in DOWNLOADERS])]):
         await cv
     trace('ALL DOWNLOADERS FINISHED WORK\n')
 

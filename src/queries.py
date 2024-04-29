@@ -6,7 +6,6 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
-# from subprocess import call as call_subprocess
 from os import chmod, path, stat
 from re import compile as re_compile
 from subprocess import check_output
@@ -19,7 +18,7 @@ from defs import (
 )
 from executor import register_queries
 from logger import trace
-from sequences import validate_sequences, form_queries, report_finals  # , report_sequences, queries_from_sequences_base
+from sequences import validate_sequences, form_queries, report_finals
 from strings import SLASH, NEWLINE, datetime_str_nfull, all_tags_negative, all_tags_positive, normalize_path
 
 __all__ = ('read_queries_file', 'prepare_queries', 'update_next_ids')
@@ -35,11 +34,11 @@ re_downloader_basepath = re_compile(r'^# basepath:[A-Z/~].+?$')
 re_common_arg = re_compile(r'^# common:-.+?$')
 re_sub_begin = re_compile(r'^# sub:[^ ].*?$')
 re_sub_end = re_compile(r'^# send$')
-re_downloader_finilize = re_compile(r'^# end$')
+re_downloader_finalize = re_compile(r'^# end$')
 
 queries_file_lines = list()  # type: List[str]
 
-sequences_names = list()  # type: List[str]
+sequences_categories = list()  # type: List[str]
 sequences_ids = list()  # type: List[DownloadCollection[IntSequence]]
 sequences_pages = list()  # type: List[DownloadCollection[IntSequence]]
 sequences_paths = list()  # type: List[DownloadCollection[str]]
@@ -100,18 +99,21 @@ def read_queries_file() -> None:
         queries_file_lines = qfile.readlines()
 
 
-def prepare_queries():
+def prepare_queries() -> None:
     def cur_dl() -> str:
         try:
-            assert cat_valid
-            assert 0 <= cur_downloader_idx < len(DOWNLOADERS)
-            return DOWNLOADERS[cur_downloader_idx]
+            assert sequences_categories
+        except AssertionError:
+            trace(f'\nat line {i + 1:d}: current download category isn\'t selected!')
+            raise
+        try:
+            assert cur_dwn
+            return cur_dwn
         except AssertionError:
             trace(f'\nat line {i + 1:d}: current downloader isn\'t selected!')
             raise
 
-    cat_valid = False
-    cur_downloader_idx = -1
+    cur_dwn = ''
     cur_tags_list = list()  # type: List[str]
     autoupdate_seqs = dict()  # type: Dict[str, List[IntSequence]]
 
@@ -128,11 +130,10 @@ def prepare_queries():
                     Config.python = line[line.find(':') + 1:]
                     continue
                 cat_match = re_category.fullmatch(line)
-                assert cat_match, f'invalid category header format: \'{line}\'!'
+                assert cat_match, f'at line {i + 1:d}: invalid category header format: \'{line}\'!'
                 cur_cat = cat_match.group(1)[:3].strip()
-                cat_valid = True
                 trace(f'Processing new category: \'{cur_cat}\'...')
-                sequences_names.append(cur_cat)
+                sequences_categories.append(cur_cat)
                 sequences_ids.append(DownloadCollection(cur_cat))
                 sequences_pages.append(DownloadCollection(cur_cat))
                 sequences_paths.append(DownloadCollection(cur_cat))
@@ -153,8 +154,9 @@ def prepare_queries():
                         trace(f'Info: \'{line}\' download mode found at line {i + 1:d}. Ignored!')
                         continue
                 if re_downloader_type.fullmatch(line):
-                    cur_downloader_idx = DOWNLOADERS.index(line.split(' ')[1])
-                    trace(f'Processing {cur_dl()} arguments')
+                    cur_dwn = line.split(' ')[1]
+                    assert cur_dwn in DOWNLOADERS
+                    trace(f'Processing \'{cur_dl().upper()}\' arguments...')
                 elif re_ids_list.fullmatch(line):
                     cdt = cur_dl()
                     idseq = IntSequence([int(num) for num in line.split(' ')[1:]], i + 1)
@@ -204,8 +206,9 @@ def prepare_queries():
                     sequences_subfolders[-1][cur_dl()].append(line[line.find(':') + 1:])
                 elif re_sub_end.fullmatch(line):
                     sequences_tags[-1][cur_dl()].append(cur_tags_list.copy())
-                elif re_downloader_finilize.fullmatch(line):
+                elif re_downloader_finalize.fullmatch(line):
                     cur_tags_list.clear()
+                    cur_dwn = ''
                 else:
                     trace(f'Error: unknown param at line {i + 1:d}!')
                     raise IOError
@@ -265,7 +268,7 @@ def prepare_queries():
                 uidseq.ints.append(maxid)
                 trace(f'{update_str_base}{str(uidseq.ints)}')
                 maxid_fetched[dt] = maxid
-        for cat, sidseq in zip(sequences_names, sequences_ids):
+        for cat, sidseq in zip(sequences_categories, sequences_ids):
             for dt in sidseq.dls:
                 if sidseq.dls[dt] is not None and len(sidseq.dls[dt]) < MIN_IDS_SEQ_LENGTH:
                     unsolved_idseqs.append(f'{cat}:{dt}')
@@ -278,8 +281,8 @@ def prepare_queries():
     trace('Sequences validated. Finalizing...\n')
     queries_final = form_queries(sequences_ids, sequences_pages, sequences_paths, sequences_tags, sequences_subfolders, sequences_common)
 
-    report_finals(queries_final, sequences_names)
-    register_queries(queries_final, sequences_names)
+    report_finals(queries_final, sequences_categories)
+    register_queries(queries_final, sequences_categories)
 
 
 def update_next_ids() -> None:

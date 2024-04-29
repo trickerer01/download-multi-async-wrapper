@@ -115,16 +115,10 @@ def _get_base_qs(
     def page_ids(cdt: str) -> bool:
         return pure_ids(cdt) is False and any_ids(cdt) is True
 
-    ri = RANGE_TEMPLATE_IDS
-    rp = RANGE_TEMPLATE_PAGES
-    rs = STOP_ID_TEMPLATE
-    rb = BEGIN_ID_TEMPLATE
-    irngs = {
-        sids.name: {dt: IntPair(sids.dls[dt][:2]) for dt in DOWNLOADERS if sids[dt]} for sids in sequences_ids
-    }  # type: Dict[str, Dict[str, IntPair]]
-    prngs = {
-        spages.name: {dt: IntPair(spages.dls[dt][:2]) for dt in DOWNLOADERS if spages[dt]} for spages in sequences_pages
-    }  # type: Dict[str, Dict[str, IntPair]]
+    ri, rp, rs, rb = RANGE_TEMPLATE_IDS, RANGE_TEMPLATE_PAGES, STOP_ID_TEMPLATE, BEGIN_ID_TEMPLATE
+    irngs, prngs = ({
+        ipseq.name: {dt: IntPair(ipseq.dls[dt][:2]) for dt in DOWNLOADERS if ipseq[dt]} for ipseq in ipseqs
+    } for ipseqs in (sequences_ids, sequences_pages))  # type: Dict[str, Dict[str, IntPair]]
     base_qs = {
         pseq.name: {
             dt: (f'{Config.python} "{pseq.dls[dt]}" '
@@ -143,20 +137,15 @@ def form_queries(
     sequences_paths: List[DownloadCollection[str]], sequences_tags: List[DownloadCollection[Sequence[List[str]]]],
     sequences_subfolders: List[DownloadCollection[Sequence[str]]], sequences_common: List[DownloadCollection[Sequence[str]]]
 ) -> Dict[str, Dict[str, List[str]]]:
-    def is_ruxx(dt: str) -> bool:
-        return dt in RUXX_DOWNLOADERS
-
-    stags = sequences_tags
-    ssubs = sequences_subfolders
-    scomms = sequences_common
+    stags, ssubs, scomms = sequences_tags, sequences_subfolders, sequences_common
     base_qs = _get_base_qs(sequences_ids, sequences_pages, sequences_paths)
-    queries_finals = {
+    queries_final = {
         cat: {
             dt: ([f'{base_qs[cat][dt]} {path_args(Config.dest_base, cat, ssubs[idx][dt][i], not Config.no_date_path)} '
-                  f'{" ".join(normalize_ruxx_tag(tag) if is_ruxx(dt) else tag for tag in scomms[idx][dt])} '
-                  f'{" ".join(normalize_ruxx_tag(tag) if is_ruxx(dt) else tag for tag in staglist)}'
+                  f'{" ".join(normalize_ruxx_tag(tag) if dt in RUXX_DOWNLOADERS else tag for tag in scomms[idx][dt])} '
+                  f'{" ".join(normalize_ruxx_tag(tag) if dt in RUXX_DOWNLOADERS else tag for tag in staglist)}'
                   for i, staglist in enumerate(stags[idx][dt]) if staglist]
-                 ) if is_ruxx(dt) or any(any(sarg.startswith('-search') for sarg in slist) for slist in stags[idx][dt]) else
+                 ) if dt in RUXX_DOWNLOADERS or any(any(sarg.startswith('-search') for sarg in slist) for slist in stags[idx][dt]) else
                 ([f'{base_qs[cat][dt]} {path_args(Config.dest_base, cat, "", not Config.no_date_path)} '
                   f'{" ".join(scomms[idx][dt])} '
                   f'-script "'
@@ -164,14 +153,14 @@ def form_queries(
                   f'"'] if stags[idx][dt] else []
                  )
             for dt in DOWNLOADERS
-        } for idx, cat in [(idx, dc.name) for idx, dc in enumerate(sequences_paths)]
+        } for idx, cat in ((idx, dc.name) for idx, dc in enumerate(sequences_paths))
     }  # type: Dict[str, Dict[str, List[str]]]
-    return queries_finals
+    return queries_final
 
 
-def report_finals(queries_finals: Dict[str, Dict[str, List[str]]], cat_names: List[str]) -> None:
+def report_finals(queries_final: Dict[str, Dict[str, List[str]]], cat_names: List[str]) -> None:
     for ty in cat_names:
-        trace(f'\nQueries {ty}:\n{NEWLINE.join(NEWLINE.join(finals) for finals in queries_finals[ty].values() if finals)}', False)
+        trace(f'\nQueries {ty}:\n{NEWLINE.join(NEWLINE.join(finals) for finals in queries_final[ty].values() if finals)}', False)
 
 #
 #

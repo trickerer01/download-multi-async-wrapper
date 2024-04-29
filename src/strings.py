@@ -15,9 +15,7 @@ NEWLINE = '\n'
 
 
 def unquote(tag: str) -> str:
-    while len(tag) > 1 and tag[0] == tag[-1] in '"\'':
-        tag = tag[1:-1]
-    return tag
+    return tag.strip('"\'')
 
 
 def normalize_path(basepath: str, append_slash=True) -> str:

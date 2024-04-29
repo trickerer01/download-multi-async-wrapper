@@ -10,7 +10,7 @@ from unittest import TestCase
 
 from cmdargs import parse_arglist
 from defs import Config, DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RC, DOWNLOADER_RN, DOWNLOADER_RX, DOWNLOADER_RS
-from executor import ques
+from executor import queries_all
 from main import main_sync
 from queries import read_queries_file, prepare_queries
 from strings import date_str_md
@@ -72,33 +72,33 @@ class QueriesFormTests(TestCase):
         read_queries_file()
         prepare_queries()
         self.assertEqual('python3', Config.python)
-        self.assertEqual(1, len(ques[0][1][DOWNLOADER_NM]))
-        self.assertEqual(0, len(ques[0][1][DOWNLOADER_RV]))
-        self.assertEqual(0, len(ques[0][1][DOWNLOADER_RC]))
-        self.assertEqual(0, len(ques[0][1][DOWNLOADER_RN]))
-        self.assertEqual(0, len(ques[0][1][DOWNLOADER_RX]))
-        self.assertEqual(0, len(ques[0][1][DOWNLOADER_RS]))
-        self.assertEqual(0, len(ques[1][1][DOWNLOADER_NM]))
-        self.assertEqual(0, len(ques[1][1][DOWNLOADER_RV]))
-        self.assertEqual(0, len(ques[1][1][DOWNLOADER_RC]))
-        self.assertEqual(0, len(ques[1][1][DOWNLOADER_RN]))
-        self.assertEqual(2, len(ques[1][1][DOWNLOADER_RX]))
-        self.assertEqual(0, len(ques[1][1][DOWNLOADER_RS]))
+        self.assertEqual(1, len(queries_all[0][1][DOWNLOADER_NM]))
+        self.assertEqual(0, len(queries_all[0][1][DOWNLOADER_RV]))
+        self.assertEqual(0, len(queries_all[0][1][DOWNLOADER_RC]))
+        self.assertEqual(0, len(queries_all[0][1][DOWNLOADER_RN]))
+        self.assertEqual(0, len(queries_all[0][1][DOWNLOADER_RX]))
+        self.assertEqual(0, len(queries_all[0][1][DOWNLOADER_RS]))
+        self.assertEqual(0, len(queries_all[1][1][DOWNLOADER_NM]))
+        self.assertEqual(0, len(queries_all[1][1][DOWNLOADER_RV]))
+        self.assertEqual(0, len(queries_all[1][1][DOWNLOADER_RC]))
+        self.assertEqual(0, len(queries_all[1][1][DOWNLOADER_RN]))
+        self.assertEqual(2, len(queries_all[1][1][DOWNLOADER_RX]))
+        self.assertEqual(0, len(queries_all[1][1][DOWNLOADER_RS]))
         self.assertEqual(
             f'python3 "D:/nm/src/ids.py" -start 1 -end 1 -path "../tests/{date_str_md("VID")}/" --dump-tags --verbose -script "'
             'a: -quality 1080p -a -b -c -dfff ggg; '
             'b: -quality 1080p -a -b -c -dfff -ggg -(x,z) (h~i~j~k); '
             'c: -quality 1080p -a -b -c -dfff -ggg -h -i -j -k (l~m~n); '
             'd: -a -b -c -ggg -h -i -j -k -l -m -n -quality 360p -uvp always"',
-            ques[0][1][DOWNLOADER_NM][0]
+            queries_all[0][1][DOWNLOADER_NM][0]
         )
         self.assertEqual(
             f'python3 "D:/ruxx/src/ruxx_cmd.py" id:>=1 id:<=1 -path "../tests/{date_str_md("IMA")}/a/" -module rx a',
-            ques[1][1][DOWNLOADER_RX][0]
+            queries_all[1][1][DOWNLOADER_RX][0]
         )
         self.assertEqual(
             f'python3 "D:/ruxx/src/ruxx_cmd.py" id:>=1 id:<=1 -path "../tests/{date_str_md("IMA")}/b/" -module rx -a b (+c+~+d+)',
-            ques[1][1][DOWNLOADER_RX][1]
+            queries_all[1][1][DOWNLOADER_RX][1]
         )
         print(f'{self._testMethodName} passed')
 
