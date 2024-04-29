@@ -8,58 +8,48 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 
 from re import compile as re_compile
 from subprocess import check_output
-from typing import Dict, List, Tuple, Optional, Mapping, Sequence, TypeVar
+from typing import Dict, List, Sequence, Optional, Any
 
 from defs import (
-    IntPair, Config, IntSequence, DOWNLOADERS, RANGE_TEMPLATE_IDS, RANGE_TEMPLATE_PAGES, RUXX_DOWNLOADERS,
-    STOP_ID_TEMPLATE, BEGIN_ID_TEMPLATE, APP_NAMES)
+    DownloadCollection, IntPair, Config, IntSequence, DOWNLOADERS, RANGE_TEMPLATE_IDS, RANGE_TEMPLATE_PAGES, RUXX_DOWNLOADERS,
+    STOP_ID_TEMPLATE, BEGIN_ID_TEMPLATE, APP_NAMES
+)
 from logger import trace
 from strings import NEWLINE, normalize_ruxx_tag, path_args
 
-__all__ = ('validate_sequences', 'queries_from_sequences', 'report_finals')
+__all__ = ('validate_sequences', 'form_queries', 'report_finals')
 
-IntSequenceMap = TypeVar('IntSequenceMap', bound=Mapping[str, Optional[IntSequence]])
-StringMap = TypeVar('StringMap', bound=Mapping[str, Optional[str]])
-StringListMap = TypeVar('StringListMap', bound=Mapping[str, Sequence[str]])
-StringListListMap = TypeVar('StringListListMap', bound=Mapping[str, Sequence[List[str]]])
+
+def unused_argument(arg: Any) -> None:
+    bool(arg)
 
 
 def validate_sequences(
-    sequences_ids_vid: IntSequenceMap, sequences_ids_img: IntSequenceMap,
-    sequences_pages_vid: IntSequenceMap, sequences_pages_img: IntSequenceMap,
-    sequences_paths_vid: StringMap, sequences_paths_img: StringMap,
-    sequences_tags_vid: StringListListMap, sequences_tags_img: StringListListMap,
-    sequences_subfolders_vid: StringListMap, sequences_subfolders_img: StringListMap,
-    sequences_paths_update: StringMap
+    sequences_ids: List[DownloadCollection[IntSequence]], sequences_pages: List[DownloadCollection[IntSequence]],
+    sequences_paths: List[DownloadCollection[str]], sequences_tags: List[DownloadCollection[Sequence[List[str]]]],
+    sequences_subfolders: List[DownloadCollection[Sequence[str]]], sequences_paths_update: Dict[str, Optional[str]]
 ) -> None:
+    unused_argument(sequences_pages)
+    unused_argument(sequences_subfolders)
     if not Config.python:
         trace('Error: python executable was not declared!')
         raise IOError
     for dt in DOWNLOADERS:
-        ivlist = list(sequences_ids_vid[dt].ints if sequences_ids_vid[dt] else [])  # type: List[int]
-        for iv in range(1, len(ivlist)):
-            if ivlist[iv - 1] >= ivlist[iv]:
-                trace(f'Error: {dt} vid ids sequence is corrupted at idx {iv - 1:d}, {ivlist[iv - 1]:d} >= {ivlist[iv]:d}!')
+        for sids in sequences_ids:
+            ivlist = list(sids[dt].ints if sids[dt] else [])
+            for iv in range(1, len(ivlist)):
+                if ivlist[iv - 1] >= ivlist[iv]:
+                    trace(f'Error: {sids.name}:{dt} ids sequence is corrupted at idx {iv - 1:d}, {ivlist[iv - 1]:d} >= {ivlist[iv]:d}!')
+                    raise IOError
+        for spaths in sequences_paths:
+            if (not not spaths[dt]) != (not not (spaths[dt] or spaths[dt])):
+                trace(f'Error: sequence list existance for {spaths.name} tags/ids mismatch for {dt}!')
                 raise IOError
-        iilist = list(sequences_ids_img[dt].ints if sequences_ids_img[dt] else [])
-        for ii in range(len(iilist)):
-            if ii > 0 and iilist[ii - 1] >= iilist[ii]:
-                trace(f'Error: {dt} img ids sequence is corrupted at idx {ii - 1:d}, {iilist[ii - 1]:d} >= {iilist[ii]:d}!')
+        for stags in sequences_tags:
+            len1, len2 = len(stags[dt]), len(stags[dt])
+            if len1 != len2:
+                trace(f'Error: sequence list for {stags.name} tags/subs mismatch for {dt}: {len1:d} vs {len2:d}!')
                 raise IOError
-        if (not not sequences_paths_vid[dt]) != (not not (sequences_ids_vid[dt] or sequences_pages_vid[dt])):
-            trace(f'Error: sequence list existance for vid tags/ids mismatch for {dt}!')
-            raise IOError
-        if (not not sequences_paths_img[dt]) != (not not (sequences_ids_img[dt] or sequences_pages_img[dt])):
-            trace(f'Error: sequence list existance for img tags/ids mismatch for {dt}!')
-            raise IOError
-        len1, len2 = len(sequences_tags_vid[dt]), len(sequences_subfolders_vid[dt])
-        if len1 != len2:
-            trace(f'Error: sequence list for vid tags/subs mismatch for {dt}: {len1:d} vs {len2:d}!')
-            raise IOError
-        len1, len2 = len(sequences_tags_img[dt]), len(sequences_subfolders_img[dt])
-        if len1 != len2:
-            trace(f'Error: sequence list for img tags/subs mismatch for {dt}: {len1:d} vs {len2:d}!')
-            raise IOError
     try:
         trace('Looking for python executable...')
         re_py_ver = re_compile(r'^[Pp]ython (\d)\.(\d{1,2})\.(\d+)$')
@@ -76,22 +66,23 @@ def validate_sequences(
         return
     checked_paths = set()
     if not Config.no_download:
-        for dtd, dpath in (list(sequences_paths_vid.items()) + list(sequences_paths_img.items())):  # type: str, Optional[str]
-            if not dpath or dtd not in Config.downloaders:
-                continue
-            if dpath in checked_paths:
-                trace(f'{dtd} downloader path is already checked!')
-                continue
-            checked_paths.add(dpath)
-            try:
-                trace(f'Looking for {dtd} downloader...')
-                out_d = check_output((Config.python, dpath, '--version'))
-                out_d_str = out_d.decode().strip()
-                out_d_str = out_d_str[out_d_str.rfind('\n') + 1:]
-                assert out_d_str.startswith(APP_NAMES[dtd]), f'Unexpected output for {dtd}: {out_d_str[:min(len(out_d_str), 20)]}!'
-            except Exception:
-                trace(f'Error: invalid {dtd} downloader found at: \'{dpath}\'!')
-                raise IOError
+        for spaths in sequences_paths:
+            for dtd, dpath in (spaths.dls.items()):
+                if not dpath or dtd not in Config.downloaders:
+                    continue
+                if dpath in checked_paths:
+                    trace(f'{dtd} downloader path is already checked!')
+                    continue
+                checked_paths.add(dpath)
+                try:
+                    trace(f'Looking for {dtd} downloader...')
+                    out_d = check_output((Config.python, dpath, '--version'))
+                    out_d_str = out_d.decode().strip()
+                    out_d_str = out_d_str[out_d_str.rfind('\n') + 1:]
+                    assert out_d_str.startswith(APP_NAMES[dtd]), f'Unexpected output for {dtd}: {out_d_str[:min(len(out_d_str), 20)]}!'
+                except Exception:
+                    trace(f'Error: invalid {dtd} downloader found at: \'{dpath}\' ({spaths.name})!')
+                    raise IOError
     if Config.update:
         for dtu, upath in sequences_paths_update.items():  # type: str, Optional[str]
             if not upath:
@@ -112,15 +103,14 @@ def validate_sequences(
 
 
 def _get_base_qs(
-    sequences_ids_vid: IntSequenceMap, sequences_ids_img: IntSequenceMap,
-    sequences_pages_vid: IntSequenceMap, sequences_pages_img: IntSequenceMap,
-    sequences_paths_vid: StringMap, sequences_paths_img: StringMap
-) -> Tuple[Dict[str, str], Dict[str, str]]:
+    sequences_ids: List[DownloadCollection[IntSequence]], sequences_pages: List[DownloadCollection[IntSequence]],
+    sequences_paths: List[DownloadCollection[str]]
+) -> Dict[str, Dict[str, str]]:
     def any_ids(cdt: str) -> bool:
-        return not not (sequences_ids_vid[cdt] or sequences_ids_img[cdt])
+        return not not any(idseq[cdt] for idseq in sequences_ids)
 
     def pure_ids(cdt: str) -> bool:
-        return not not (any_ids(cdt) and not (sequences_pages_vid[cdt] or sequences_pages_img[cdt]))
+        return not not (any_ids(cdt) and not any(pseq[cdt] for pseq in sequences_pages))
 
     def page_ids(cdt: str) -> bool:
         return pure_ids(cdt) is False and any_ids(cdt) is True
@@ -129,56 +119,59 @@ def _get_base_qs(
     rp = RANGE_TEMPLATE_PAGES
     rs = STOP_ID_TEMPLATE
     rb = BEGIN_ID_TEMPLATE
-    virange, iirange = (
-        {dt: IntPair(sids[dt][:2]) for dt in DOWNLOADERS if sids[dt]} for sids in (sequences_ids_vid, sequences_ids_img)
-    )  # type: Dict[str, IntPair]
-    vprange, iprange = (
-        {dt: IntPair(spages[dt][:2]) for dt in DOWNLOADERS if spages[dt]} for spages in (sequences_pages_vid, sequences_pages_img)
-    )  # type: Dict[str, IntPair]
-    base_q_v, base_q_i = ({
-        dt: (f'{Config.python} "{spath[dt]}" '
-             f'{(ri[dt].first % sirange[dt].first) if pure_ids(dt) else (rp[dt].first % sprange[dt].first)} '
-             f'{(ri[dt].second % (sirange[dt].second - 1)) if pure_ids(dt) else (rp[dt].second % sprange[dt].second)}'
-             f'{f" {rs % sirange[dt].first}" if sirange[dt].first and page_ids(dt) else ""}'
-             f'{f" {rb % sirange[dt].second}" if sirange[dt].second and page_ids(dt) else ""}')
-        for dt in DOWNLOADERS if (dt in sirange or dt in sprange) and dt in spath
-    } for spath, sirange, sprange in zip(
-        (sequences_paths_vid, sequences_paths_img), (virange, iirange), (vprange, iprange)))  # type: Dict[str, str]
-    return base_q_v, base_q_i
+    irngs = {
+        sids.name: {dt: IntPair(sids.dls[dt][:2]) for dt in DOWNLOADERS if sids[dt]} for sids in sequences_ids
+    }  # type: Dict[str, Dict[str, IntPair]]
+    prngs = {
+        spages.name: {dt: IntPair(spages.dls[dt][:2]) for dt in DOWNLOADERS if spages[dt]} for spages in sequences_pages
+    }  # type: Dict[str, Dict[str, IntPair]]
+    base_qs = {
+        pseq.name: {
+            dt: (f'{Config.python} "{pseq.dls[dt]}" '
+                 f'{(ri[dt].first % irngs[pseq.name][dt].first) if pure_ids(dt) else (rp[dt].first % prngs[pseq.name][dt].first)} '
+                 f'{(ri[dt].second % (irngs[pseq.name][dt].second - 1)) if pure_ids(dt) else (rp[dt].second % prngs[pseq.name][dt].second)}'
+                 f'{f" {rs % irngs[pseq.name][dt].first}" if irngs[pseq.name][dt].first and page_ids(dt) else ""}'
+                 f'{f" {rb % irngs[pseq.name][dt].second}" if irngs[pseq.name][dt].second and page_ids(dt) else ""}')
+            for dt in DOWNLOADERS if (dt in irngs[pseq.name] or dt in prngs[pseq.name])
+        } for pseq in sequences_paths
+    }  # type: Dict[str, Dict[str, str]]
+    return base_qs
 
 
-def queries_from_sequences(
-    sequences_ids_vid: IntSequenceMap, sequences_ids_img: IntSequenceMap,
-    sequences_pages_vid: IntSequenceMap, sequences_pages_img: IntSequenceMap,
-    sequences_paths_vid: StringMap, sequences_paths_img: StringMap,
-    sequences_tags_vid: StringListListMap, sequences_tags_img: StringListListMap,
-    sequences_subfolders_vid: StringListMap, sequences_subfolders_img: StringListMap,
-    sequences_common_vid: StringListMap, sequences_common_img: StringListMap
-) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
-    base_q_v, base_q_i = _get_base_qs(
-        sequences_ids_vid, sequences_ids_img, sequences_pages_vid, sequences_pages_img, sequences_paths_vid, sequences_paths_img)
-    queries_final_vid, queries_final_img = ({
-        dt: ([f'{sbase_q[dt]} {path_args(Config.dest_base, not is_vidpath, ssub[dt][i], not Config.no_date_path)} '
-              f'{" ".join(normalize_ruxx_tag(tag) if dt in RUXX_DOWNLOADERS else tag for tag in ctags[dt])} '
-              f'{" ".join(normalize_ruxx_tag(tag) if dt in RUXX_DOWNLOADERS else tag for tag in staglist)}'
-              for i, staglist in enumerate(stags[dt]) if staglist]
-             ) if dt in RUXX_DOWNLOADERS or any(any(sarg.startswith('-search') for sarg in slist) for slist in stags[dt]) else
-            ([f'{sbase_q[dt]} {path_args(Config.dest_base, not is_vidpath, "", not Config.no_date_path)} '
-              f'{" ".join(ctags[dt])} '
-              f'-script "'
-              f'{"; ".join(" ".join([f"{ssub[dt][i]}:"] + staglist) for i, staglist in enumerate(stags[dt]))}'
-              f'"'] if stags[dt] else []
-             )
-        for dt in DOWNLOADERS
-    } for sbase_q, ssub, ctags, stags, is_vidpath in
-        zip((base_q_v, base_q_i), (sequences_subfolders_vid, sequences_subfolders_img), (sequences_common_vid, sequences_common_img),
-            (sequences_tags_vid, sequences_tags_img), (True, False)))  # type: Dict[str, List[str]]
-    return queries_final_vid, queries_final_img
+def form_queries(
+    sequences_ids: List[DownloadCollection[IntSequence]], sequences_pages: List[DownloadCollection[IntSequence]],
+    sequences_paths: List[DownloadCollection[str]], sequences_tags: List[DownloadCollection[Sequence[List[str]]]],
+    sequences_subfolders: List[DownloadCollection[Sequence[str]]], sequences_common: List[DownloadCollection[Sequence[str]]]
+) -> Dict[str, Dict[str, List[str]]]:
+    def is_ruxx(dt: str) -> bool:
+        return dt in RUXX_DOWNLOADERS
+
+    stags = sequences_tags
+    ssubs = sequences_subfolders
+    scomms = sequences_common
+    base_qs = _get_base_qs(sequences_ids, sequences_pages, sequences_paths)
+    queries_finals = {
+        cat: {
+            dt: ([f'{base_qs[cat][dt]} {path_args(Config.dest_base, cat, ssubs[idx][dt][i], not Config.no_date_path)} '
+                  f'{" ".join(normalize_ruxx_tag(tag) if is_ruxx(dt) else tag for tag in scomms[idx][dt])} '
+                  f'{" ".join(normalize_ruxx_tag(tag) if is_ruxx(dt) else tag for tag in staglist)}'
+                  for i, staglist in enumerate(stags[idx][dt]) if staglist]
+                 ) if is_ruxx(dt) or any(any(sarg.startswith('-search') for sarg in slist) for slist in stags[idx][dt]) else
+                ([f'{base_qs[cat][dt]} {path_args(Config.dest_base, cat, "", not Config.no_date_path)} '
+                  f'{" ".join(scomms[idx][dt])} '
+                  f'-script "'
+                  f'{"; ".join(" ".join([f"{ssubs[idx][dt][i]}:"] + staglist) for i, staglist in enumerate(stags[idx][dt]))}'
+                  f'"'] if stags[idx][dt] else []
+                 )
+            for dt in DOWNLOADERS
+        } for idx, cat in [(idx, dc.name) for idx, dc in enumerate(sequences_paths)]
+    }  # type: Dict[str, Dict[str, List[str]]]
+    return queries_finals
 
 
-def report_finals(queries_final_vid: StringListMap, queries_final_img: StringListMap) -> None:
-    for ty, final_q in zip(('vid', 'img'), (queries_final_vid, queries_final_img)):
-        trace(f'\nQueries {ty}:\n{NEWLINE.join(NEWLINE.join(finals) for finals in final_q.values() if finals)}', False)
+def report_finals(queries_finals: Dict[str, Dict[str, List[str]]], cat_names: List[str]) -> None:
+    for ty in cat_names:
+        trace(f'\nQueries {ty}:\n{NEWLINE.join(NEWLINE.join(finals) for finals in queries_finals[ty].values() if finals)}', False)
 
 #
 #

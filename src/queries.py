@@ -14,16 +14,17 @@ from threading import Thread, Lock as ThreadLock
 from typing import List, Dict, Optional, Tuple, Iterable
 
 from defs import (
-    IntSequence, Config, StrPair, UTF8, DOWNLOADERS, MIN_IDS_SEQ_LENGTH, PATH_APPEND_DOWNLOAD_IDS, PATH_APPEND_DOWNLOAD_PAGES,
-    PATH_APPEND_UPDATE, RUXX_DOWNLOADERS, PAGE_DOWNLOADERS, PROXY_ARG,
+    DownloadCollection, IntSequence, Config, StrPair, UTF8, DOWNLOADERS, MIN_IDS_SEQ_LENGTH, PATH_APPEND_DOWNLOAD_IDS,
+    PATH_APPEND_DOWNLOAD_PAGES, PATH_APPEND_UPDATE, RUXX_DOWNLOADERS, PAGE_DOWNLOADERS, PROXY_ARG,
 )
 from executor import register_queries
 from logger import trace
-from sequences import validate_sequences, queries_from_sequences, report_finals  # , report_sequences, queries_from_sequences_base
+from sequences import validate_sequences, form_queries, report_finals  # , report_sequences, queries_from_sequences_base
 from strings import SLASH, NEWLINE, datetime_str_nfull, all_tags_negative, all_tags_positive, normalize_path
 
-__all__ = ('read_queries_file', 'form_queries', 'update_next_ids')
+__all__ = ('read_queries_file', 'prepare_queries', 'update_next_ids')
 
+re_category = re_compile(r'^### \(([A-zÀ-ʯА-я\d_+\-! ]+)\) ###$')
 re_comment = re_compile(r'^##[^#].*?$')
 re_download_mode = re_compile(r'^.*[: ]-dmode .+?$')
 re_python_exec = re_compile(r'^### PYTHON:.*?$')
@@ -38,10 +39,13 @@ re_downloader_finilize = re_compile(r'^# end$')
 
 queries_file_lines = list()  # type: List[str]
 
-sequences_ids_vid = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[IntSequence]]
-sequences_ids_img = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[IntSequence]]
-sequences_pages_vid = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[IntSequence]]
-sequences_pages_img = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[IntSequence]]
+sequences_names = list()  # type: List[str]
+sequences_ids = list()  # type: List[DownloadCollection[IntSequence]]
+sequences_pages = list()  # type: List[DownloadCollection[IntSequence]]
+sequences_paths = list()  # type: List[DownloadCollection[str]]
+sequences_common = list()  # type: List[DownloadCollection[List[str]]]
+sequences_tags = list()  # type: List[DownloadCollection[List[List[str]]]]
+sequences_subfolders = list()  # type: List[DownloadCollection[List[str]]]
 
 sequences_paths_update = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[str]]
 proxies_update = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[StrPair]]
@@ -96,33 +100,19 @@ def read_queries_file() -> None:
         queries_file_lines = qfile.readlines()
 
 
-def form_queries():
+def prepare_queries():
     def cur_dl() -> str:
         try:
+            assert cat_valid
             assert 0 <= cur_downloader_idx < len(DOWNLOADERS)
             return DOWNLOADERS[cur_downloader_idx]
         except AssertionError:
             trace(f'\nat line {i + 1:d}: current downloader isn\'t selected!')
             raise
 
-    sequences_paths_vid = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[str]]
-    sequences_paths_img = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[str]]
-    sequences_common_vid = {dt: [] for dt in DOWNLOADERS}  # type: Dict[str, List[str]]
-    sequences_common_img = {dt: [] for dt in DOWNLOADERS}  # type: Dict[str, List[str]]
-    sequences_tags_vid = {dt: [] for dt in DOWNLOADERS}  # type: Dict[str, List[List[str]]]
-    sequences_tags_img = {dt: [] for dt in DOWNLOADERS}  # type: Dict[str, List[List[str]]]
-    sequences_subfolders_vid = {dt: [] for dt in DOWNLOADERS}  # type: Dict[str, List[str]]
-    sequences_subfolders_img = {dt: [] for dt in DOWNLOADERS}  # type: Dict[str, List[str]]
-
+    cat_valid = False
     cur_downloader_idx = -1
-    cur_seq_ids = sequences_ids_vid
-    cur_seq_pages = sequences_ids_vid
-    cur_seq_paths = sequences_paths_vid
-    cur_seq_common = sequences_common_vid
-    cur_seq_tags = sequences_tags_vid
-    cur_seq_subs = sequences_subfolders_vid
     cur_tags_list = list()  # type: List[str]
-
     autoupdate_seqs = dict()  # type: Dict[str, List[IntSequence]]
 
     trace('\nAnalyzing queries file strings...')
@@ -130,28 +120,31 @@ def form_queries():
     for i, line in enumerate(queries_file_lines):
         try:
             line = line.strip(' \n\ufeff')  # remove BOM too
-            if line in ('', '### (VIDEOS) ###', '### (IMAGES) ###'):
-                if line == '### (VIDEOS) ###':
-                    cur_seq_ids = sequences_ids_vid
-                    cur_seq_pages = sequences_pages_vid
-                    cur_seq_paths = sequences_paths_vid
-                    cur_seq_common = sequences_common_vid
-                    cur_seq_tags = sequences_tags_vid
-                    cur_seq_subs = sequences_subfolders_vid
-                    cur_tags_list.clear()
-                elif line == '### (IMAGES) ###':
-                    cur_seq_ids = sequences_ids_img
-                    cur_seq_pages = sequences_pages_img
-                    cur_seq_paths = sequences_paths_img
-                    cur_seq_common = sequences_common_img
-                    cur_seq_tags = sequences_tags_img
-                    cur_seq_subs = sequences_subfolders_img
-                    cur_tags_list.clear()
+            if line == '':
+                continue
+            if line.startswith('###'):
+                if re_python_exec.fullmatch(line):
+                    assert Config.python == '', 'Python executable must be declared exactly once!'
+                    Config.python = line[line.find(':') + 1:]
+                    continue
+                cat_match = re_category.fullmatch(line)
+                assert cat_match, f'invalid category header format: \'{line}\'!'
+                cur_cat = cat_match.group(1)[:3].strip()
+                cat_valid = True
+                trace(f'Processing new category: \'{cur_cat}\'...')
+                sequences_names.append(cur_cat)
+                sequences_ids.append(DownloadCollection(cur_cat))
+                sequences_pages.append(DownloadCollection(cur_cat))
+                sequences_paths.append(DownloadCollection(cur_cat))
+                sequences_common.append(DownloadCollection(cur_cat, []))
+                sequences_tags.append(DownloadCollection(cur_cat, []))
+                sequences_subfolders.append(DownloadCollection(cur_cat, []))
+                cur_tags_list.clear()
                 continue
             if line[0] not in '(-*#' and not line[0].isalpha():
                 trace(f'Error: corrupted line beginning found at line {i + 1:d}!')
                 raise IOError
-            if line[0] == '#':
+            if line.startswith('#'):
                 if re_comment.fullmatch(line):
                     # trace(f'Ignoring commented out line {i + 1:d}: \'{line}\'')
                     continue
@@ -159,17 +152,15 @@ def form_queries():
                     if Config.ignore_download_mode is True:
                         trace(f'Info: \'{line}\' download mode found at line {i + 1:d}. Ignored!')
                         continue
-                if re_python_exec.fullmatch(line):
-                    assert Config.python == '', 'Python executable must be declared exactly once!'
-                    Config.python = line[line.find(':') + 1:]
-                elif re_downloader_type.fullmatch(line):
+                if re_downloader_type.fullmatch(line):
                     cur_downloader_idx = DOWNLOADERS.index(line.split(' ')[1])
+                    trace(f'Processing {cur_dl()} arguments')
                 elif re_ids_list.fullmatch(line):
                     cdt = cur_dl()
                     idseq = IntSequence([int(num) for num in line.split(' ')[1:]], i + 1)
-                    if cur_seq_pages[cdt]:
+                    if sequences_pages[-1][cdt]:
                         assert len(idseq) <= 2, f'{cdt} has pages but defines ids range of {len(idseq)} > 2!\n\tat line {i + 1}: {line}'
-                    cur_seq_ids[cdt] = idseq
+                    sequences_ids[-1][cdt] = idseq
                     if len(idseq) < MIN_IDS_SEQ_LENGTH:
                         if cdt in Config.downloaders:
                             trace(f'{cdt} at line {i + 1:d} provides a single id hence requires maxid autoupdate')
@@ -181,18 +172,18 @@ def form_queries():
                 elif re_pages_list.fullmatch(line):
                     cdt = cur_dl()
                     assert cdt in PAGE_DOWNLOADERS, f'{cdt} doesn\'t support pages search!\n\tat line {i + 1}: {line}'
-                    idseq = cur_seq_ids[cdt]
+                    idseq = sequences_ids[-1][cdt]
                     if idseq:
                         assert len(idseq) <= 2, f'{cdt} defines pages but has ids range of {len(idseq)} > 2!\n\tat line {i + 1}: {line}'
                     pageseq = IntSequence([int(num[1:]) for num in line.split(' ')[1:]], i + 1)
-                    cur_seq_pages[cdt] = pageseq
+                    sequences_pages[-1][cdt] = pageseq
                     if len(pageseq) < MIN_IDS_SEQ_LENGTH:
                         pageseq.ints.append(1)
                 elif re_downloader_basepath.fullmatch(line):
                     cdt = cur_dl()
                     basepath = line[line.find(':') + 1:]
                     basepath_n = normalize_path(basepath)
-                    path_append = PATH_APPEND_DOWNLOAD_PAGES if cur_seq_pages[cdt] else PATH_APPEND_DOWNLOAD_IDS
+                    path_append = PATH_APPEND_DOWNLOAD_PAGES if sequences_pages[-1][cdt] else PATH_APPEND_DOWNLOAD_IDS
                     path_downloader = f'{basepath_n}{path_append[cdt]}'
                     path_updater = f'{basepath_n}{PATH_APPEND_UPDATE[cdt]}'
                     if Config.test is False:
@@ -200,7 +191,7 @@ def form_queries():
                         assert path.isfile(path_downloader)
                         if Config.update:
                             assert path.isfile(path_updater)
-                    cur_seq_paths[cur_dl()] = path_downloader
+                    sequences_paths[-1][cur_dl()] = path_downloader
                     sequences_paths_update[cur_dl()] = normalize_path(path.abspath(path_updater), False)
                 elif re_common_arg.fullmatch(line):
                     common_args = line[line.find(':') + 1:].split(' ')
@@ -208,18 +199,18 @@ def form_queries():
                     if proxy_idx >= 0:
                         assert len(common_args) > proxy_idx + 1
                         proxies_update[cur_dl()] = StrPair((common_args[proxy_idx], common_args[proxy_idx + 1]))
-                    cur_seq_common[cur_dl()] += common_args
+                    sequences_common[-1][cur_dl()] += common_args
                 elif re_sub_begin.fullmatch(line):
-                    cur_seq_subs[cur_dl()].append(line[line.find(':') + 1:])
+                    sequences_subfolders[-1][cur_dl()].append(line[line.find(':') + 1:])
                 elif re_sub_end.fullmatch(line):
-                    cur_seq_tags[cur_dl()].append(cur_tags_list.copy())
+                    sequences_tags[-1][cur_dl()].append(cur_tags_list.copy())
                 elif re_downloader_finilize.fullmatch(line):
                     cur_tags_list.clear()
                 else:
                     trace(f'Error: unknown param at line {i + 1:d}!')
                     raise IOError
             else:  # elif line[0] in '(-*' or line[0].isalpha():
-                assert cur_seq_ids[cur_dl()] or cur_seq_pages[cur_dl()]
+                assert sequences_ids[-1][cur_dl()] or sequences_pages[-1][cur_dl()]
                 if '  ' in line:
                     trace(f'Error: double space found in tags at line {i + 1:d}!')
                     raise IOError
@@ -265,38 +256,30 @@ def form_queries():
 
     if autoupdate_seqs:
         trace('Running max ID autoupdates...')
-        unsolved_idseqs_vid = [''] * 0
-        unsolved_idseqs_img = [''] * 0
+        unsolved_idseqs = [''] * 0
         maxids = fetch_maxids(dt for dt in autoupdate_seqs)
         for dt in autoupdate_seqs:
-            for idseq in autoupdate_seqs[dt]:
-                update_str_base = f'{dt} id sequence extended from {str(idseq.ints)} to '
+            for uidseq in autoupdate_seqs[dt]:
+                update_str_base = f'{dt} id sequence extended from {str(uidseq.ints)} to '
                 maxid = int(maxids[dt][4:])
-                idseq.ints.append(maxid)
-                trace(f'{update_str_base}{str(idseq.ints)}')
+                uidseq.ints.append(maxid)
+                trace(f'{update_str_base}{str(uidseq.ints)}')
                 maxid_fetched[dt] = maxid
-        for typ, idseq, usiseq in zip(('vid', 'img'), (sequences_ids_vid, sequences_ids_img), (unsolved_idseqs_vid, unsolved_idseqs_img)):
-            for dt in idseq:
-                if idseq[dt] is not None and len(idseq[dt]) < MIN_IDS_SEQ_LENGTH:
-                    usiseq.append(f'{dt}')
-                    trace(f'{dt} {typ} sequence is not fixed! \'{str(idseq[dt])}\'')
-        assert all(len(usiseq) == 0 for usiseq in (unsolved_idseqs_vid, unsolved_idseqs_img))
+        for cat, sidseq in zip(sequences_names, sequences_ids):
+            for dt in sidseq.dls:
+                if sidseq.dls[dt] is not None and len(sidseq.dls[dt]) < MIN_IDS_SEQ_LENGTH:
+                    unsolved_idseqs.append(f'{cat}:{dt}')
+                    trace(f'{cat}:{dt} sequence is not fixed! \'{str(sidseq.dls[dt])}\'')
+        assert len(unsolved_idseqs) == 0
 
     trace('Sequences parsed successfully\n')
-    validate_sequences(sequences_ids_vid, sequences_ids_img, sequences_pages_vid, sequences_pages_img,
-                       sequences_paths_vid, sequences_paths_img, sequences_tags_vid, sequences_tags_img,
-                       sequences_subfolders_vid, sequences_subfolders_img,
-                       sequences_paths_update)
+    validate_sequences(sequences_ids, sequences_pages, sequences_paths, sequences_tags, sequences_subfolders, sequences_paths_update)
 
     trace('Sequences validated. Finalizing...\n')
-    queries_final_vid, queries_final_img = queries_from_sequences(
-        sequences_ids_vid, sequences_ids_img, sequences_pages_vid, sequences_pages_img,
-        sequences_paths_vid, sequences_paths_img, sequences_tags_vid, sequences_tags_img,
-        sequences_subfolders_vid, sequences_subfolders_img, sequences_common_vid, sequences_common_img
-    )
+    queries_final = form_queries(sequences_ids, sequences_pages, sequences_paths, sequences_tags, sequences_subfolders, sequences_common)
 
-    report_finals(queries_final_vid, queries_final_img)
-    register_queries(queries_final_vid, queries_final_img)
+    report_finals(queries_final, sequences_names)
+    register_queries(queries_final, sequences_names)
 
 
 def update_next_ids() -> None:
@@ -312,7 +295,7 @@ def update_next_ids() -> None:
     filename_bak = f'{queries_file_name}_bak_{datetime_str_nfull()}.list'
     trace(f'File: \'{queries_file_name}\', backup file: \'{filename_bak}\'')
     try:
-        ids_downloaders = [dt for dt in Config.downloaders if (sequences_ids_vid[dt] or sequences_ids_img[dt])]
+        ids_downloaders = [dt for dt in Config.downloaders if any(idseq.dls[dt] for idseq in sequences_ids)]
         if ids_downloaders:
             [ids_downloaders.remove(dt) for dt in maxid_fetched if dt in ids_downloaders]
             results = fetch_maxids(ids_downloaders)
@@ -337,13 +320,14 @@ def update_next_ids() -> None:
             trace(f'\nWriting updated queries to \'{queries_file_name}\'...')
             maxids = {dt: int(results[dt][4:]) for dt in results}  # type: Dict[str, int]
             maxids.update(maxid_fetched)
-            for ty, sequences_ids_type in zip(('vid', 'img'), (sequences_ids_vid, sequences_ids_img)):
-                for i, dtseq in enumerate(sequences_ids_type.items()):  # type: int, Tuple[str, Optional[IntSequence]]
+            for idseq in sequences_ids:
+                ty = idseq.name
+                for i, dtseq in enumerate(idseq.dls.items()):  # type: int, Tuple[str, Optional[IntSequence]]
                     dt, seq = dtseq
                     line_n = (seq.line_num - 1) if seq and dt in maxids else None
-                    trace(f'{"W" if line_n else "Not w"}riting {dt} {ty} ids at idx {i:d}, line {line_n + 1 if line_n else -1:d}...')
+                    trace(f'{"W" if line_n else "Not w"}riting {ty} {dt} ids at idx {i:d}, line {line_n + 1 if line_n else -1:d}...')
                     if line_n:
-                        delta = 1 * int(not not {'vid': sequences_pages_vid, 'img': sequences_pages_img}[ty][dt])
+                        delta = 1 * int(not not [seqp.dls[dt] for seqp in sequences_pages if ty == seqp.name])
                         ids_at_line = queries_file_lines[line_n].strip().split(' ')
                         queries_file_lines[line_n] = ' '.join([ids_at_line[0]] + ids_at_line[2:] + [f'{maxids[dt] + delta:d}\n'])
                 trace(f'Writing {ty} ids done')

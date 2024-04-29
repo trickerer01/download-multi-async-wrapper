@@ -1,13 +1,13 @@
-## made by: somebody             <-- COMMENTS
+## author: trickerer01           <-- COMMENTS
 ## This file is only for syntax reference
 
 ### PYTHON:python3               <-- PATH TO PYTHON EXECUTABLE (NORMALLY PRESENT IN PATH) <REQUIRED>
-### (VIDEOS) ###                 <-- VIDEOS MARKER <REQUIRED>
+### (vid) ###                    <-- CATEGORY MARKER, AT LEAST 1 SYMBOL (SUBFOLDER NAME: 'vid') <REQUIRED>
 # nm                             <-- DOWNLOADER TYPE <REQUIRED>
 # p10 s1                         <-- SWITCH TO PAGES SCAN INSTEAD OF IDS (PAGES NUMBER, STARTING PAGE) <OPTIONAL>
 # 50000 51000                    <-- AT LEAST ONE OR TWO IDS FOR RANGE <REQUIRED>
                                      A SIGNLE ID MEANS FROM THIS AND UP (TILL CURRENT MAX ID)
-# basepath:D:/Projects/NM        <-- PATH TO THE DOWNLOADER BASE PATH <REQUIRED>
+# basepath:D:/Projects/NM        <-- PATH TO THE DOWNLOADER BASE FOLDER <REQUIRED>
 # common:-dmode touch            <-- ARGUMENTS TO ADD TO EVERY QUERY <OPTIONAL>
 # common:-log trace              <-- ARGUMENTS TO ADD TO EVERY QUERY <OPTIONAL>
 # common:--dump-tags             <-- ARGUMENTS TO ADD TO EVERY QUERY <OPTIONAL>
@@ -84,7 +84,7 @@ ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
 # send
 # end
 
-### (IMAGES) ###                 <-- IMAGES MARKER (RUXX ONLY) <REQUIRED>
+### (img) ###
 # rx
 # 5050000 5051000
 # basepath:D:/Projects/Ruxx
@@ -92,4 +92,8 @@ ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
 # sub:...
 ...
 # send
+# end
+
+### (comic) ###
+...
 # end

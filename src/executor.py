@@ -8,13 +8,13 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 
 from asyncio import AbstractEventLoop, Future, SubprocessProtocol, new_event_loop, sleep, as_completed
 from os import path
-from typing import Dict, List, Optional, Mapping, Sequence
+from typing import Dict, List, Optional, Sequence, Tuple
 
 from defs import Config, UTF8, DOWNLOADERS, RUN_FILE_DOWNLOADERS
 from logger import trace, log_to
 from strings import datetime_str_nfull, unquote
 
-__all__ = ('ques_vid', 'ques_img', 'register_queries', 'execute')
+__all__ = ('ques', 'register_queries', 'execute')
 
 
 class DummyResultProtocol(SubprocessProtocol):
@@ -27,13 +27,17 @@ class DummyResultProtocol(SubprocessProtocol):
 
 executor_event_loop = None  # type: Optional[AbstractEventLoop]
 
-ques_vid = {dt: list() for dt in DOWNLOADERS}  # type: Dict[str, List[str]]
-ques_img = {dt: list() for dt in DOWNLOADERS}  # type: Dict[str, List[str]]
+ques = list()  # type: List[Tuple[str, Dict[str, List[str]]]]
 
 
-def register_queries(queries_v: Mapping[str, List[str]], queries_i: Mapping[str, List[str]]) -> None:
-    ques_vid.update(queries_v)
-    ques_img.update(queries_i)
+def sum_lists(lists) -> list:
+    total = list()
+    [total.extend(li) for li in lists]
+    return total
+
+
+def register_queries(queries: Dict[str, Dict[str, List[str]]], cat_names: List[str]) -> None:
+    [ques.append((cat, queries[cat])) for cat in cat_names]
 
 
 def split_into_args(query: str) -> List[str]:
@@ -92,19 +96,19 @@ async def run_dt_cmds(dts: Sequence[str], qts: Sequence[str], queries: Sequence[
 
     dt = dts[0]
     assert all(_ == dt for _ in dts)
+    assert len(dts) == len(qts) == len(queries)
 
     if dt not in Config.downloaders:
         await sleep(1.0)  # delay this message so it isn't printed somewhere inbetween initial cmds
         trace(f'\n{dt.upper()} SKIPPED\n')
         return
 
-    qns = [0, 0]
-    for qi in range(len(queries)):
-        q_idx = 1 - int(qts[qi] == 'vid')
-        qns[q_idx] += 1
+    qns = {qt: 0 for qt in qts}  # type: Dict[str, int]
+    for qi, qt in enumerate(qts):
+        qns[qt] += 1
         if Config.test:
             continue
-        await run_cmd(queries[qi], dt, qi + 1, qts[qi], qns[q_idx])
+        await run_cmd(queries[qi], dt, qi + 1, qt, qns[qt])
     trace(f'{dt.upper()} COMPLETED\n')
 
 
@@ -114,9 +118,9 @@ async def run_all_cmds() -> None:
         return
 
     for cv in as_completed([run_dt_cmds(dts, qts, queries) for dts, qts, queries in
-                            zip([[dt] * (len(ques_vid[dt]) + len(ques_img[dt])) for dt in DOWNLOADERS],
-                                [['vid'] * len(ques_vid[dt]) + ['img'] * len(ques_img[dt]) for dt in DOWNLOADERS],
-                                [ques_vid[dt] + ques_img[dt] for dt in DOWNLOADERS])]):
+                            zip([[dt] * sum(len(cq[dt]) for _, cq in ques) for dt in DOWNLOADERS],
+                                [sum_lists([ty] * len(cq[dt]) for ty, cq in ques) for dt in DOWNLOADERS],
+                                [sum_lists(cques[dt] for ty, cques in ques) for dt in DOWNLOADERS])]):
         await cv
     trace('ALL DOWNLOADERS FINISHED WORK\n')
 

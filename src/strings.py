@@ -51,8 +51,8 @@ def normalize_ruxx_tag(tag: str) -> str:
     return tag
 
 
-def path_args(dest_base: str, img: bool, sub: str, datepath: bool) -> str:
-    return f'-path "{dest_base}{f"{date_str_md(img)}/" if datepath else ""}{sub}{"/" if sub else ""}"'
+def path_args(dest_base: str, cat: str, sub: str, datepath: bool) -> str:
+    return f'-path "{dest_base}{f"{date_str_md(cat)}/" if datepath else ""}{f"{sub}/" if sub else ""}"'
 
 
 def time_now_fmt(fmt: str) -> str:
@@ -76,14 +76,12 @@ def datetime_str_nfull() -> str:
     return time_now_fmt('%Y-%m-%d_%H_%M_%S')
 
 
-def date_str_md(img: bool) -> str:
+def date_str_md(cat: str) -> str:
     """
-    date in format:\n\n
-    'mmdd' for videos\n\n
-    'img_mmdd' for images\n\n
+    date in '{cat}_mmdd' format\n\n
     usable in folder names
     """
-    return f'{"img_" if img else ""}{time_now_fmt("%m%d")}'
+    return f'{f"{cat}_" if cat else ""}{time_now_fmt("%m%d")}'
 
 #
 #

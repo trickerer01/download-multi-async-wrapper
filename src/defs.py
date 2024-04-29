@@ -8,7 +8,8 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 
 from abc import ABC, abstractmethod
-from typing import List, Union, Tuple, Iterable, TypeVar
+from copy import deepcopy
+from typing import List, Union, Tuple, Iterable, TypeVar, Dict, Optional, Generic
 
 UTF8 = 'utf-8'
 ACTION_STORE_TRUE = 'store_true'
@@ -213,6 +214,36 @@ RANGE_TEMPLATE_PAGES = {
 
 STOP_ID_TEMPLATE = '-stop_id %d'
 BEGIN_ID_TEMPLATE = '-begin_id %d'
+
+# must have __len__() defined
+DT = TypeVar('DT', str, list, IntSequence)
+
+
+class DownloadCollection(Generic[DT]):
+
+    def __init__(self, name: str, init_value: DT = None) -> None:
+        self._name = name
+        self._dls = {dt: deepcopy(init_value) for dt in DOWNLOADERS}  # type: Dict[str, Optional[DT]]
+
+    def __getitem__(self, key: str) -> DT:
+        return self.dls.__getitem__(key)
+
+    def __setitem__(self, key: str, value: DT) -> None:
+        self.dls.__setitem__(key, value)
+
+    def __str__(self) -> str:
+        return f'\'{self.name}\': {",".join(f"{t}[{len(self.dls[t])}]" for t in self.dls if self.dls[t]) or "None"}'
+
+    def __repr__(self) -> str:
+        return str(self)
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def dls(self) -> Dict[str, Optional[DT]]:
+        return self._dls
 
 #
 #

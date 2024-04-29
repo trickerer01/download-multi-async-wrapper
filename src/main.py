@@ -14,7 +14,7 @@ from cmdargs import parse_arglist
 from defs import SUPPORTED_SYSTEMS
 from executor import execute
 from logger import open_logfile, close_logfile, trace
-from queries import read_queries_file, form_queries, update_next_ids
+from queries import read_queries_file, prepare_queries, update_next_ids
 from strings import datetime_str_full
 
 __all__ = ('main_sync',)
@@ -28,7 +28,7 @@ def run_main(args: Sequence[str]) -> int:
         trace('Logfile opened...', False)
         trace(f'\n# Started at {datetime_str_full()} #')
         read_queries_file()
-        form_queries()
+        prepare_queries()
         execute()
         update_next_ids()
         trace(f'\n# Finished at {datetime_str_full()} #')
