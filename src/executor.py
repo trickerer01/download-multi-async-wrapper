@@ -65,7 +65,7 @@ def split_into_args(query: str) -> List[str]:
 
 async def run_cmd(query: str, dt: str, qn: int, qt: str, qtn: int) -> None:
     exec_time = datetime_str_nfull()
-    begin_msg = f'\nExecuting {dt} {qt} query {qtn:d}:\n{query}'
+    begin_msg = f'\nExecuting \'{qt}\' {dt} query {qtn:d} ({dt} query {qn:d}):\n{query}'
     log_file_name = f'{Config.dest_logs_base}log_{dt}{qn:03d}_{qt}{qtn:03d}_{exec_time}.log'
     with open(log_file_name, 'at', encoding=UTF8, buffering=1) as log_file:
         trace(begin_msg)
