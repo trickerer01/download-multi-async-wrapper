@@ -7,6 +7,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 
 from asyncio import AbstractEventLoop, Future, SubprocessProtocol, new_event_loop, sleep, as_completed
+from math import log10, ceil
 from os import path
 from typing import Dict, List, Optional, Sequence, Tuple
 
@@ -28,6 +29,7 @@ class DummyResultProtocol(SubprocessProtocol):
 executor_event_loop = None  # type: Optional[AbstractEventLoop]
 
 queries_all = list()  # type: List[Tuple[str, Dict[str, List[str]]]]
+dtqn_fmt = '02d'
 
 
 def sum_lists(lists) -> list:
@@ -37,7 +39,10 @@ def sum_lists(lists) -> list:
 
 
 def register_queries(queries: Dict[str, Dict[str, List[str]]], cat_names: List[str]) -> None:
+    global dtqn_fmt
     [queries_all.append((cat, queries[cat])) for cat in cat_names]
+    max_queries_per_downloader = max(max(list(len(queries[cat][dt]) for dt in queries[cat]) for cat in queries))
+    dtqn_fmt = f'0{int(ceil(log10(max_queries_per_downloader + 1))):d}d'
 
 
 def split_into_args(query: str) -> List[str]:
@@ -66,7 +71,7 @@ def split_into_args(query: str) -> List[str]:
 async def run_cmd(query: str, dt: str, qn: int, qt: str, qtn: int) -> None:
     exec_time = datetime_str_nfull()
     begin_msg = f'\nExecuting \'{qt}\' {dt} query {qtn:d} ({dt} query {qn:d}):\n{query}'
-    log_file_name = f'{Config.dest_logs_base}log_{dt}{qn:03d}_{qt}{qtn:03d}_{exec_time}.log'
+    log_file_name = f'{Config.dest_logs_base}log_{dt}{qn:{dtqn_fmt}}_{qt}{qtn:{dtqn_fmt}}_{exec_time}.log'
     with open(log_file_name, 'at', encoding=UTF8, buffering=1) as log_file:
         trace(begin_msg)
         log_to(begin_msg, log_file)
@@ -75,7 +80,7 @@ async def run_cmd(query: str, dt: str, qn: int, qt: str, qtn: int) -> None:
         # if DOWNLOADERS.index(dt) not in {0} or qn not in range(1, 2):
         #     return
         if dt in RUN_FILE_DOWNLOADERS and len(query) > Config.max_cmd_len:
-            run_file_name = f'{Config.dest_run_base}run_{dt}{qn:03d}_{qt}{qtn:03d}_{exec_time}.conf'
+            run_file_name = f'{Config.dest_run_base}run_{dt}{qn:{dtqn_fmt}}_{qt}{qtn:{dtqn_fmt}}_{exec_time}.conf'
             trace(f'Cmdline is too long ({len(query):d}/{Config.max_cmd_len:d})! Converting to run file: {run_file_name}')
             run_file_abspath = path.abspath(run_file_name)
             cmd_args_new = cmd_args[2:]
