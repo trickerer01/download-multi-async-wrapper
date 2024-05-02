@@ -220,6 +220,7 @@ def prepare_queries() -> None:
                 if line[0] != '(' and not line.startswith('-+(') and '~' in line:
                     trace(f'Error: unsupported ungrouped OR symbol at line {i + 1:d}!')
                     raise IOError
+                need_append = True
                 if all_tags_negative(line.split(' ')):  # line[0] === '-'
                     if line[1] in '-+':
                         # remove --tag(s) or -+tag(s) from list, convert: --a --b -> [-a, -b] OR -+a -+b -> [a, b]
@@ -238,11 +239,22 @@ def prepare_queries() -> None:
                         assert all(len(tag) > 0 for tag in tags_split)
                         need_find_previous_or_group = True
                         tags_rem = '~'.join(tags_split)
-                        start_idx = 1 if split_len > 1 else 0  # type: int
-                        end_idx = -1 if split_len > 1 else None  # type: Optional[int]
+                        tags_search = ','.join(tags_split)
+                        start_idx = 1 if split_len > 1 else 0
+                        end_idx = -1 if split_len > 1 else None
                         for j in reversed(range(len(cur_tags_list))):  # type: int
-                            border_condition = split_len == 1 or cur_tags_list[j][:: len(cur_tags_list[j]) - 1] == '()'
-                            if border_condition and cur_tags_list[j][start_idx:end_idx] == tags_rem:
+                            cur_tag = cur_tags_list[j]
+                            prev_tag = cur_tags_list[j - 1] if j > 0 else ''
+                            try_match_search = j > 0 and prev_tag.startswith('-search')
+                            if try_match_search and cur_tag == tags_search:
+                                del cur_tags_list[j]
+                                del cur_tags_list[j - 1]
+                                need_find_previous_or_group = False
+                                if prev_tag == '-search' or prev_tag.startswith('-search_rule'):
+                                    need_append = False
+                                break
+                            try_match_rem = split_len == 1 or cur_tag[::len(cur_tag) - 1] == '()'
+                            if try_match_rem and cur_tag[start_idx:end_idx] == tags_rem:
                                 del cur_tags_list[j]
                                 need_find_previous_or_group = False
                                 break
@@ -250,9 +262,11 @@ def prepare_queries() -> None:
                             trace(f'Info: exclusion(s) at {i + 1:d}, no previous matching tag or \'or\' group found. Line: \'{line}\'')
                 elif not all_tags_positive(line.split(' ')):
                     param_like = line[0] == '-' and len(line.split(' ')) == 2
-                    trace(f'Warning (W2): mixed positive / negative tags at line {i + 1:d}, '
-                          f'{"param" if param_like else "error"}? Line: \'{line}\'')
-                cur_tags_list += line.split(' ')
+                    if not (param_like and (line.startswith('-search') or line.startswith('-quality'))):
+                        trace(f'Warning (W2): mixed positive / negative tags at line {i + 1:d}, '
+                              f'{"param" if param_like else "error"}? Line: \'{line}\'')
+                if need_append:
+                    cur_tags_list += line.split(' ')
         except Exception:
             trace(f'Error: issue encountered while parsing queries file at line {i + 1:d}!')
             raise
