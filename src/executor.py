@@ -41,7 +41,7 @@ def sum_lists(lists: Iterable[Iterable[Any]]) -> list:
 def register_queries(queries: DownloadCollection[List[str]]) -> None:
     global dtqn_fmt
     queries_all.update(queries)
-    max_queries_per_downloader = max(max(list(len(queries[cat][dt]) for dt in queries[cat]) for cat in queries))
+    max_queries_per_downloader = max(sum(len(queries[cat][dt]) for cat in queries) for dt in DOWNLOADERS)
     dtqn_fmt = f'0{int(ceil(log10(max_queries_per_downloader + 1))):d}d'
 
 
