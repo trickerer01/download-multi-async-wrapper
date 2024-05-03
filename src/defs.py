@@ -8,8 +8,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 
 from abc import ABC, abstractmethod
-from collections import OrderedDict
-from typing import List, Union, Tuple, Iterable, Type, TypeVar, Dict, Optional, Generic
+from typing import List, Union, Tuple, Iterable, Type, TypeVar, Dict, OrderedDict, Optional
 
 UTF8 = 'utf-8'
 ACTION_STORE_TRUE = 'store_true'
@@ -95,9 +94,9 @@ RUXX_DOWNLOADERS = (DOWNLOADER_RN, DOWNLOADER_RX, DOWNLOADER_RS)
 RUN_FILE_DOWNLOADERS = (DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RC)
 PAGE_DOWNLOADERS = (DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RC)
 
-APP_NAME_NM = DOWNLOADER_NM.upper(),
-APP_NAME_RV = DOWNLOADER_RV.upper(),
-APP_NAME_RC = DOWNLOADER_RC.upper(),
+APP_NAME_NM = DOWNLOADER_NM.upper()
+APP_NAME_RV = DOWNLOADER_RV.upper()
+APP_NAME_RC = DOWNLOADER_RC.upper()
 APP_NAME_RUXX = 'Ruxx'
 APP_NAMES = {
     DOWNLOADER_NM: APP_NAME_NM,
@@ -219,7 +218,7 @@ BEGIN_ID_TEMPLATE = '-begin_id %d'
 DT = TypeVar('DT', str, list, IntSequence)
 
 
-class DownloadCollection(OrderedDict, Generic[DT]):
+class DownloadCollection(OrderedDict[str, Dict[str, Optional[DT]]]):
     def add_category(self, cat: str, init_type: Type[DT] = None) -> None:
         self[cat] = {dt: self._make_init_value(init_type) for dt in DOWNLOADERS}
 

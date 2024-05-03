@@ -283,7 +283,7 @@ def prepare_queries() -> None:
                 uidseq.ints.append(maxid)
                 trace(f'{update_str_base}{str(uidseq.ints)}')
                 maxid_fetched[dt] = maxid
-        for cat in sequences_ids:  # type: str
+        for cat in sequences_ids:
             for dt in sequences_ids[cat]:
                 if sequences_ids[cat][dt] is not None and len(sequences_ids[cat][dt]) < MIN_IDS_SEQ_LENGTH:
                     unsolved_idseqs.append(f'{cat}:{dt}')

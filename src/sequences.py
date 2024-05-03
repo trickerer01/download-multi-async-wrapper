@@ -8,7 +8,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 
 from re import compile as re_compile
 from subprocess import check_output
-from typing import Dict, List, Sequence, Optional, Any
+from typing import Dict, Set, List, Sequence, Optional, Any
 
 from defs import (
     DownloadCollection, IntPair, Config, IntSequence, DOWNLOADERS, RANGE_TEMPLATE_IDS, RANGE_TEMPLATE_PAGES, RUXX_DOWNLOADERS,
@@ -39,10 +39,10 @@ def validate_runners(sequences_paths: DownloadCollection[str], sequences_paths_u
         raise IOError
     if Config.test is True:
         return
-    checked_paths = set()
+    checked_paths = set()  # type: Set[str]
     if not Config.no_download:
-        for cat in sequences_paths:  # type: str
-            for dtd in sequences_paths[cat]:  # type: str
+        for cat in sequences_paths:
+            for dtd in sequences_paths[cat]:
                 dpath = sequences_paths[cat][dtd]  # type: Optional[str]
                 if not dpath or dtd not in Config.downloaders:
                     continue
@@ -60,7 +60,7 @@ def validate_runners(sequences_paths: DownloadCollection[str], sequences_paths_u
                     trace(f'Error: invalid {dtd} downloader found at: \'{dpath}\' ({cat})!')
                     raise IOError
     if Config.update:
-        for dtu, upath in sequences_paths_update.items():  # type: str, Optional[str]
+        for dtu, upath in sequences_paths_update.items():
             if not upath:
                 continue
             if upath in checked_paths:
@@ -89,7 +89,7 @@ def validate_sequences(
         trace('Error: python executable was not declared!')
         raise IOError
     for dt in DOWNLOADERS:
-        for cat in sequences_ids:  # type: str
+        for cat in sequences_ids:
             intseq = sequences_ids[cat][dt]  # type: Optional[IntSequence]
             ivlist = list(intseq.ints if intseq else [])
             for iv in range(1, len(ivlist)):
