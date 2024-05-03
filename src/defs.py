@@ -9,8 +9,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 
 from abc import ABC, abstractmethod
 from collections import OrderedDict
-from copy import deepcopy
-from typing import List, Union, Tuple, Iterable, TypeVar, Dict, Optional, Generic
+from typing import List, Union, Tuple, Iterable, Type, TypeVar, Dict, Optional, Generic
 
 UTF8 = 'utf-8'
 ACTION_STORE_TRUE = 'store_true'
@@ -221,11 +220,15 @@ DT = TypeVar('DT', str, list, IntSequence)
 
 
 class DownloadCollection(OrderedDict, Generic[DT]):
-    def add_category(self, cat: str, init_value: DT = None) -> None:
-        self[cat] = {dt: deepcopy(init_value) for dt in DOWNLOADERS}  # type: Dict[str, Optional[DT]]
+    def add_category(self, cat: str, init_type: Type[DT] = None) -> None:
+        self[cat] = {dt: self._make_init_value(init_type) for dt in DOWNLOADERS}
 
     def cur(self) -> Dict[str, Optional[DT]]:
         return self.values().__reversed__().__next__()
+
+    @staticmethod
+    def _make_init_value(init_type: Type[DT]) -> DT:
+        return init_type() if init_type else None
 
     def _sub_to_str(self, cat: str) -> str:
         return f'\'{self[cat]}\': {",".join(f"{dt}[{len(self[cat][dt])}]" for dt in self[cat] if self[cat][dt]) or "None"}'

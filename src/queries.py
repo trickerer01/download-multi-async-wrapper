@@ -135,9 +135,9 @@ def prepare_queries() -> None:
                 sequences_ids.add_category(cur_cat)
                 sequences_pages.add_category(cur_cat)
                 sequences_paths.add_category(cur_cat)
-                sequences_common.add_category(cur_cat, list())
-                sequences_tags.add_category(cur_cat, list())
-                sequences_subfolders.add_category(cur_cat, list())
+                sequences_common.add_category(cur_cat, list)
+                sequences_tags.add_category(cur_cat, list)
+                sequences_subfolders.add_category(cur_cat, list)
                 cur_tags_list.clear()
                 continue
             if line[0] not in '(-*#' and not line[0].isalpha():

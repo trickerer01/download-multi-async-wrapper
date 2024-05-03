@@ -121,11 +121,12 @@ async def run_all_cmds() -> None:
     if Config.no_download is True:
         trace('\n\nALL DOWNLOADERS SKIPPED DUE TO no_download FLAG!\n')
         return
-
-    for cv in as_completed([run_dt_cmds(dts, qts, queries) for dts, qts, queries in
-                            zip([[dt] * sum(len(queries_all[cat][dt]) for cat in queries_all) for dt in DOWNLOADERS],
-                                [sum_lists([cat] * len(queries_all[cat][dt]) for cat in queries_all) for dt in DOWNLOADERS],
-                                [sum_lists(queries_all[cat][dt] for cat in queries_all) for dt in DOWNLOADERS])]):
+    for cv in as_completed(map(
+        run_dt_cmds,
+        [[dt] * sum(len(queries_all[cat][dt]) for cat in queries_all) for dt in DOWNLOADERS],
+        [sum_lists([cat] * len(queries_all[cat][dt]) for cat in queries_all) for dt in DOWNLOADERS],
+        [sum_lists(queries_all[cat][dt] for cat in queries_all) for dt in DOWNLOADERS]
+    )):
         await cv
     trace('ALL DOWNLOADERS FINISHED WORK\n')
 
