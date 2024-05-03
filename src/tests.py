@@ -73,7 +73,7 @@ class QueriesFormTests(TestCase):
         prepare_queries()
         self.assertEqual('python3', Config.python)
         self.assertEqual(1, len(queries_all[0][1][DOWNLOADER_NM]))
-        self.assertEqual(0, len(queries_all[0][1][DOWNLOADER_RV]))
+        self.assertEqual(3, len(queries_all[0][1][DOWNLOADER_RV]))
         self.assertEqual(0, len(queries_all[0][1][DOWNLOADER_RC]))
         self.assertEqual(0, len(queries_all[0][1][DOWNLOADER_RN]))
         self.assertEqual(0, len(queries_all[0][1][DOWNLOADER_RX]))
@@ -85,12 +85,30 @@ class QueriesFormTests(TestCase):
         self.assertEqual(2, len(queries_all[1][1][DOWNLOADER_RX]))
         self.assertEqual(0, len(queries_all[1][1][DOWNLOADER_RS]))
         self.assertEqual(
-            f'python3 "D:/nm/src/ids.py" -start 1 -end 1 -path "../tests/{date_str_md("VID")}/" --dump-tags --verbose -script "'
+            f'python3 "D:/NM/src/ids.py" -start 1 -end 1 -path "../tests/{date_str_md("VID")}/" --dump-tags -script "'
             'a: -quality 1080p -a -b -c -dfff ggg; '
             'b: -quality 1080p -a -b -c -dfff -ggg -(x,z) (h~i~j~k); '
             'c: -quality 1080p -a -b -c -dfff -ggg -h -i -j -k (l~m~n); '
             'd: -a -b -c -ggg -h -i -j -k -l -m -n -quality 360p -uvp always"',
             queries_all[0][1][DOWNLOADER_NM][0]
+        )
+        self.assertEqual(
+            f'python3 "D:/old/RV/src/pages.py" -pages 5 -start 2 -stop_id 5 -begin_id 9 -path "../tests/{date_str_md("VID")}/a/" '
+            '-log info -timeout 15 -retries 50 -throttle 30 --dump-descriptions --dump-tags --dump-comments '
+            '-quality 1080p -search a',
+            queries_all[0][1][DOWNLOADER_RV][0]
+        )
+        self.assertEqual(
+            f'python3 "D:/old/RV/src/pages.py" -pages 5 -start 2 -stop_id 5 -begin_id 9 -path "../tests/{date_str_md("VID")}/b/" '
+            '-log info -timeout 15 -retries 50 -throttle 30 --dump-descriptions --dump-tags --dump-comments '
+            '-quality 1080p -search_tag b,c,d -search_rule_tag any',
+            queries_all[0][1][DOWNLOADER_RV][1]
+        )
+        self.assertEqual(
+            f'python3 "D:/old/RV/src/pages.py" -pages 5 -start 2 -stop_id 5 -begin_id 9 -path "../tests/{date_str_md("VID")}/c/" '
+            '-log info -timeout 15 -retries 50 -throttle 30 --dump-descriptions --dump-tags --dump-comments '
+            '-quality 1080p -b -c -d -(g,h,i) -search_tag e,f -search_rule_tag all',
+            queries_all[0][1][DOWNLOADER_RV][2]
         )
         self.assertEqual(
             f'python3 "D:/ruxx/src/ruxx_cmd.py" id:>=1 id:<=1 -path "../tests/{date_str_md("IMA")}/a/" -module rx a',

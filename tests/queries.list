@@ -2,16 +2,15 @@
 ### (VIDEOS) ###
 # nm
 # 1 2
-# basepath:D:/nm/
+# basepath:D:/NM/
 # common:-dmode touch
 # common:--dump-tags
-# common:--verbose
+## <generic comment>
 # sub:a
 -quality 1080p
 -a -b -c -dfff
 ggg
 # send
-
 
 # sub:b
 -ggg
@@ -31,6 +30,32 @@ ggg
 --dfff
 -quality 360p
 -uvp always
+# send
+# end
+
+# rv
+# p5 s2
+# 5 9
+# basepath:D:/old/RV
+# common:-log info -timeout 15 -retries 50 -throttle 30 --dump-descriptions --dump-tags --dump-comments
+# sub:a
+-quality 1080p
+-search a
+# send
+
+# sub:b
+## --search -+a
+-a
+-search_tag b,c,d
+-search_rule_tag any
+# send
+
+# sub:c
+-any
+-b -c -d
+-(g,h,i)
+-search_tag e,f
+-search_rule_tag all
 # send
 # end
 
