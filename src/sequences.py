@@ -17,39 +17,14 @@ from defs import (
 from logger import trace
 from strings import NEWLINE, normalize_ruxx_tag, path_args
 
-__all__ = ('validate_sequences', 'form_queries', 'report_finals')
+__all__ = ('validate_runners', 'validate_sequences', 'form_queries', 'report_finals')
 
 
 def unused_argument(arg: Any) -> None:
     bool(arg)
 
 
-def validate_sequences(
-    sequences_ids: List[DownloadCollection[IntSequence]], sequences_pages: List[DownloadCollection[IntSequence]],
-    sequences_paths: List[DownloadCollection[str]], sequences_tags: List[DownloadCollection[Sequence[List[str]]]],
-    sequences_subfolders: List[DownloadCollection[Sequence[str]]], sequences_paths_update: Dict[str, Optional[str]]
-) -> None:
-    unused_argument(sequences_pages)
-    unused_argument(sequences_subfolders)
-    if not Config.python:
-        trace('Error: python executable was not declared!')
-        raise IOError
-    for dt in DOWNLOADERS:
-        for sids in sequences_ids:
-            ivlist = list(sids[dt].ints if sids[dt] else [])
-            for iv in range(1, len(ivlist)):
-                if ivlist[iv - 1] >= ivlist[iv]:
-                    trace(f'Error: {sids.name}:{dt} ids sequence is corrupted at idx {iv - 1:d}, {ivlist[iv - 1]:d} >= {ivlist[iv]:d}!')
-                    raise IOError
-        for spaths in sequences_paths:
-            if (not not spaths[dt]) != (not not (spaths[dt] or spaths[dt])):
-                trace(f'Error: sequence list existance for {spaths.name} tags/ids mismatch for {dt}!')
-                raise IOError
-        for stags in sequences_tags:
-            len1, len2 = len(stags[dt]), len(stags[dt])
-            if len1 != len2:
-                trace(f'Error: sequence list for {stags.name} tags/subs mismatch for {dt}: {len1:d} vs {len2:d}!')
-                raise IOError
+def validate_runners(sequences_paths: List[DownloadCollection[str]], sequences_paths_update: Dict[str, Optional[str]]) -> None:
     try:
         trace('Looking for python executable...')
         re_py_ver = re_compile(r'^[Pp]ython (\d)\.(\d{1,2})\.(\d+)$')
@@ -99,6 +74,34 @@ def validate_sequences(
                 assert out_u_str.startswith(APP_NAMES[dtu]), f'Unexpected output for {dtu}: {out_u_str[:min(len(out_u_str), 20)]}!'
             except Exception:
                 trace(f'Error: invalid {dtu} updater found at: \'{upath}\'!')
+                raise IOError
+
+
+def validate_sequences(
+    sequences_ids: List[DownloadCollection[IntSequence]], sequences_pages: List[DownloadCollection[IntSequence]],
+    sequences_paths: List[DownloadCollection[str]], sequences_tags: List[DownloadCollection[Sequence[List[str]]]],
+    sequences_subfolders: List[DownloadCollection[Sequence[str]]]
+) -> None:
+    unused_argument(sequences_pages)
+    unused_argument(sequences_subfolders)
+    if not Config.python:
+        trace('Error: python executable was not declared!')
+        raise IOError
+    for dt in DOWNLOADERS:
+        for sids in sequences_ids:
+            ivlist = list(sids[dt].ints if sids[dt] else [])
+            for iv in range(1, len(ivlist)):
+                if ivlist[iv - 1] >= ivlist[iv]:
+                    trace(f'Error: {sids.name}:{dt} ids sequence is corrupted at idx {iv - 1:d}, {ivlist[iv - 1]:d} >= {ivlist[iv]:d}!')
+                    raise IOError
+        for spaths in sequences_paths:
+            if (not not spaths[dt]) != (not not (spaths[dt] or spaths[dt])):
+                trace(f'Error: sequence list existance for {spaths.name} tags/ids mismatch for {dt}!')
+                raise IOError
+        for stags in sequences_tags:
+            len1, len2 = len(stags[dt]), len(stags[dt])
+            if len1 != len2:
+                trace(f'Error: sequence list for {stags.name} tags/subs mismatch for {dt}: {len1:d} vs {len2:d}!')
                 raise IOError
 
 

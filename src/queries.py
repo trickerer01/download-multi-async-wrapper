@@ -18,7 +18,7 @@ from defs import (
 )
 from executor import register_queries
 from logger import trace
-from sequences import validate_sequences, form_queries, report_finals
+from sequences import validate_sequences, form_queries, report_finals, validate_runners
 from strings import SLASH, NEWLINE, datetime_str_nfull, all_tags_negative, all_tags_positive, normalize_path
 
 __all__ = ('read_queries_file', 'prepare_queries', 'update_next_ids')
@@ -271,8 +271,11 @@ def prepare_queries() -> None:
             trace(f'Error: issue encountered while parsing queries file at line {i + 1:d}!')
             raise
 
+    trace('Sequences parsed successfully\n')
     if autoupdate_seqs:
-        trace('Running max ID autoupdates...')
+        trace('[Autoupdate] validating runners...\n')
+        validate_runners(sequences_paths, sequences_paths_update)
+        trace('Running max ID autoupdates...\n')
         unsolved_idseqs = [''] * 0
         maxids = fetch_maxids(dt for dt in autoupdate_seqs)
         for dt in autoupdate_seqs:
@@ -289,8 +292,10 @@ def prepare_queries() -> None:
                     trace(f'{cat}:{dt} sequence is not fixed! \'{str(sidseq.dls[dt])}\'')
         assert len(unsolved_idseqs) == 0
 
-    trace('Sequences parsed successfully\n')
-    validate_sequences(sequences_ids, sequences_pages, sequences_paths, sequences_tags, sequences_subfolders, sequences_paths_update)
+    trace('Validating sequences...\n')
+    validate_sequences(sequences_ids, sequences_pages, sequences_paths, sequences_tags, sequences_subfolders)
+    if not autoupdate_seqs:
+        validate_runners(sequences_paths, sequences_paths_update)
 
     trace('Sequences validated. Finalizing...\n')
     queries_final = form_queries(sequences_ids, sequences_pages, sequences_paths, sequences_tags, sequences_subfolders, sequences_common)
