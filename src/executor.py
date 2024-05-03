@@ -9,9 +9,9 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 from asyncio import AbstractEventLoop, Future, SubprocessProtocol, new_event_loop, sleep, as_completed
 from math import log10, ceil
 from os import path
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, List, Optional, Sequence, Iterable, Any
 
-from defs import Config, UTF8, DOWNLOADERS, RUN_FILE_DOWNLOADERS
+from defs import DownloadCollection, Config, UTF8, DOWNLOADERS, RUN_FILE_DOWNLOADERS
 from logger import trace, log_to
 from strings import datetime_str_nfull, unquote
 
@@ -28,19 +28,19 @@ class DummyResultProtocol(SubprocessProtocol):
 
 executor_event_loop = None  # type: Optional[AbstractEventLoop]
 
-queries_all = list()  # type: List[Tuple[str, Dict[str, List[str]]]]
+queries_all = DownloadCollection()  # type: DownloadCollection[List[str]]
 dtqn_fmt = '02d'
 
 
-def sum_lists(lists) -> list:
+def sum_lists(lists: Iterable[Iterable[Any]]) -> list:
     total = list()
     [total.extend(li) for li in lists]
     return total
 
 
-def register_queries(queries: Dict[str, Dict[str, List[str]]], cat_names: List[str]) -> None:
+def register_queries(queries: DownloadCollection[List[str]]) -> None:
     global dtqn_fmt
-    [queries_all.append((cat, queries[cat])) for cat in cat_names]
+    queries_all.update(queries)
     max_queries_per_downloader = max(max(list(len(queries[cat][dt]) for dt in queries[cat]) for cat in queries))
     dtqn_fmt = f'0{int(ceil(log10(max_queries_per_downloader + 1))):d}d'
 
@@ -123,9 +123,9 @@ async def run_all_cmds() -> None:
         return
 
     for cv in as_completed([run_dt_cmds(dts, qts, queries) for dts, qts, queries in
-                            zip([[dt] * sum(len(cques[dt]) for _, cques in queries_all) for dt in DOWNLOADERS],
-                                [sum_lists([ty] * len(cques[dt]) for ty, cques in queries_all) for dt in DOWNLOADERS],
-                                [sum_lists(cques[dt] for ty, cques in queries_all) for dt in DOWNLOADERS])]):
+                            zip([[dt] * sum(len(queries_all[cat][dt]) for cat in queries_all) for dt in DOWNLOADERS],
+                                [sum_lists([cat] * len(queries_all[cat][dt]) for cat in queries_all) for dt in DOWNLOADERS],
+                                [sum_lists(queries_all[cat][dt] for cat in queries_all) for dt in DOWNLOADERS])]):
         await cv
     trace('ALL DOWNLOADERS FINISHED WORK\n')
 

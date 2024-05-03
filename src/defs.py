@@ -8,6 +8,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 
 from abc import ABC, abstractmethod
+from collections import OrderedDict
 from copy import deepcopy
 from typing import List, Union, Tuple, Iterable, TypeVar, Dict, Optional, Generic
 
@@ -219,31 +220,21 @@ BEGIN_ID_TEMPLATE = '-begin_id %d'
 DT = TypeVar('DT', str, list, IntSequence)
 
 
-class DownloadCollection(Generic[DT]):
+class DownloadCollection(OrderedDict, Generic[DT]):
+    def add_category(self, cat: str, init_value: DT = None) -> None:
+        self[cat] = {dt: deepcopy(init_value) for dt in DOWNLOADERS}  # type: Dict[str, Optional[DT]]
 
-    def __init__(self, name: str, init_value: DT = None) -> None:
-        self._name = name
-        self._dls = {dt: deepcopy(init_value) for dt in DOWNLOADERS}  # type: Dict[str, Optional[DT]]
+    def cur(self) -> Dict[str, Optional[DT]]:
+        return self.values().__reversed__().__next__()
 
-    def __getitem__(self, key: str) -> DT:
-        return self.dls.__getitem__(key)
-
-    def __setitem__(self, key: str, value: DT) -> None:
-        self.dls.__setitem__(key, value)
+    def _sub_to_str(self, cat: str) -> str:
+        return f'\'{self[cat]}\': {",".join(f"{dt}[{len(self[cat][dt])}]" for dt in self[cat] if self[cat][dt]) or "None"}'
 
     def __str__(self) -> str:
-        return f'\'{self.name}\': {",".join(f"{t}[{len(self.dls[t])}]" for t in self.dls if self.dls[t]) or "None"}'
+        return '\n'.join(self._sub_to_str(cat) for cat in self)
 
     def __repr__(self) -> str:
         return str(self)
-
-    @property
-    def name(self) -> str:
-        return self._name
-
-    @property
-    def dls(self) -> Dict[str, Optional[DT]]:
-        return self._dls
 
 #
 #
