@@ -315,7 +315,7 @@ def update_next_ids() -> None:
     filename_bak = f'{queries_file_name}_bak_{datetime_str_nfull()}.list'
     trace(f'File: \'{queries_file_name}\', backup file: \'{filename_bak}\'')
     try:
-        ids_downloaders = [dt for dt in Config.downloaders if any(idseq.dls[dt] for idseq in sequences_ids)]
+        ids_downloaders = [dt for dt in Config.downloaders if any(sequences_ids[cat][dt] for cat in sequences_ids)]
         if ids_downloaders:
             [ids_downloaders.remove(dt) for dt in maxid_fetched if dt in ids_downloaders]
             results = fetch_maxids(ids_downloaders)
@@ -340,17 +340,16 @@ def update_next_ids() -> None:
             trace(f'\nWriting updated queries to \'{queries_file_name}\'...')
             maxids = {dt: int(results[dt][4:]) for dt in results}  # type: Dict[str, int]
             maxids.update(maxid_fetched)
-            for idseq in sequences_ids:
-                ty = idseq.name
-                for i, dtseq in enumerate(idseq.dls.items()):  # type: int, Tuple[str, Optional[IntSequence]]
+            for cat in sequences_ids:
+                for i, dtseq in enumerate(sequences_ids[cat].items()):  # type: int, Tuple[str, Optional[IntSequence]]
                     dt, seq = dtseq
                     line_n = (seq.line_num - 1) if seq and dt in maxids else None
-                    trace(f'{"W" if line_n else "Not w"}riting {ty} {dt} ids at idx {i:d}, line {line_n + 1 if line_n else -1:d}...')
+                    trace(f'{"W" if line_n else "Not w"}riting {cat}:{dt} ids at idx {i:d}, line {line_n + 1 if line_n else -1:d}...')
                     if line_n:
-                        delta = 1 * int(not not [seqp.dls[dt] for seqp in sequences_pages if ty == seqp.name])
+                        delta = 1 * int(not not sequences_pages[cat][dt])
                         ids_at_line = queries_file_lines[line_n].strip().split(' ')
                         queries_file_lines[line_n] = ' '.join([ids_at_line[0]] + ids_at_line[2:] + [f'{maxids[dt] + delta:d}\n'])
-                trace(f'Writing {ty} ids done')
+                trace(f'Writing {cat} ids done')
             with open(Config.script_path, 'wt', encoding=UTF8, buffering=1) as outfile:
                 outfile.writelines(queries_file_lines)
             trace('Writing done\n\nNext ids update successfully completed')
