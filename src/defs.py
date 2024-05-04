@@ -54,6 +54,8 @@ class IntSequence:
     def __setitem__(self, key: Union[int, slice], value: Union[int, Iterable[int]]) -> None:
         self.ints.__setitem__(key, value)
 
+    __repr__ = __str__
+
 
 class Pair(ABC):
     PT = TypeVar('PT')
@@ -241,8 +243,7 @@ class DownloadCollection(OrderedDict[str, Dict[str, Optional[DT]]]):
     def __str__(self) -> str:
         return '\n'.join(self._sub_to_str(cat) for cat in self)
 
-    def __repr__(self) -> str:
-        return str(self)
+    __repr__ = __str__
 
 
 class Wrapper(Generic[WT]):
