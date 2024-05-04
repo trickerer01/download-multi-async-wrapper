@@ -25,7 +25,6 @@ def run_main(args: Sequence[str]) -> int:
     try:
         parse_arglist(args)
         open_logfile()
-        trace('Logfile opened...', False)
         trace(f'\n# Started at {datetime_str_full()} #')
         read_queries_file()
         prepare_queries()
@@ -37,7 +36,6 @@ def run_main(args: Sequence[str]) -> int:
         traceback.print_exc()
         result = -3
     finally:
-        trace('\nClosing logfile...\n\n', False)
         close_logfile()
         return result
 

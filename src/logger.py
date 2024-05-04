@@ -21,11 +21,13 @@ def open_logfile() -> None:
     global logfile
     log_basename = f'log_{datetime_str_nfull()}.log' if not Config.debug else 'log.log'
     logfile = open(f'{Config.dest_logs_base}{log_basename}', 'at', encoding=UTF8, buffering=1)
+    trace('Logfile opened...', False)
 
 
 def close_logfile() -> None:
     global logfile
     if logfile:
+        trace('\nClosing logfile...\n\n', False)
         logfile.close()
         if Config.test:
             from os import remove
