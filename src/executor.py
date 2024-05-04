@@ -29,7 +29,7 @@ class DummyResultProtocol(SubprocessProtocol):
 executor_event_loop = Wrapper()  # type: Wrapper[Optional[AbstractEventLoop]]
 
 queries_all = DownloadCollection()  # type: DownloadCollection[List[str]]
-dtqn_fmt = '02d'
+dtqn_fmt = Wrapper('02d')
 
 
 def sum_lists(lists: Iterable[Iterable[Any]]) -> list:
@@ -39,10 +39,9 @@ def sum_lists(lists: Iterable[Iterable[Any]]) -> list:
 
 
 def register_queries(queries: DownloadCollection[List[str]]) -> None:
-    global dtqn_fmt
     queries_all.update(queries)
     max_queries_per_downloader = max(sum(len(queries[cat][dt]) for cat in queries) for dt in DOWNLOADERS)
-    dtqn_fmt = f'0{int(ceil(log10(max_queries_per_downloader + 1))):d}d'
+    dtqn_fmt.reset(f'0{int(ceil(log10(max_queries_per_downloader + 1))):d}d')
 
 
 def split_into_args(query: str) -> List[str]:
@@ -71,7 +70,7 @@ def split_into_args(query: str) -> List[str]:
 async def run_cmd(query: str, dt: str, qn: int, qt: str, qtn: int) -> None:
     exec_time = datetime_str_nfull()
     begin_msg = f'\nExecuting \'{qt}\' {dt} query {qtn:d} ({dt} query {qn:d}):\n{query}'
-    log_file_name = f'{Config.dest_logs_base}log_{dt}{qn:{dtqn_fmt}}_{qt}{qtn:{dtqn_fmt}}_{exec_time}.log'
+    log_file_name = f'{Config.dest_logs_base}log_{dt}{qn:{dtqn_fmt()}}_{qt}{qtn:{dtqn_fmt()}}_{exec_time}.log'
     with open(log_file_name, 'at', encoding=UTF8, buffering=1) as log_file:
         trace(begin_msg)
         log_to(begin_msg, log_file)
@@ -80,7 +79,7 @@ async def run_cmd(query: str, dt: str, qn: int, qt: str, qtn: int) -> None:
         # if DOWNLOADERS.index(dt) not in {0} or qn not in range(1, 2):
         #     return
         if dt in RUN_FILE_DOWNLOADERS and len(query) > Config.max_cmd_len:
-            run_file_name = f'{Config.dest_run_base}run_{dt}{qn:{dtqn_fmt}}_{qt}{qtn:{dtqn_fmt}}_{exec_time}.conf'
+            run_file_name = f'{Config.dest_run_base}run_{dt}{qn:{dtqn_fmt()}}_{qt}{qtn:{dtqn_fmt()}}_{exec_time}.conf'
             trace(f'Cmdline is too long ({len(query):d}/{Config.max_cmd_len:d})! Converting to run file: {run_file_name}')
             run_file_abspath = path.abspath(run_file_name)
             cmd_args_new = cmd_args[2:]

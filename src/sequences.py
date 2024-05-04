@@ -8,20 +8,16 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 
 from re import compile as re_compile
 from subprocess import check_output
-from typing import Dict, Set, List, Sequence, Optional, Any
+from typing import Dict, Set, List, Sequence, Optional
 
 from defs import (
     DownloadCollection, IntPair, Config, IntSequence, DOWNLOADERS, RANGE_TEMPLATE_IDS, RANGE_TEMPLATE_PAGES, RUXX_DOWNLOADERS,
-    STOP_ID_TEMPLATE, BEGIN_ID_TEMPLATE, APP_NAMES
+    STOP_ID_TEMPLATE, BEGIN_ID_TEMPLATE, APP_NAMES, unused_argument
 )
 from logger import trace
 from strings import NEWLINE, normalize_ruxx_tag, path_args
 
 __all__ = ('validate_runners', 'validate_sequences', 'form_queries', 'report_finals')
-
-
-def unused_argument(arg: Any) -> None:
-    bool(arg)
 
 
 def validate_runners(sequences_paths: DownloadCollection[str], sequences_paths_update: Dict[str, Optional[str]]) -> None:

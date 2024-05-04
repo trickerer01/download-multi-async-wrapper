@@ -32,6 +32,10 @@ MAX_CMD_LEN = {
 }
 
 
+def unused_argument(arg: Any) -> None:
+    bool(arg)
+
+
 def assert_notnull(obj: Any) -> Any:
     assert obj is not None
     return obj

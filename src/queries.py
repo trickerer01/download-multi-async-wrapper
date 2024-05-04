@@ -13,7 +13,7 @@ from threading import Thread, Lock as ThreadLock
 from typing import List, Dict, Optional, Tuple, Iterable
 
 from defs import (
-    DownloadCollection, IntSequence, Config, StrPair, UTF8, DOWNLOADERS, MIN_IDS_SEQ_LENGTH, PATH_APPEND_DOWNLOAD_IDS,
+    DownloadCollection, Wrapper, IntSequence, Config, StrPair, UTF8, DOWNLOADERS, MIN_IDS_SEQ_LENGTH, PATH_APPEND_DOWNLOAD_IDS,
     PATH_APPEND_DOWNLOAD_PAGES, PATH_APPEND_UPDATE, RUXX_DOWNLOADERS, PAGE_DOWNLOADERS, PROXY_ARG,
 )
 from executor import register_queries
@@ -36,7 +36,7 @@ re_sub_begin = re_compile(r'^# sub:[^ ].*?$')
 re_sub_end = re_compile(r'^# send$')
 re_downloader_finalize = re_compile(r'^# end$')
 
-queries_file_lines = list()  # type: List[str]
+queries_file_lines = Wrapper([''] * 0)
 
 sequences_ids = DownloadCollection()  # type: DownloadCollection[IntSequence]
 sequences_pages = DownloadCollection()  # type: DownloadCollection[IntSequence]
@@ -92,10 +92,8 @@ def fetch_maxids(dts: Iterable[str]) -> Dict[str, str]:
 
 
 def read_queries_file() -> None:
-    global queries_file_lines
-
     with open(Config.script_path, 'rt', encoding=UTF8) as qfile:
-        queries_file_lines = qfile.readlines()
+        queries_file_lines.reset(qfile.readlines())
 
 
 def prepare_queries() -> None:
@@ -118,7 +116,7 @@ def prepare_queries() -> None:
 
     trace('\nAnalyzing queries file strings...')
 
-    for i, line in enumerate(queries_file_lines):
+    for i, line in enumerate(queries_file_lines()):
         try:
             line = line.strip(' \n\ufeff')  # remove BOM too
             if line == '':
@@ -322,7 +320,7 @@ def update_next_ids() -> None:
             trace(f'\nSaving backup to \'{filename_bak}\'...')
             bak_fullpath = f'{Config.dest_bak_base}{filename_bak}'
             with open(bak_fullpath, 'wt', encoding=UTF8, buffering=1) as outfile_bak:
-                outfile_bak.writelines(queries_file_lines)
+                outfile_bak.writelines(queries_file_lines())
                 trace('Saving done')
 
             trace(f'\nSetting read-only permissions for \'{filename_bak}\'...')
@@ -347,11 +345,11 @@ def update_next_ids() -> None:
                     trace(f'{"W" if line_n else "Not w"}riting {cat}:{dt} ids at idx {i:d}, line {line_n + 1 if line_n else -1:d}...')
                     if line_n:
                         delta = 1 * int(not not sequences_pages[cat][dt])
-                        ids_at_line = queries_file_lines[line_n].strip().split(' ')
-                        queries_file_lines[line_n] = ' '.join([ids_at_line[0]] + ids_at_line[2:] + [f'{maxids[dt] + delta:d}\n'])
+                        ids_at_line = queries_file_lines()[line_n].strip().split(' ')
+                        queries_file_lines()[line_n] = ' '.join([ids_at_line[0]] + ids_at_line[2:] + [f'{maxids[dt] + delta:d}\n'])
                 trace(f'Writing {cat} ids done')
             with open(Config.script_path, 'wt', encoding=UTF8, buffering=1) as outfile:
-                outfile.writelines(queries_file_lines)
+                outfile.writelines(queries_file_lines())
             trace('Writing done\n\nNext ids update successfully completed')
         else:
             trace('No id sequences were used, next ids update cancelled')
