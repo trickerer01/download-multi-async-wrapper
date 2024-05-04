@@ -8,7 +8,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 
 from abc import ABC, abstractmethod
-from typing import List, Union, Tuple, Iterable, Type, TypeVar, Dict, OrderedDict, Optional
+from typing import List, Union, Tuple, Iterable, Type, TypeVar, Dict, OrderedDict, Optional, Any, Generic
 
 UTF8 = 'utf-8'
 ACTION_STORE_TRUE = 'store_true'
@@ -30,6 +30,11 @@ MAX_CMD_LEN = {
     OS_LINUX: 127000,
     OS_MACOS: 65000,
 }
+
+
+def assert_notnull(obj: Any) -> Any:
+    assert obj is not None
+    return obj
 
 
 class IntSequence:
@@ -216,6 +221,7 @@ BEGIN_ID_TEMPLATE = '-begin_id %d'
 
 # must have __len__() defined
 DT = TypeVar('DT', str, list, IntSequence)
+WT = TypeVar('WT')
 
 
 class DownloadCollection(OrderedDict[str, Dict[str, Optional[DT]]]):
@@ -237,6 +243,26 @@ class DownloadCollection(OrderedDict[str, Dict[str, Optional[DT]]]):
 
     def __repr__(self) -> str:
         return str(self)
+
+
+class Wrapper(Generic[WT]):
+    def __init__(self, value: WT = None) -> None:
+        self._value = value
+
+    def get(self) -> Optional[WT]:
+        return assert_notnull(self._value)
+
+    def reset(self, value: WT = None) -> None:
+        self.__init__(value)
+
+    def __bool__(self) -> bool:
+        return not not self._value
+
+    def __str__(self) -> str:
+        return str(self._value)
+
+    __repr__ = __str__
+    __call__ = get
 
 #
 #

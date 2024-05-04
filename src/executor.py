@@ -11,7 +11,7 @@ from math import log10, ceil
 from os import path
 from typing import Dict, List, Optional, Sequence, Iterable, Any
 
-from defs import DownloadCollection, Config, UTF8, DOWNLOADERS, RUN_FILE_DOWNLOADERS
+from defs import DownloadCollection, Wrapper, Config, UTF8, DOWNLOADERS, RUN_FILE_DOWNLOADERS
 from logger import trace, log_to
 from strings import datetime_str_nfull, unquote
 
@@ -26,7 +26,7 @@ class DummyResultProtocol(SubprocessProtocol):
         self.future.set_result(True)
 
 
-executor_event_loop = None  # type: Optional[AbstractEventLoop]
+executor_event_loop = Wrapper()  # type: Wrapper[Optional[AbstractEventLoop]]
 
 queries_all = DownloadCollection()  # type: DownloadCollection[List[str]]
 dtqn_fmt = '02d'
@@ -87,8 +87,8 @@ async def run_cmd(query: str, dt: str, qn: int, qt: str, qtn: int) -> None:
             cmd_args[2:] = ['file', '-path', run_file_abspath]
             with open(run_file_abspath, 'wt', encoding=UTF8, buffering=1) as run_file:
                 run_file.write('\n'.join(cmd_args_new))
-        ef = Future(loop=executor_event_loop)
-        tr, _ = await executor_event_loop.subprocess_exec(lambda: DummyResultProtocol(ef), *cmd_args, stderr=log_file, stdout=log_file)
+        ef = Future(loop=executor_event_loop())
+        tr, _ = await executor_event_loop().subprocess_exec(lambda: DummyResultProtocol(ef), *cmd_args, stderr=log_file, stdout=log_file)
         await ef
         tr.close()
     with open(log_file_name, 'rt', encoding=UTF8, errors='replace', buffering=1) as completed_log_file:
@@ -132,11 +132,10 @@ async def run_all_cmds() -> None:
 
 
 def execute() -> None:
-    global executor_event_loop
-    executor_event_loop = new_event_loop()
-    executor_event_loop.run_until_complete(run_all_cmds())
-    executor_event_loop.close()
-    executor_event_loop = None
+    executor_event_loop.reset(new_event_loop())
+    executor_event_loop().run_until_complete(run_all_cmds())
+    executor_event_loop().close()
+    executor_event_loop.reset()
 
 #
 #
