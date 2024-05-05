@@ -11,8 +11,8 @@ from subprocess import check_output
 from typing import Dict, Set, List, Sequence, Optional
 
 from defs import (
-    DownloadCollection, IntPair, Config, IntSequence, DOWNLOADERS, RANGE_TEMPLATE_IDS, RANGE_TEMPLATE_PAGES, RUXX_DOWNLOADERS,
-    STOP_ID_TEMPLATES, BEGIN_ID_TEMPLATES, APP_NAMES, unused_argument
+    DownloadCollection, IntPair, Config, IntSequence, DOWNLOADERS, RANGE_TEMPLATE_IDS, RANGE_TEMPLATE_PAGES, RANGE_TEMPLATE_PAGE_IDS,
+    RUXX_DOWNLOADERS, APP_NAMES, unused_argument
 )
 from logger import trace
 from strings import NEWLINE, normalize_ruxx_tag, path_args
@@ -114,10 +114,10 @@ def _get_base_qs(
         return not not (any_ids(cdt) and not any(pseq[cdt] for pseq in sequences_pages.values()))
 
     def page_ids(cdt: str) -> bool:
-        return pure_ids(cdt) is False and any_ids(cdt) is True
+        return any_ids(cdt) and not pure_ids(cdt)
 
     base_qs = DownloadCollection()  # type: DownloadCollection[str]
-    ri, rp, rs, rb = RANGE_TEMPLATE_IDS, RANGE_TEMPLATE_PAGES, STOP_ID_TEMPLATES, BEGIN_ID_TEMPLATES
+    ri, rp, rpi = RANGE_TEMPLATE_IDS, RANGE_TEMPLATE_PAGES, RANGE_TEMPLATE_PAGE_IDS
     irngs, prngs = ({
         k: {dt: IntPair(ipseqs[k][dt][:2]) for dt in DOWNLOADERS if ipseqs[k][dt]} for k in ipseqs
     } for ipseqs in (sequences_ids, sequences_pages))  # type: Dict[str, Dict[str, IntPair]]
@@ -126,12 +126,11 @@ def _get_base_qs(
             dt: (f'{Config.python} "{sequences_paths[k][dt]}" '
                  f'{(ri[dt].first % irngs[k][dt].first) if pure_ids(dt) else (rp[dt].first % prngs[k][dt].first)} '
                  f'{(ri[dt].second % (irngs[k][dt].second - 1)) if pure_ids(dt) else (rp[dt].second % prngs[k][dt].second)}'
-                 f'{f" {rs[dt] % irngs[k][dt].first}" if irngs[k][dt].first and page_ids(dt) else ""}'
-                 f'{f" {rb[dt] % (irngs[k][dt].second - 1)}" if irngs[k][dt].second and page_ids(dt) else ""}')
+                 f'{f" {rpi[dt].first % irngs[k][dt].first}" if irngs[k][dt].first and page_ids(dt) else ""}'
+                 f'{f" {rpi[dt].second % (irngs[k][dt].second - 1)}" if irngs[k][dt].second and page_ids(dt) else ""}')
             for dt in DOWNLOADERS if (dt in irngs[k] or dt in prngs[k])
         }
-    }) for k in sequences_paths
-    ]
+    }) for k in sequences_paths]
     return base_qs
 
 
@@ -158,8 +157,7 @@ def form_queries(
                  )
             for dt in DOWNLOADERS
         }
-    }) for k in sequences_paths
-    ]
+    }) for k in sequences_paths]
     return queries_final
 
 
