@@ -71,6 +71,7 @@ class QueriesFormTests(TestCase):
         parse_arglist(args_argparse_str2.split())
         read_queries_file()
         prepare_queries()
+        self.assertEqual('script_0', Config.title)
         self.assertEqual('python3', Config.python)
         self.assertEqual(1, len(queries_all['VID'][DOWNLOADER_NM]))
         self.assertEqual(3, len(queries_all['VID'][DOWNLOADER_RV]))

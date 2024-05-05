@@ -1,6 +1,7 @@
 ## author: trickerer01           <-- COMMENTS
 ## This file is only for syntax reference
 
+### TITLE:script_1               <-- SCRIPT TITLE (USED IN LOG AND RUN FILE NAMES AS A SUFFIX, 0-20 SYMBOLS) <OPTIONAL>
 ### PYTHON:python3               <-- PATH TO PYTHON EXECUTABLE (NORMALLY PRESENT IN PATH) <REQUIRED>
 ### (vid) ###                    <-- CATEGORY MARKER, AT LEAST 1 SYMBOL (SUBFOLDER NAME: 'vid') <REQUIRED>
 # nm                             <-- DOWNLOADER TYPE <REQUIRED>

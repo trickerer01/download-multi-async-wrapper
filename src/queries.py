@@ -23,10 +23,11 @@ from strings import SLASH, NEWLINE, datetime_str_nfull, all_tags_negative, all_t
 
 __all__ = ('read_queries_file', 'prepare_queries', 'update_next_ids')
 
+re_title = re_compile(r'^### TITLE:[A-zÀ-ʯА-я\d_+\-!]{,20}$')
 re_category = re_compile(r'^### \(([A-zÀ-ʯА-я\d_+\-! ]+)\) ###$')
 re_comment = re_compile(r'^##[^#].*?$')
 re_download_mode = re_compile(r'^.*[: ]-dmode .+?$')
-re_python_exec = re_compile(r'^### PYTHON:.*?$')
+re_python_exec = re_compile(r'^### PYTHON:.+?$')
 re_downloader_type = re_compile(fr'^# (?:{"|".join(DOWNLOADERS)}).*?$')
 re_ids_list = re_compile(r'^#(?: \d+)+$')
 re_pages_list = re_compile(r'^# p\d+(?: s\d+)?$')
@@ -122,9 +123,16 @@ def prepare_queries() -> None:
             if line == '':
                 continue
             if line.startswith('###'):
+                if re_title.fullmatch(line):
+                    assert Config.title == '', 'Title can be declared only once!'
+                    title_base = line[line.find(':') + 1:]
+                    trace(f'Parsed title: \'{title_base}\'')
+                    Config.title = title_base
+                    continue
                 if re_python_exec.fullmatch(line):
                     assert Config.python == '', 'Python executable must be declared exactly once!'
                     Config.python = line[line.find(':') + 1:]
+                    trace(f'Parsed python exexutable: \'{Config.python}\'')
                     continue
                 cat_match = re_category.fullmatch(line)
                 assert cat_match, f'at line {i + 1:d}: invalid category header format: \'{line}\'!'

@@ -135,6 +135,7 @@ class BaseConfig(object):
         self.ignore_download_mode = False
         # calculated
         self.max_cmd_len = MAX_CMD_LEN[OS_WINDOWS] // 2  # MAX_CMD_LEN.get(running_system())
+        self.title = ''
         self.python = ''
         # non-cmd params
         self.test = test
