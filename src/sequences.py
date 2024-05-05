@@ -124,10 +124,10 @@ def _get_base_qs(
     [base_qs.update({
         k: {
             dt: (f'{Config.python} "{sequences_paths[k][dt]}" '
-                 f'{(ri[dt].first % (irngs[k][dt].first + 1)) if pure_ids(dt) else (rp[dt].first % prngs[k][dt].first)} '
-                 f'{(ri[dt].second % irngs[k][dt].second) if pure_ids(dt) else (rp[dt].second % prngs[k][dt].second)}'
-                 f'{f" {rs[dt] % (irngs[k][dt].first + 1)}" if irngs[k][dt].first and page_ids(dt) else ""}'
-                 f'{f" {rb[dt] % irngs[k][dt].second}" if irngs[k][dt].second and page_ids(dt) else ""}')
+                 f'{(ri[dt].first % irngs[k][dt].first) if pure_ids(dt) else (rp[dt].first % prngs[k][dt].first)} '
+                 f'{(ri[dt].second % (irngs[k][dt].second - 1)) if pure_ids(dt) else (rp[dt].second % prngs[k][dt].second)}'
+                 f'{f" {rs[dt] % irngs[k][dt].first}" if irngs[k][dt].first and page_ids(dt) else ""}'
+                 f'{f" {rb[dt] % (irngs[k][dt].second - 1)}" if irngs[k][dt].second and page_ids(dt) else ""}')
             for dt in DOWNLOADERS if (dt in irngs[k] or dt in prngs[k])
         }
     }) for k in sequences_paths

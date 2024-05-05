@@ -95,19 +95,19 @@ class QueriesFormTests(TestCase):
             queries_all['VID'][DOWNLOADER_NM][0]
         )
         self.assertEqual(
-            f'python3 "D:/old/RV/src/pages.py" -pages 5 -start 2 -stop_id 5 -begin_id 9 -path "../tests/{date_str_md("VID")}/a/" '
+            f'python3 "D:/old/RV/src/pages.py" -pages 5 -start 2 -stop_id 5 -begin_id 8 -path "../tests/{date_str_md("VID")}/a/" '
             '-log info -timeout 15 -retries 50 -throttle 30 --dump-descriptions --dump-tags --dump-comments '
             '-quality 1080p -search a',
             queries_all['VID'][DOWNLOADER_RV][0]
         )
         self.assertEqual(
-            f'python3 "D:/old/RV/src/pages.py" -pages 5 -start 2 -stop_id 5 -begin_id 9 -path "../tests/{date_str_md("VID")}/b/" '
+            f'python3 "D:/old/RV/src/pages.py" -pages 5 -start 2 -stop_id 5 -begin_id 8 -path "../tests/{date_str_md("VID")}/b/" '
             '-log info -timeout 15 -retries 50 -throttle 30 --dump-descriptions --dump-tags --dump-comments '
             '-quality 1080p -search_tag b,c,d -search_rule_tag any',
             queries_all['VID'][DOWNLOADER_RV][1]
         )
         self.assertEqual(
-            f'python3 "D:/old/RV/src/pages.py" -pages 5 -start 2 -stop_id 5 -begin_id 9 -path "../tests/{date_str_md("VID")}/c/" '
+            f'python3 "D:/old/RV/src/pages.py" -pages 5 -start 2 -stop_id 5 -begin_id 8 -path "../tests/{date_str_md("VID")}/c/" '
             '-log info -timeout 15 -retries 50 -throttle 30 --dump-descriptions --dump-tags --dump-comments '
             '-quality 1080p -b -c -d -(g,h,i) -search_tag e,f -search_rule_tag all',
             queries_all['VID'][DOWNLOADER_RV][2]
