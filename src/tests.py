@@ -72,6 +72,7 @@ class QueriesFormTests(TestCase):
         read_queries_file()
         prepare_queries()
         self.assertEqual('script_0', Config.title)
+        self.assertTrue(Config.datesub)
         self.assertEqual('python3', Config.python)
         self.assertEqual(1, len(queries_all['VID'][DOWNLOADER_NM]))
         self.assertEqual(3, len(queries_all['VID'][DOWNLOADER_RV]))

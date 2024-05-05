@@ -24,6 +24,7 @@ from strings import SLASH, NEWLINE, datetime_str_nfull, all_tags_negative, all_t
 __all__ = ('read_queries_file', 'prepare_queries', 'update_next_ids')
 
 re_title = re_compile(r'^### TITLE:[A-zÀ-ʯА-я\d_+\-!]{,20}$')
+re_datesub = re_compile(r'^### DATESUB:.+?$')
 re_category = re_compile(r'^### \(([A-zÀ-ʯА-я\d_+\-! ]+)\) ###$')
 re_comment = re_compile(r'^##[^#].*?$')
 re_download_mode = re_compile(r'^.*[: ]-dmode .+?$')
@@ -128,6 +129,11 @@ def prepare_queries() -> None:
                     title_base = line[line.find(':') + 1:]
                     trace(f'Parsed title: \'{title_base}\'')
                     Config.title = title_base
+                    continue
+                if re_datesub.fullmatch(line):
+                    datesub_str = line[line.find(':') + 1:]
+                    trace(f'Parsed date subfolder flag value: \'{datesub_str}\'')
+                    Config.datesub = {'YES': True, 'NO': False}[datesub_str]
                     continue
                 if re_python_exec.fullmatch(line):
                     assert Config.python == '', 'Python executable must be declared exactly once!'
@@ -352,9 +358,8 @@ def update_next_ids() -> None:
                     line_n = (seq.line_num - 1) if seq and dt in maxids else None
                     trace(f'{"W" if line_n else "Not w"}riting {cat}:{dt} ids at idx {i:d}, line {line_n + 1 if line_n else -1:d}...')
                     if line_n:
-                        delta = 1 * int(not not sequences_pages[cat][dt])
                         ids_at_line = queries_file_lines()[line_n].strip().split(' ')
-                        queries_file_lines()[line_n] = ' '.join([ids_at_line[0]] + ids_at_line[2:] + [f'{maxids[dt] + delta:d}\n'])
+                        queries_file_lines()[line_n] = ' '.join([ids_at_line[0]] + ids_at_line[2:] + [f'{maxids[dt]:d}\n'])
                 trace(f'Writing {cat} ids done')
             with open(Config.script_path, 'wt', encoding=UTF8, buffering=1) as outfile:
                 outfile.writelines(queries_file_lines())

@@ -12,7 +12,7 @@ from typing import List, Sequence
 
 from defs import (
     Config, DOWNLOADERS, ACTION_STORE_TRUE, HELP_DEBUG, HELP_DOWNLOADERS, HELP_PATH, HELP_SCRIPT_PATH, HELP_RUN_PATH, HELP_LOGS_PATH,
-    HELP_BAK_PATH, HELP_UPDATE, HELP_NO_DOWNLOAD, HELP_NO_DATE_PATH, HELP_IGNORE_DMODE,
+    HELP_BAK_PATH, HELP_UPDATE, HELP_NO_DOWNLOAD, HELP_IGNORE_DMODE,
 )
 from logger import trace
 from strings import normalize_path, unquote
@@ -69,7 +69,6 @@ def parse_arglist(args: Sequence[str]) -> None:
     parser.add_argument('--ignore-download-mode', action=ACTION_STORE_TRUE, help=HELP_IGNORE_DMODE)
     parser.add_argument('--update', action=ACTION_STORE_TRUE, help=HELP_UPDATE)
     parser.add_argument('--no-download', action=ACTION_STORE_TRUE, help=HELP_NO_DOWNLOAD)
-    parser.add_argument('--no-date-path', action=ACTION_STORE_TRUE, help=HELP_NO_DATE_PATH)
     parser.add_argument('-runpath', metavar='#PATH_TO_DIR', default=ncdir, help=HELP_RUN_PATH, type=valid_dir_path)
     parser.add_argument('-logspath', metavar='#PATH_TO_DIR', default=ncdir, help=HELP_LOGS_PATH, type=valid_dir_path)
     parser.add_argument('-bakpath', metavar='#PATH_TO_DIR', default=ncdir, help=HELP_BAK_PATH, type=valid_dir_path)
@@ -82,7 +81,6 @@ def parse_arglist(args: Sequence[str]) -> None:
     Config.ignore_download_mode = parsed.ignore_download_mode
     Config.update = parsed.update
     Config.no_download = parsed.no_download
-    Config.no_date_path = parsed.no_date_path
     Config.dest_run_base = parsed.runpath
     Config.dest_logs_base = parsed.logspath
     Config.dest_bak_base = parsed.bakpath

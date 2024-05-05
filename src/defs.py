@@ -131,11 +131,11 @@ class BaseConfig(object):
         self.script_path = ''
         self.update = False
         self.no_download = False
-        self.no_date_path = False
         self.ignore_download_mode = False
         # calculated
         self.max_cmd_len = MAX_CMD_LEN[OS_WINDOWS] // 2  # MAX_CMD_LEN.get(running_system())
         self.title = ''
+        self.datesub = True
         self.python = ''
         # non-cmd params
         self.test = test
@@ -166,65 +166,73 @@ HELP_LOGS_PATH = 'Path to the folder where logs will be stored'
 HELP_BAK_PATH = 'Path to the folder where script backup will be put before updating'
 HELP_UPDATE = 'Boolean flag to update script file with current max ids fetched from the websites'
 HELP_NO_DOWNLOAD = 'Boolean flag to skip actual download (do not launch downloaders)'
-HELP_NO_DATE_PATH = 'Do not append date string to base download path'
 HELP_IGNORE_DMODE = 'Boolean flag to ignore all \'-dmode\' arguments and always download files in full'
 
 PATH_APPEND_DOWNLOAD_RUXX = 'src/ruxx_cmd.py'
-PATH_APPEND_DOWNLOAD_NM_IDS = 'src/ids.py'
-PATH_APPEND_DOWNLOAD_RV_IDS = PATH_APPEND_DOWNLOAD_NM_IDS
-PATH_APPEND_DOWNLOAD_RC_IDS = PATH_APPEND_DOWNLOAD_NM_IDS
-PATH_APPEND_DOWNLOAD_NM_PAGES = 'src/pages.py'
-PATH_APPEND_DOWNLOAD_RV_PAGES = PATH_APPEND_DOWNLOAD_NM_PAGES
-PATH_APPEND_DOWNLOAD_RC_PAGES = PATH_APPEND_DOWNLOAD_NM_PAGES
-
+PATH_APPEND_DOWNLOAD_NRVC_IDS = 'src/ids.py'
+PATH_APPEND_DOWNLOAD_NRVC_PAGES = 'src/pages.py'
 PATH_APPEND_UPDATE_RUXX = 'src/ruxx_cmd.py'
-PATH_APPEND_UPDATE_NM = 'src/pages.py'
-PATH_APPEND_UPDATE_RV = PATH_APPEND_UPDATE_NM
-PATH_APPEND_UPDATE_RC = PATH_APPEND_UPDATE_NM
+PATH_APPEND_UPDATE_NRVC = 'src/pages.py'
 
 PATH_APPEND_DOWNLOAD_IDS = {
-    DOWNLOADER_NM: PATH_APPEND_DOWNLOAD_NM_IDS,
-    DOWNLOADER_RV: PATH_APPEND_DOWNLOAD_RV_IDS,
-    DOWNLOADER_RC: PATH_APPEND_DOWNLOAD_RC_IDS,
+    DOWNLOADER_NM: PATH_APPEND_DOWNLOAD_NRVC_IDS,
+    DOWNLOADER_RV: PATH_APPEND_DOWNLOAD_NRVC_IDS,
+    DOWNLOADER_RC: PATH_APPEND_DOWNLOAD_NRVC_IDS,
     DOWNLOADER_RN: PATH_APPEND_DOWNLOAD_RUXX,
     DOWNLOADER_RX: PATH_APPEND_DOWNLOAD_RUXX,
     DOWNLOADER_RS: PATH_APPEND_DOWNLOAD_RUXX,
 }
 PATH_APPEND_DOWNLOAD_PAGES = {
-    DOWNLOADER_NM: PATH_APPEND_DOWNLOAD_NM_PAGES,
-    DOWNLOADER_RV: PATH_APPEND_DOWNLOAD_RV_PAGES,
-    DOWNLOADER_RC: PATH_APPEND_DOWNLOAD_RC_PAGES,
+    DOWNLOADER_NM: PATH_APPEND_DOWNLOAD_NRVC_PAGES,
+    DOWNLOADER_RV: PATH_APPEND_DOWNLOAD_NRVC_PAGES,
+    DOWNLOADER_RC: PATH_APPEND_DOWNLOAD_NRVC_PAGES,
     DOWNLOADER_RN: PATH_APPEND_DOWNLOAD_RUXX,
     DOWNLOADER_RX: PATH_APPEND_DOWNLOAD_RUXX,
     DOWNLOADER_RS: PATH_APPEND_DOWNLOAD_RUXX,
 }
 
 PATH_APPEND_UPDATE = {
-    DOWNLOADER_NM: PATH_APPEND_UPDATE_NM,
-    DOWNLOADER_RV: PATH_APPEND_UPDATE_RV,
-    DOWNLOADER_RC: PATH_APPEND_UPDATE_RC,
+    DOWNLOADER_NM: PATH_APPEND_UPDATE_NRVC,
+    DOWNLOADER_RV: PATH_APPEND_UPDATE_NRVC,
+    DOWNLOADER_RC: PATH_APPEND_UPDATE_NRVC,
     DOWNLOADER_RN: PATH_APPEND_UPDATE_RUXX,
     DOWNLOADER_RX: PATH_APPEND_UPDATE_RUXX,
     DOWNLOADER_RS: PATH_APPEND_UPDATE_RUXX,
 }
 
+STOP_ID_TEMPLATE_NRVC = '-stop_id %d'
+BEGIN_ID_TEMPLATE_NRVC = '-begin_id %d'
+RANGE_ID_TEMPLATE_NRVC = StrPair(('-start %d', '-end %d'))
+RANGE_ID_TEMPLATE_RN = StrPair(('id>=%d', 'id<=%d'))
+RANGE_ID_TEMPLATE_RX_RS = StrPair(('id:>=%d', 'id:<=%d'))
+RANGE_PAGE_TEMPLATE_NRVC = StrPair(('-pages %d', '-start %d'))
+
 RANGE_TEMPLATE_IDS = {
-    DOWNLOADER_NM: StrPair(('-start %d', '-end %d')),
-    DOWNLOADER_RV: StrPair(('-start %d', '-end %d')),
-    DOWNLOADER_RC: StrPair(('-start %d', '-end %d')),
-    DOWNLOADER_RN: StrPair(('id>=%d', 'id<=%d')),
-    DOWNLOADER_RX: StrPair(('id:>=%d', 'id:<=%d')),
-    DOWNLOADER_RS: StrPair(('id:>=%d', 'id:<=%d')),
+    DOWNLOADER_NM: RANGE_ID_TEMPLATE_NRVC,
+    DOWNLOADER_RV: RANGE_ID_TEMPLATE_NRVC,
+    DOWNLOADER_RC: RANGE_ID_TEMPLATE_NRVC,
+    DOWNLOADER_RN: RANGE_ID_TEMPLATE_RN,
+    DOWNLOADER_RX: RANGE_ID_TEMPLATE_RX_RS,
+    DOWNLOADER_RS: RANGE_ID_TEMPLATE_RX_RS,
 }
 
 RANGE_TEMPLATE_PAGES = {
-    DOWNLOADER_NM: StrPair(('-pages %d', '-start %d')),
-    DOWNLOADER_RV: StrPair(('-pages %d', '-start %d')),
-    DOWNLOADER_RC: StrPair(('-pages %d', '-start %d')),
+    DOWNLOADER_NM: RANGE_PAGE_TEMPLATE_NRVC,
+    DOWNLOADER_RV: RANGE_PAGE_TEMPLATE_NRVC,
+    DOWNLOADER_RC: RANGE_PAGE_TEMPLATE_NRVC,
 }
 
-STOP_ID_TEMPLATE = '-stop_id %d'
-BEGIN_ID_TEMPLATE = '-begin_id %d'
+STOP_ID_TEMPLATES = {
+    DOWNLOADER_NM: STOP_ID_TEMPLATE_NRVC,
+    DOWNLOADER_RV: STOP_ID_TEMPLATE_NRVC,
+    DOWNLOADER_RC: STOP_ID_TEMPLATE_NRVC,
+}
+
+BEGIN_ID_TEMPLATES = {
+    DOWNLOADER_NM: BEGIN_ID_TEMPLATE_NRVC,
+    DOWNLOADER_RV: BEGIN_ID_TEMPLATE_NRVC,
+    DOWNLOADER_RC: BEGIN_ID_TEMPLATE_NRVC,
+}
 
 # must have __len__() defined
 DT = TypeVar('DT', str, list, IntSequence)
