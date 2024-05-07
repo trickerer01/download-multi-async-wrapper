@@ -8,7 +8,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 
 from abc import ABC, abstractmethod
-from typing import List, Union, Tuple, Iterable, Type, TypeVar, Dict, OrderedDict, Optional, Any, Generic
+from typing import List, Union, Tuple, Iterable, Type, TypeVar, Dict, Optional, Any, Generic
 
 UTF8 = 'utf-8'
 ACTION_STORE_TRUE = 'store_true'
@@ -232,7 +232,7 @@ DT = TypeVar('DT', str, list, IntSequence)
 WT = TypeVar('WT')
 
 
-class DownloadCollection(OrderedDict[str, Dict[str, Optional[DT]]]):
+class DownloadCollection(Dict[str, Dict[str, Optional[DT]]]):
     def add_category(self, cat: str, init_type: Type[DT] = None) -> None:
         self[cat] = {dt: self._make_init_value(init_type) for dt in DOWNLOADERS}
 
