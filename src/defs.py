@@ -138,6 +138,7 @@ class BaseConfig(object):
         self.title = ''
         self.datesub = True
         self.python = ''
+        self.disabled_downloaders = dict()  # type: Dict[str, List[str]]
         # non-cmd params
         self.test = test
         self.console_log = not (test and not console_log)

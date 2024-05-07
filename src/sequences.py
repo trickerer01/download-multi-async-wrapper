@@ -92,8 +92,14 @@ def validate_sequences(
             ivlist = list(intseq.ints if intseq else [])
             for iv in range(1, len(ivlist)):
                 if ivlist[iv - 1] >= ivlist[iv]:
-                    trace(f'Error: {cat}:{dt} ids sequence is corrupted at idx {iv - 1:d}, {ivlist[iv - 1]:d} >= {ivlist[iv]:d}!')
-                    raise IOError
+                    if ivlist[iv - 1] > ivlist[iv] or iv > 1:
+                        trace(f'Error: {cat}:{dt} ids sequence is corrupted at idx {iv - 1:d}, {ivlist[iv - 1]:d} >= {ivlist[iv]:d}!')
+                        raise IOError
+                    else:
+                        trace(f'{cat}:{dt} ids sequence forms zero-length range {ivlist[iv - 1]:d}-{ivlist[iv] - 1:d}! Will be skipped!')
+                        if cat not in Config.disabled_downloaders:
+                            Config.disabled_downloaders[cat] = list()
+                        Config.disabled_downloaders[cat].append(dt)
         for cat in sequences_paths:
             if (not not sequences_paths[cat][dt]) != (not not (sequences_ids[cat][dt] or sequences_tags[cat][dt])):
                 trace(f'Error: sequence list existance for {cat}:{dt} tags/ids mismatch!')

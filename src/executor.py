@@ -95,26 +95,31 @@ async def run_cmd(query: str, dt: str, qn: int, qt: str, qtn: int) -> None:
         trace(f'\n{"".join(completed_log_file.readlines())}')
 
 
-async def run_dt_cmds(dts: Sequence[str], qts: Sequence[str], queries: Sequence[str]) -> None:
+async def run_dt_cmds(dt: str, qts: Sequence[str], queries: Sequence[str]) -> None:
     if not queries:
         return
 
-    dt = dts[0]
-    assert all(_ == dt for _ in dts)
-    assert len(dts) == len(qts) == len(queries)
+    assert len(qts) == len(queries)
 
     if dt not in Config.downloaders:
         await sleep(1.0)  # delay this message so it isn't printed somewhere inbetween initial cmds
         trace(f'\n{dt.upper()} SKIPPED\n')
         return
 
+    qt_skips = set()
     qns = {qt: 0 for qt in qts}  # type: Dict[str, int]
     for qi, qt in enumerate(qts):
         qns[qt] += 1
         if Config.test:
             continue
+        if qt in Config.disabled_downloaders and dt in Config.disabled_downloaders[qt]:
+            if qt not in qt_skips:
+                qt_skips.add(qt)
+                await sleep(1.0)
+                trace(f'{dt.upper()} category \'{qt}\' was disabled! Skipped!\n')
+            continue
         await run_cmd(queries[qi], dt, qi + 1, qt, qns[qt])
-    trace(f'{dt.upper()} COMPLETED\n')
+    trace(f'{dt.upper()} COMPLETED ({len(queries_all) - len(qt_skips)} / {len(queries_all)} categories processed)\n')
 
 
 async def run_all_cmds() -> None:
@@ -123,7 +128,7 @@ async def run_all_cmds() -> None:
         return
     for cv in as_completed(map(
         run_dt_cmds,
-        [[dt] * sum(len(queries_all[cat][dt]) for cat in queries_all) for dt in DOWNLOADERS],
+        [dt for dt in DOWNLOADERS],
         [sum_lists([cat] * len(queries_all[cat][dt]) for cat in queries_all) for dt in DOWNLOADERS],
         [sum_lists(queries_all[cat][dt] for cat in queries_all) for dt in DOWNLOADERS]
     )):
