@@ -78,3 +78,23 @@ b
 (c~d)
 # send
 # end
+
+### (VIDEOS ) ###
+# nm
+# 1 2
+# basepath:D:/NM/
+# common:-dmode touch
+# common:--dump-tags
+## <generic comment>
+# sub:a
+-quality 1080p
+-a -b -c -dfff
+ggg
+# send
+
+# sub:b
+-ggg
+-(x,z)
+(h~i~j~k)
+# send
+# end

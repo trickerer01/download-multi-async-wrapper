@@ -14,6 +14,7 @@ UTF8 = 'utf-8'
 ACTION_STORE_TRUE = 'store_true'
 PROXY_ARG = '-proxy'
 MIN_IDS_SEQ_LENGTH = 2
+MAX_CATEGORY_NAME_LENGTH = 10
 
 OS_WINDOWS = 'Windows'
 OS_LINUX = 'Linux'
@@ -238,6 +239,9 @@ class DownloadCollection(Dict[str, Dict[str, Optional[DT]]]):
 
     def cur(self) -> Dict[str, Optional[DT]]:
         return self.values().__reversed__().__next__()
+
+    def cur_key(self) -> str:
+        return self.keys().__reversed__().__next__()
 
     @staticmethod
     def _make_init_value(init_type: Type[DT]) -> DT:

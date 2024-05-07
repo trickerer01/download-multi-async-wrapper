@@ -12,7 +12,11 @@ from cmdargs import parse_arglist
 from defs import Config, DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RC, DOWNLOADER_RN, DOWNLOADER_RX, DOWNLOADER_RS
 from executor import queries_all
 from main import main_sync
-from queries import read_queries_file, prepare_queries
+# noinspection PyProtectedMember
+from queries import (
+    read_queries_file, prepare_queries, sequences_ids, sequences_pages, sequences_paths, sequences_common, sequences_tags,
+    sequences_subfolders
+)
 from strings import date_str_md
 
 __all__ = ()
@@ -39,6 +43,12 @@ def set_up_test(log=False) -> None:
     Config._reset()
     Config.test = True
     Config.console_log = log
+    sequences_ids.clear()
+    sequences_pages.clear()
+    sequences_paths.clear()
+    sequences_common.clear()
+    sequences_tags.clear()
+    sequences_subfolders.clear()
 
 
 class ArgParseTests(TestCase):
@@ -67,6 +77,7 @@ class ArgParseTests(TestCase):
 
 class QueriesFormTests(TestCase):
     def test_queries1(self) -> None:
+        cat_vid, cat_img, cat_vid_ = 'VIDEOS', 'IMAGES', 'VIDEOS '
         set_up_test()
         parse_arglist(args_argparse_str2.split())
         read_queries_file()
@@ -74,51 +85,63 @@ class QueriesFormTests(TestCase):
         self.assertEqual('script_0', Config.title)
         self.assertTrue(Config.datesub)
         self.assertEqual('python3', Config.python)
-        self.assertEqual(1, len(queries_all['VID'][DOWNLOADER_NM]))
-        self.assertEqual(3, len(queries_all['VID'][DOWNLOADER_RV]))
-        self.assertEqual(0, len(queries_all['VID'][DOWNLOADER_RC]))
-        self.assertEqual(0, len(queries_all['VID'][DOWNLOADER_RN]))
-        self.assertEqual(0, len(queries_all['VID'][DOWNLOADER_RX]))
-        self.assertEqual(0, len(queries_all['VID'][DOWNLOADER_RS]))
-        self.assertEqual(0, len(queries_all['IMA'][DOWNLOADER_NM]))
-        self.assertEqual(0, len(queries_all['IMA'][DOWNLOADER_RV]))
-        self.assertEqual(0, len(queries_all['IMA'][DOWNLOADER_RC]))
-        self.assertEqual(0, len(queries_all['IMA'][DOWNLOADER_RN]))
-        self.assertEqual(2, len(queries_all['IMA'][DOWNLOADER_RX]))
-        self.assertEqual(0, len(queries_all['IMA'][DOWNLOADER_RS]))
+        self.assertEqual(1, len(queries_all[cat_vid][DOWNLOADER_NM]))
+        self.assertEqual(3, len(queries_all[cat_vid][DOWNLOADER_RV]))
+        self.assertEqual(0, len(queries_all[cat_vid][DOWNLOADER_RC]))
+        self.assertEqual(0, len(queries_all[cat_vid][DOWNLOADER_RN]))
+        self.assertEqual(0, len(queries_all[cat_vid][DOWNLOADER_RX]))
+        self.assertEqual(0, len(queries_all[cat_vid][DOWNLOADER_RS]))
+        self.assertEqual(0, len(queries_all[cat_img][DOWNLOADER_NM]))
+        self.assertEqual(0, len(queries_all[cat_img][DOWNLOADER_RV]))
+        self.assertEqual(0, len(queries_all[cat_img][DOWNLOADER_RC]))
+        self.assertEqual(0, len(queries_all[cat_img][DOWNLOADER_RN]))
+        self.assertEqual(2, len(queries_all[cat_img][DOWNLOADER_RX]))
+        self.assertEqual(0, len(queries_all[cat_img][DOWNLOADER_RS]))
+        self.assertEqual(1, len(queries_all[cat_vid_][DOWNLOADER_NM]))
+        self.assertEqual(0, len(queries_all[cat_vid_][DOWNLOADER_RV]))
+        self.assertEqual(0, len(queries_all[cat_vid_][DOWNLOADER_RC]))
+        self.assertEqual(0, len(queries_all[cat_vid_][DOWNLOADER_RN]))
+        self.assertEqual(0, len(queries_all[cat_vid_][DOWNLOADER_RX]))
+        self.assertEqual(0, len(queries_all[cat_vid_][DOWNLOADER_RS]))
         self.assertEqual(
-            f'python3 "D:/NM/src/ids.py" -start 1 -end 1 -path "../tests/{date_str_md("VID")}/" --dump-tags -script "'
+            f'python3 "D:/NM/src/ids.py" -start 1 -end 1 -path "../tests/{date_str_md(cat_vid)}/" --dump-tags -script "'
             'a: -quality 1080p -a -b -c -dfff ggg; '
             'b: -quality 1080p -a -b -c -dfff -ggg -(x,z) (h~i~j~k); '
             'c: -quality 1080p -a -b -c -dfff -ggg -h -i -j -k (l~m~n); '
             'd: -a -b -c -ggg -h -i -j -k -l -m -n -quality 360p -uvp always"',
-            queries_all['VID'][DOWNLOADER_NM][0]
+            queries_all[cat_vid][DOWNLOADER_NM][0]
         )
         self.assertEqual(
-            f'python3 "D:/old/RV/src/pages.py" -pages 5 -start 2 -stop_id 5 -begin_id 8 -path "../tests/{date_str_md("VID")}/a/" '
+            f'python3 "D:/old/RV/src/pages.py" -pages 5 -start 2 -stop_id 5 -begin_id 8 -path "../tests/{date_str_md(cat_vid)}/a/" '
             '-log info -timeout 15 -retries 50 -throttle 30 --dump-descriptions --dump-tags --dump-comments '
             '-quality 1080p -search a',
-            queries_all['VID'][DOWNLOADER_RV][0]
+            queries_all[cat_vid][DOWNLOADER_RV][0]
         )
         self.assertEqual(
-            f'python3 "D:/old/RV/src/pages.py" -pages 5 -start 2 -stop_id 5 -begin_id 8 -path "../tests/{date_str_md("VID")}/b/" '
+            f'python3 "D:/old/RV/src/pages.py" -pages 5 -start 2 -stop_id 5 -begin_id 8 -path "../tests/{date_str_md(cat_vid)}/b/" '
             '-log info -timeout 15 -retries 50 -throttle 30 --dump-descriptions --dump-tags --dump-comments '
             '-quality 1080p -search_tag b,c,d -search_rule_tag any',
-            queries_all['VID'][DOWNLOADER_RV][1]
+            queries_all[cat_vid][DOWNLOADER_RV][1]
         )
         self.assertEqual(
-            f'python3 "D:/old/RV/src/pages.py" -pages 5 -start 2 -stop_id 5 -begin_id 8 -path "../tests/{date_str_md("VID")}/c/" '
+            f'python3 "D:/old/RV/src/pages.py" -pages 5 -start 2 -stop_id 5 -begin_id 8 -path "../tests/{date_str_md(cat_vid)}/c/" '
             '-log info -timeout 15 -retries 50 -throttle 30 --dump-descriptions --dump-tags --dump-comments '
             '-quality 1080p -b -c -d -(g,h,i) -search_tag e,f -search_rule_tag all',
-            queries_all['VID'][DOWNLOADER_RV][2]
+            queries_all[cat_vid][DOWNLOADER_RV][2]
         )
         self.assertEqual(
-            f'python3 "D:/ruxx/src/ruxx_cmd.py" id:>=1 id:<=1 -path "../tests/{date_str_md("IMA")}/a/" -module rx a',
-            queries_all['IMA'][DOWNLOADER_RX][0]
+            f'python3 "D:/ruxx/src/ruxx_cmd.py" id:>=1 id:<=1 -path "../tests/{date_str_md(cat_img)}/a/" -module rx a',
+            queries_all[cat_img][DOWNLOADER_RX][0]
         )
         self.assertEqual(
-            f'python3 "D:/ruxx/src/ruxx_cmd.py" id:>=1 id:<=1 -path "../tests/{date_str_md("IMA")}/b/" -module rx -a b (+c+~+d+)',
-            queries_all['IMA'][DOWNLOADER_RX][1]
+            f'python3 "D:/ruxx/src/ruxx_cmd.py" id:>=1 id:<=1 -path "../tests/{date_str_md(cat_img)}/b/" -module rx -a b (+c+~+d+)',
+            queries_all[cat_img][DOWNLOADER_RX][1]
+        )
+        self.assertEqual(  # same dest for 'vid' and 'vid_' categories
+            f'python3 "D:/NM/src/ids.py" -start 1 -end 1 -path "../tests/{date_str_md(cat_vid)}/" --dump-tags -script "'
+            'a: -quality 1080p -a -b -c -dfff ggg; '
+            'b: -quality 1080p -a -b -c -dfff -ggg -(x,z) (h~i~j~k)"',
+            queries_all[cat_vid_][DOWNLOADER_NM][0]
         )
         print(f'{self._testMethodName} passed')
 

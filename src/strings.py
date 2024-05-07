@@ -50,7 +50,7 @@ def normalize_ruxx_tag(tag: str) -> str:
 
 
 def path_args(dest_base: str, cat: str, sub: str, datepath: bool) -> str:
-    return f'-path "{dest_base}{f"{date_str_md(cat)}/" if datepath else ""}{f"{sub}/" if sub else ""}"'
+    return f'-path "{dest_base}{f"{date_str_md(cat.strip())}/" if datepath else ""}{f"{sub}/" if sub else ""}"'
 
 
 def time_now_fmt(fmt: str) -> str:

@@ -110,7 +110,7 @@ ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
 # send
 # end
 
-### (img) ###
+### (img) ###                    <-- SECOND CATEGORY MARKER (SUBFOLDER NAME: 'img')
 # rx
 # 5050000 5051000
 # basepath:D:/Projects/Ruxx
@@ -120,6 +120,34 @@ ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
 # send
 # end
 
-### (comic) ###
+### (comic) ###                  <-- THIRD CATEGORY MARKER
 ...
 # end
+
+### (vid ) ###                   <-- FOURTH CATEGORY MARKER. TRAILING SPACE ALLOWS TO DOWNLOAD TO THE SAME FOLDER AS FIRST CATEGORY
+                                     (SUBFOLDER NAME: 'vid')
+# nm
+# 50000 51000
+# basepath:D:/Projects/NM
+# common:-dmode touch
+# common:-log trace
+# common:--dump-tags
+# sub:a
+-quality 1080p
+-aa -bb -cc -dd
+fff
+# send
+
+# sub:b
+-fff
+-(xx,zz)
+(hh~ii~jj~kk)
+# send
+# end
+                                 <-- AT THIS POINT 2 NM QUERIES WERE CREATED WHICH WILL BE THEN COMBINED INTO A SINGLE DOWNLOAD SCRIPT
+                                 <-- 'python "D:/Projects/NM/src/ids.py" -path "<PATH>" -start 50000 -end 50999
+                                     -dmode touch -log trace --dump-tags -script
+                                     "a: -quality 1080p -aa -bb -cc -dd fff;
+                                      b: -quality 1080p -aa -bb -cc -dd -fff -(xx,zz) (hh~ii~jj~kk)"'
+                                 <-- WHICH DOWNLOADS MATCHING VIDEOS TO 2 DIFFERENT FOLDERS IN A SINGLE PASS
+                                     WHILE QUERY IS DIFFERENT IT WILL BE DOWNLOADED TO THE SAME SUBFOLDERS AS 'vid' CATEGORY

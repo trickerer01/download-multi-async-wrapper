@@ -12,12 +12,12 @@ from typing import Dict, Set, List, Sequence, Optional
 
 from defs import (
     DownloadCollection, IntPair, Config, IntSequence, DOWNLOADERS, RANGE_TEMPLATE_IDS, RANGE_TEMPLATE_PAGES, RANGE_TEMPLATE_PAGE_IDS,
-    RUXX_DOWNLOADERS, APP_NAMES, unused_argument
+    RUXX_DOWNLOADERS, APP_NAMES, unused_argument, PATH_APPEND_DOWNLOAD_IDS, PATH_APPEND_DOWNLOAD_PAGES
 )
 from logger import trace
 from strings import NEWLINE, normalize_ruxx_tag, path_args
 
-__all__ = ('validate_runners', 'validate_sequences', 'form_queries', 'report_finals')
+__all__ = ('validate_runners', 'validate_sequences', 'form_queries', 'report_queries', 'report_unoptimized')
 
 
 def validate_runners(sequences_paths: DownloadCollection[str], sequences_paths_update: Dict[str, Optional[str]]) -> None:
@@ -42,22 +42,24 @@ def validate_runners(sequences_paths: DownloadCollection[str], sequences_paths_u
                 dpath = sequences_paths[cat][dtd]  # type: Optional[str]
                 if not dpath or dtd not in Config.downloaders:
                     continue
+                dtype = ('pages' if dpath.endswith(PATH_APPEND_DOWNLOAD_PAGES[dtd]) else
+                         'ids' if dpath.endswith(PATH_APPEND_DOWNLOAD_IDS[dtd]) else 'unknown')
                 if dpath in checked_paths:
-                    trace(f'{dtd} downloader path is already checked!')
+                    trace(f'{dtd} {dtype} downloader path is already checked!')
                     continue
                 checked_paths.add(dpath)
                 try:
-                    trace(f'Looking for {dtd} downloader...')
+                    trace(f'Looking for {dtd} {dtype} downloader...')
                     out_d = check_output((Config.python, dpath, '--version'))
                     out_d_str = out_d.decode().strip()
                     out_d_str = out_d_str[out_d_str.rfind('\n') + 1:]
                     assert out_d_str.startswith(APP_NAMES[dtd]), f'Unexpected output for {dtd}: {out_d_str[:min(len(out_d_str), 20)]}!'
                 except Exception:
-                    trace(f'Error: invalid {dtd} downloader found at: \'{dpath}\' ({cat})!')
+                    trace(f'Error: invalid {dtd} {dtype} downloader found at: \'{dpath}\' ({cat})!')
                     raise IOError
     if Config.update:
         for dtu, upath in sequences_paths_update.items():
-            if not upath:
+            if not upath or dtu not in Config.downloaders:
                 continue
             if upath in checked_paths:
                 trace(f'{dtu} updater path is already checked!')
@@ -107,14 +109,17 @@ def _get_base_qs(
     sequences_ids: DownloadCollection[IntSequence], sequences_pages: DownloadCollection[IntSequence],
     sequences_paths: DownloadCollection[str]
 ) -> DownloadCollection[str]:
-    def any_ids(cdt: str) -> bool:
-        return not not any(idseq[cdt] for idseq in sequences_ids.values())
+    def has_ids(cat: str, cdt: str) -> bool:
+        return not not sequences_ids[cat][cdt]
 
-    def pure_ids(cdt: str) -> bool:
-        return not not (any_ids(cdt) and not any(pseq[cdt] for pseq in sequences_pages.values()))
+    def has_pages(cat: str, cdt: str) -> bool:
+        return not not sequences_pages[cat][cdt]
 
-    def page_ids(cdt: str) -> bool:
-        return any_ids(cdt) and not pure_ids(cdt)
+    def pure_ids(cat: str, cdt: str) -> bool:
+        return has_ids(cat, cdt) and not has_pages(cat, cdt)
+
+    def page_ids(cat: str, cdt: str) -> bool:
+        return has_ids(cat, cdt) and has_pages(cat, cdt)
 
     base_qs = DownloadCollection()  # type: DownloadCollection[str]
     ri, rp, rpi = RANGE_TEMPLATE_IDS, RANGE_TEMPLATE_PAGES, RANGE_TEMPLATE_PAGE_IDS
@@ -124,10 +129,10 @@ def _get_base_qs(
     [base_qs.update({
         k: {
             dt: (f'{Config.python} "{sequences_paths[k][dt]}" '
-                 f'{(ri[dt].first % irngs[k][dt].first) if pure_ids(dt) else (rp[dt].first % prngs[k][dt].first)} '
-                 f'{(ri[dt].second % (irngs[k][dt].second - 1)) if pure_ids(dt) else (rp[dt].second % prngs[k][dt].second)}'
-                 f'{f" {rpi[dt].first % irngs[k][dt].first}" if irngs[k][dt].first and page_ids(dt) else ""}'
-                 f'{f" {rpi[dt].second % (irngs[k][dt].second - 1)}" if irngs[k][dt].second and page_ids(dt) else ""}')
+                 f'{(ri[dt].first % irngs[k][dt].first) if pure_ids(k, dt) else (rp[dt].first % prngs[k][dt].first)} '
+                 f'{(ri[dt].second % (irngs[k][dt].second - 1)) if pure_ids(k, dt) else (rp[dt].second % prngs[k][dt].second)}'
+                 f'{f" {rpi[dt].first % irngs[k][dt].first}" if irngs[k][dt].first and page_ids(k, dt) else ""}'
+                 f'{f" {rpi[dt].second % (irngs[k][dt].second - 1)}" if irngs[k][dt].second and page_ids(k, dt) else ""}')
             for dt in DOWNLOADERS if (dt in irngs[k] or dt in prngs[k])
         }
     }) for k in sequences_paths]
@@ -161,7 +166,26 @@ def form_queries(
     return queries_final
 
 
-def report_finals(queries: DownloadCollection[List[str]]) -> None:
+def report_unoptimized(
+    sequences_ids: DownloadCollection[IntSequence], sequences_pages: DownloadCollection[IntSequence],
+    sequences_paths: DownloadCollection[str], sequences_tags: DownloadCollection[Sequence[List[str]]],
+    sequences_subfolders: DownloadCollection[Sequence[str]], sequences_common: DownloadCollection[Sequence[str]]
+) -> None:
+    stags, ssubs, scomms = sequences_tags, sequences_subfolders, sequences_common
+    base_qs = _get_base_qs(sequences_ids, sequences_pages, sequences_paths)
+    queries = DownloadCollection()  # type: DownloadCollection[List[str]]
+    [queries.update({
+        k: {
+            dt: ([f'{base_qs[k][dt]} {path_args(Config.dest_base, k, ssubs[k][dt][i], Config.datesub)} '
+                  f'{" ".join(normalize_ruxx_tag(tag) if dt in RUXX_DOWNLOADERS else tag for tag in scomms[k][dt])} '
+                  f'{" ".join(normalize_ruxx_tag(tag) if dt in RUXX_DOWNLOADERS else tag for tag in staglist)}'
+                  for i, staglist in enumerate(stags[k][dt]) if staglist]) for dt in DOWNLOADERS
+        }
+    }) for k in sequences_paths]
+    report_queries(queries)
+
+
+def report_queries(queries: DownloadCollection[List[str]]) -> None:
     for cat in queries:
         trace(f'\nQueries \'{cat}\':\n{NEWLINE.join(NEWLINE.join(queries[cat][dt]) for dt in queries[cat] if queries[cat][dt])}', False)
 
