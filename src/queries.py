@@ -15,6 +15,7 @@ from typing import List, Dict, Optional, Tuple, Iterable
 from defs import (
     DownloadCollection, Wrapper, IntSequence, Config, StrPair, UTF8, DOWNLOADERS, MIN_IDS_SEQ_LENGTH, PATH_APPEND_DOWNLOAD_IDS,
     PATH_APPEND_DOWNLOAD_PAGES, PATH_APPEND_UPDATE, RUXX_DOWNLOADERS, PAGE_DOWNLOADERS, PROXY_ARG, MAX_CATEGORY_NAME_LENGTH,
+    LOOKAHEAD_AMOUNTS,
 )
 from executor import register_queries
 from logger import trace
@@ -25,6 +26,7 @@ __all__ = ('read_queries_file', 'prepare_queries', 'update_next_ids')
 
 re_title = re_compile(r'^### TITLE:[A-zÀ-ʯА-я\d_+\-!]{,20}$')
 re_datesub = re_compile(r'^### DATESUB:.+?$')
+re_lookahead = re_compile(r'^### LOOKAHEAD:.+?$')
 re_category = re_compile(r'^### \(([A-zÀ-ʯА-я\d_+\-! ]+)\) ###$')
 re_comment = re_compile(r'^##[^#].*?$')
 re_download_mode = re_compile(r'^.*[: ]-dmode .+?$')
@@ -142,6 +144,11 @@ def prepare_queries() -> None:
                     datesub_str = line[line.find(':') + 1:]
                     trace(f'Parsed date subfolder flag value: \'{datesub_str}\'')
                     Config.datesub = {'YES': True, 'NO': False}[datesub_str]
+                    continue
+                if re_lookahead.fullmatch(line):
+                    lookahead_str = line[line.find(':') + 1:]
+                    trace(f'Parsed lookahead flag value: \'{lookahead_str}\'')
+                    Config.lookahead = {'YES': True, 'NO': False}[lookahead_str]
                     continue
                 if re_python_exec.fullmatch(line):
                     assert Config.python == '', 'Python executable must be declared exactly once!'
@@ -307,12 +314,15 @@ def prepare_queries() -> None:
         needed_updates = [
             dt for dt in DOWNLOADERS if any(dt in autoupdate_seqs[cat] for cat in autoupdate_seqs if autoupdate_seqs[cat][dt])]
         maxids = fetch_maxids(needed_updates)
-        for dt in DOWNLOADERS:
+        for dt in needed_updates:
+            maxid = int(maxids[dt][4:])
+            if Config.lookahead and LOOKAHEAD_AMOUNTS[dt] != 0:
+                trace(f'Applying {dt} lookahead offset: {LOOKAHEAD_AMOUNTS[dt]:d}')
+                maxid += LOOKAHEAD_AMOUNTS[dt]
             for cat in autoupdate_seqs:
                 uidseq = autoupdate_seqs[cat][dt]  # type: Optional[IntSequence]
                 if uidseq:
                     update_str_base = f'{cat}:{dt} id sequence extended from {str(uidseq.ints)} to '
-                    maxid = int(maxids[dt][4:])
                     uidseq.ints.append(maxid)
                     trace(f'{update_str_base}{str(uidseq.ints)}')
                     maxid_fetched[dt] = maxid
@@ -326,6 +336,8 @@ def prepare_queries() -> None:
     trace('Validating sequences...\n')
     validate_sequences(sequences_ids, sequences_pages, sequences_paths, sequences_tags, sequences_subfolders)
     if not autoupdate_seqs:
+        if Config.lookahead:
+            trace('Warning: LOOKAHEAD flag is set but no downloaders need it!')
         validate_runners(sequences_paths, sequences_paths_update)
 
     trace('Sequences validated. Finalizing...\n')

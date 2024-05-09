@@ -119,6 +119,15 @@ APP_NAMES = {
     DOWNLOADER_RS: APP_NAME_RUXX,
 }
 
+LOOKAHEAD_AMOUNTS = {
+    DOWNLOADER_NM: 0,
+    DOWNLOADER_RV: 900,
+    DOWNLOADER_RC: 100,
+    DOWNLOADER_RN: 0,
+    DOWNLOADER_RX: 0,
+    DOWNLOADER_RS: 0,
+}
+
 
 class BaseConfig(object):
     def __init__(self, *, test=False, console_log=False) -> None:
@@ -136,8 +145,9 @@ class BaseConfig(object):
         # calculated
         self.max_cmd_len = MAX_CMD_LEN[OS_WINDOWS] // 2  # MAX_CMD_LEN.get(running_system())
         self.title = ''
-        self.datesub = True
         self.python = ''
+        self.datesub = True
+        self.lookahead = False
         self.disabled_downloaders = dict()  # type: Dict[str, List[str]]
         # non-cmd params
         self.test = test
