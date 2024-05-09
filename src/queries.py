@@ -316,7 +316,7 @@ def prepare_queries() -> None:
         maxids = fetch_maxids(needed_updates)
         for dt in needed_updates:
             maxid = int(maxids[dt][4:])
-            if Config.lookahead and LOOKAHEAD_AMOUNTS[dt] != 0:
+            if Config.lookahead:
                 trace(f'Applying {dt} lookahead offset: {LOOKAHEAD_AMOUNTS[dt]:d}')
                 maxid += LOOKAHEAD_AMOUNTS[dt]
             for cat in autoupdate_seqs:
