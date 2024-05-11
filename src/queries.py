@@ -6,6 +6,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
+import sys
 from os import chmod, path, stat
 from re import compile as re_compile
 from subprocess import check_output
@@ -22,7 +23,7 @@ from logger import trace
 from sequences import validate_sequences, form_queries, report_queries, validate_runners, report_unoptimized
 from strings import SLASH, NEWLINE, datetime_str_nfull, all_tags_negative, all_tags_positive, normalize_path
 
-__all__ = ('read_queries_file', 'prepare_queries', 'update_next_ids')
+__all__ = ('read_queries_file', 'prepare_queries', 'update_next_ids', 'at_startup')
 
 re_title = re_compile(r'^### TITLE:[A-zÀ-ʯА-я\d_+\-!]{,20}$')
 re_datesub = re_compile(r'^### DATESUB:.+?$')
@@ -96,6 +97,7 @@ def fetch_maxids(dts: Iterable[str]) -> Dict[str, str]:
 
 
 def read_queries_file() -> None:
+    trace(f'\nReading queries file: \'{Config.script_path}\'')
     with open(Config.script_path, 'rt', encoding=UTF8) as qfile:
         queries_file_lines.reset(qfile.readlines())
 
@@ -126,7 +128,7 @@ def prepare_queries() -> None:
     cur_tags_list = list()  # type: List[str]
     autoupdate_seqs = DownloadCollection()  # type: DownloadCollection[IntSequence]
 
-    trace('\nAnalyzing queries file strings...')
+    trace('Analyzing queries file strings...')
 
     for i, line in enumerate(queries_file_lines()):  # type: int, str
         try:
@@ -407,6 +409,10 @@ def update_next_ids() -> None:
     except Exception:
         trace(f'\nError: failed to update next ids, you\'ll have to do it manually!! (backup has to be {filename_bak})\n')
         raise
+
+
+def at_startup() -> None:
+    trace(f'Python {sys.version}\nCommand-line args: {" ".join(sys.argv)}')
 
 #
 #
