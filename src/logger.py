@@ -12,15 +12,22 @@ from typing import TextIO, Optional
 from defs import Wrapper, Config, UTF8
 from strings import datetime_str_nfull, timestamped_string
 
-__all__ = ('open_logfile', 'close_logfile', 'log_to', 'trace')
+__all__ = ('open_logfile', 'ensure_logfile', 'close_logfile', 'log_to', 'trace')
 
 logfile = Wrapper()  # type: Wrapper[Optional[TextIO]]
+buffered_strings = [''] * 0
 
 
 def open_logfile() -> None:
     log_basename = f'log_{datetime_str_nfull()}.log' if not Config.debug else 'log.log'
     logfile.reset(open(f'{Config.dest_logs_base}{log_basename}', 'at', encoding=UTF8, buffering=1))
-    trace('Logfile opened...', False)
+    if buffered_strings:
+        trace('\n#^^Buffered strings dumped^^#\n', False)
+
+
+def ensure_logfile() -> None:
+    if not logfile:
+        open_logfile()
 
 
 def close_logfile() -> None:
@@ -50,7 +57,13 @@ def trace(msg: str, add_timestamp=True) -> None:
         except Exception:
             print('<Message was not logged due to UnicodeError>')
     if logfile:
+        if buffered_strings:
+            for buffered in buffered_strings:
+                logfile().write(buffered)
+            buffered_strings.clear()
         logfile().write(t_msg)
+    else:
+        buffered_strings.append(t_msg)
 
 #
 #

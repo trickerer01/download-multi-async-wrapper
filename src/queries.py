@@ -20,7 +20,7 @@ from defs import (
     LOOKAHEAD_AMOUNTS, BOOL_STRS,
 )
 from executor import register_queries
-from logger import trace
+from logger import trace, open_logfile, ensure_logfile
 from sequences import validate_sequences, form_queries, report_queries, validate_runners, report_unoptimized
 from strings import SLASH, NEWLINE, datetime_str_nfull, all_tags_negative, all_tags_positive, normalize_path
 
@@ -171,6 +171,7 @@ def prepare_queries() -> None:
                     trace(f'Parsed logs dest base: \'{dest_log}\'')
                     assert Config.dest_logs_base == Config.DEFAULT_PATH, f'Logs path re-declaration! Was \'{Config.dest_logs_base}\''
                     Config.dest_logs_base = valid_dir_path(dest_log)
+                    open_logfile()
                     continue
                 if re_datesub.fullmatch(line):
                     datesub_str = line[line.find(':') + 1:]
@@ -193,6 +194,7 @@ def prepare_queries() -> None:
                     assert Config.python == '', 'Python executable must be declared exactly once!'
                     Config.python = python_str
                     continue
+                ensure_logfile()
                 cat_match = re_category.fullmatch(line)
                 assert cat_match, f'at line {i + 1:d}: invalid category header format: \'{line}\'!'
                 cur_cat = cat_match.group(1)

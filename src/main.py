@@ -13,7 +13,7 @@ from typing import Sequence
 from cmdargs import parse_arglist
 from defs import SUPPORTED_SYSTEMS
 from executor import execute
-from logger import open_logfile, close_logfile, trace
+from logger import close_logfile, trace
 from queries import read_queries_file, prepare_queries, update_next_ids, at_startup
 from strings import datetime_str_full
 
@@ -24,7 +24,7 @@ def run_main(args: Sequence[str]) -> int:
     result = 0
     try:
         parse_arglist(args)
-        open_logfile()
+        trace('Logfile opened...', False)
         trace(f'\n# Started at {datetime_str_full()} #')
         if __name__ == '__main__':
             at_startup()
