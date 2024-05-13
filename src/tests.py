@@ -31,7 +31,6 @@ args_argparse_str2 = (
     '-path ../tests '
     '-script "../tests/queries.list" '
     '--ignore-download-mode '
-    '--update '
     '-runpath ../run '
     '-logspath ../logs '
     '-bakpath ../bak'
@@ -76,7 +75,7 @@ class ArgParseTests(TestCase):
         parse_arglist(args_argparse_str2.split())
         self.assertEqual(
             'debug: True, downloaders: [\'rv\', \'rn\', \'rx\', \'rs\'], script: ../tests/queries.list, dest: ../tests/, '
-            'run: ../run/, logs: ../logs/, bak: ../bak/, update: True, no_download: False, ignore_download_mode: True, '
+            'run: ../run/, logs: ../logs/, bak: ../bak/, update: False, no_download: False, ignore_download_mode: True, '
             'max_cmd_len: 16000',
             str(Config)
         )
@@ -93,6 +92,7 @@ class QueriesFormTests(TestCase):
         self.assertEqual('script_0', Config.title)
         self.assertTrue(Config.datesub)
         self.assertTrue(Config.lookahead)
+        self.assertTrue(Config.update)
         self.assertEqual('python3', Config.python)
         self.assertEqual(1, len(queries_all[cat_vid][DOWNLOADER_NM]))
         self.assertEqual(3, len(queries_all[cat_vid][DOWNLOADER_RV]))

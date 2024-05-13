@@ -17,7 +17,7 @@ from cmdargs import valid_dir_path
 from defs import (
     DownloadCollection, Wrapper, IntSequence, Config, StrPair, UTF8, DOWNLOADERS, MIN_IDS_SEQ_LENGTH, PATH_APPEND_DOWNLOAD_IDS,
     PATH_APPEND_DOWNLOAD_PAGES, PATH_APPEND_UPDATE, RUXX_DOWNLOADERS, PAGE_DOWNLOADERS, PROXY_ARG, MAX_CATEGORY_NAME_LENGTH,
-    LOOKAHEAD_AMOUNTS,
+    LOOKAHEAD_AMOUNTS, BOOL_STRS,
 )
 from executor import register_queries
 from logger import trace
@@ -30,6 +30,7 @@ re_title = re_compile(r'^### TITLE:[A-zÀ-ʯА-я\d_+\-!]{,20}$')
 re_dest_base = re_compile(r'^### DESTPATH:.+?$')
 re_datesub = re_compile(r'^### DATESUB:.+?$')
 re_lookahead = re_compile(r'^### LOOKAHEAD:.+?$')
+re_update = re_compile(r'^### UPDATE:.+?$')
 re_category = re_compile(r'^### \(([A-zÀ-ʯА-я\d_+\-! ]+)\) ###$')
 re_comment = re_compile(r'^##[^#].*?$')
 re_download_mode = re_compile(r'^.*[: ]-dmode .+?$')
@@ -153,12 +154,17 @@ def prepare_queries() -> None:
                 if re_datesub.fullmatch(line):
                     datesub_str = line[line.find(':') + 1:]
                     trace(f'Parsed date subfolder flag value: \'{datesub_str}\'')
-                    Config.datesub = {'YES': True, 'NO': False}[datesub_str]
+                    Config.datesub = BOOL_STRS[datesub_str]
                     continue
                 if re_lookahead.fullmatch(line):
                     lookahead_str = line[line.find(':') + 1:]
                     trace(f'Parsed lookahead flag value: \'{lookahead_str}\'')
-                    Config.lookahead = {'YES': True, 'NO': False}[lookahead_str]
+                    Config.lookahead = BOOL_STRS[lookahead_str]
+                    continue
+                if re_update.fullmatch(line):
+                    update_str = line[line.find(':') + 1:]
+                    trace(f'Parsed update flag value: \'{update_str}\'')
+                    Config.update = BOOL_STRS[update_str]
                     continue
                 if re_python_exec.fullmatch(line):
                     python_str = line[line.find(':') + 1:]

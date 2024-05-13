@@ -32,6 +32,8 @@ MAX_CMD_LEN = {
     OS_MACOS: 65000,
 }
 
+BOOL_STRS = {'YES': True, 'NO': False}
+
 
 def unused_argument(arg: Any) -> None:
     bool(arg)
