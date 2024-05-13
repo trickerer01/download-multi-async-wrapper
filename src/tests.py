@@ -27,13 +27,10 @@ args_argparse_str1 = (
 
 args_argparse_str2 = (
     '--debug '
+    '--ignore-download-mode '
     '-downloaders rv,rx,rn,rs '
     '-path ../tests '
-    '-script "../tests/queries.list" '
-    '--ignore-download-mode '
-    '-runpath ../run '
-    '-logspath ../logs '
-    '-bakpath ../bak'
+    '-script "../tests/queries.list"'
 )
 
 args_argparse_str3 = (
@@ -75,7 +72,7 @@ class ArgParseTests(TestCase):
         parse_arglist(args_argparse_str2.split())
         self.assertEqual(
             'debug: True, downloaders: [\'rv\', \'rn\', \'rx\', \'rs\'], script: ../tests/queries.list, dest: ../tests/, '
-            'run: ../run/, logs: ../logs/, bak: ../bak/, update: False, no_download: False, ignore_download_mode: True, '
+            'run: ./, logs: ./, bak: ./, update: False, no_download: False, ignore_download_mode: True, '
             'max_cmd_len: 16000',
             str(Config)
         )
@@ -93,6 +90,9 @@ class QueriesFormTests(TestCase):
         self.assertTrue(Config.datesub)
         self.assertTrue(Config.lookahead)
         self.assertTrue(Config.update)
+        self.assertEqual('../bak/', Config.dest_bak_base)
+        self.assertEqual('../run/', Config.dest_run_base)
+        self.assertEqual('../logs/', Config.dest_logs_base)
         self.assertEqual('python3', Config.python)
         self.assertEqual(1, len(queries_all[cat_vid][DOWNLOADER_NM]))
         self.assertEqual(3, len(queries_all[cat_vid][DOWNLOADER_RV]))
@@ -161,6 +161,9 @@ class QueriesFormTests(TestCase):
         prepare_queries()
         self.assertEqual('script_2', Config.title)
         self.assertEqual('P:/', Config.dest_base)
+        self.assertEqual('P:/', Config.dest_bak_base)
+        self.assertEqual('P:/', Config.dest_run_base)
+        self.assertEqual('P:/', Config.dest_logs_base)
         print(f'{self._testMethodName} passed')
 
     def test_queries3(self) -> None:
@@ -174,19 +177,19 @@ class QueriesFormTests(TestCase):
 class RunTests(TestCase):
     def test_main1(self) -> None:
         set_up_test()
-        main_sync(('-script', '"../tests/queries.list"', '-logspath', '../logs/archive',
+        main_sync(('-script', '"../tests/queries.list"',
                    '--debug', '--no-download', '-downloaders', 'rx,nm,rn,rs'))
         print(f'{self._testMethodName} passed')
 
     def test_main2(self) -> None:
         set_up_test()
-        main_sync(('-script', '"../tests/queries.list"', '-logspath', '../logs/archive',
+        main_sync(('-script', '"../tests/queries.list"',
                    '--debug', '-downloaders', 'rx,nm,rn,rs'))
         print(f'{self._testMethodName} passed')
 
     def test_main3(self) -> None:
         set_up_test()
-        main_sync(('-script', '"../tests/queries.list"', '-logspath', '../logs/archive',
+        main_sync(('-script', '"../tests/queries.list"',
                    '-downloaders', 'rx,nm,rn,rs'))
         print(f'{self._testMethodName} passed')
 

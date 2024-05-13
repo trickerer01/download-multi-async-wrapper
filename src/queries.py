@@ -28,6 +28,9 @@ __all__ = ('read_queries_file', 'prepare_queries', 'update_next_ids', 'at_startu
 
 re_title = re_compile(r'^### TITLE:[A-zÀ-ʯА-я\d_+\-!]{,20}$')
 re_dest_base = re_compile(r'^### DESTPATH:.+?$')
+re_dest_bak = re_compile(r'^### BAKPATH:.+?$')
+re_dest_run = re_compile(r'^### RUNPATH:.+?$')
+re_dest_log = re_compile(r'^### LOGPATH:.+?$')
 re_datesub = re_compile(r'^### DATESUB:.+?$')
 re_lookahead = re_compile(r'^### LOOKAHEAD:.+?$')
 re_update = re_compile(r'^### UPDATE:.+?$')
@@ -148,8 +151,26 @@ def prepare_queries() -> None:
                 if re_dest_base.fullmatch(line):
                     dest_base = line[line.find(':') + 1:]
                     trace(f'Parsed dest base: \'{dest_base}\'')
-                    assert Config.dest_base == Config.DEFAULT_PATH, f'Destination can only be declared once! Was \'{Config.dest_base}\''
+                    assert Config.dest_base == Config.DEFAULT_PATH, f'Destination re-declaration! Was \'{Config.dest_base}\''
                     Config.dest_base = valid_dir_path(dest_base)
+                    continue
+                if re_dest_bak.fullmatch(line):
+                    dest_bak = line[line.find(':') + 1:]
+                    trace(f'Parsed backup dest base: \'{dest_bak}\'')
+                    assert Config.dest_bak_base == Config.DEFAULT_PATH, f'Backup path re-declaration! Was \'{Config.dest_bak_base}\''
+                    Config.dest_bak_base = valid_dir_path(dest_bak)
+                    continue
+                if re_dest_run.fullmatch(line):
+                    dest_run = line[line.find(':') + 1:]
+                    trace(f'Parsed run dest base: \'{dest_run}\'')
+                    assert Config.dest_run_base == Config.DEFAULT_PATH, f'Run path re-declaration! Was \'{Config.dest_run_base}\''
+                    Config.dest_run_base = valid_dir_path(dest_run)
+                    continue
+                if re_dest_log.fullmatch(line):
+                    dest_log = line[line.find(':') + 1:]
+                    trace(f'Parsed logs dest base: \'{dest_log}\'')
+                    assert Config.dest_logs_base == Config.DEFAULT_PATH, f'Logs path re-declaration! Was \'{Config.dest_logs_base}\''
+                    Config.dest_logs_base = valid_dir_path(dest_log)
                     continue
                 if re_datesub.fullmatch(line):
                     datesub_str = line[line.find(':') + 1:]

@@ -1,4 +1,7 @@
 ### TITLE:script_0
+### BAKPATH:../bak
+### RUNPATH:../run
+### LOGPATH:../logs
 ### DATESUB:YES
 ### LOOKAHEAD:YES
 ### UPDATE:YES
