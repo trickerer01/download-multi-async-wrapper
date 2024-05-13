@@ -1,5 +1,5 @@
 ## author: trickerer01           <-- COMMENTS
-## This file is only for syntax reference
+## THIS FILE IS FOR SYNTAX REFERENCE ONLY
 
 ### TITLE:script_1               <-- SCRIPT TITLE (USED IN LOG AND RUN FILE NAMES AS A SUFFIX, 0-20 SYMBOLS) <OPTIONAL>
 ### DESTPATH:D:/download/        <-- DESTINATION BASE FOLDER, CAN BE USED INSTEAD OF '-path' CMD ARGUMENT (BUT NOT BOTH) <OPTIONAL>

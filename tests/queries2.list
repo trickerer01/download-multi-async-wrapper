@@ -1,102 +1,11 @@
 ### TITLE:script_2
 ### DESTPATH:P:/
-### DATESUB:YES
-### LOOKAHEAD:YES
 ### PYTHON:python3
 ### (VIDEOS) ###
 # nm
-# 1 2
+# p5
 # downloader:D:/NM/
-# common:-dmode touch
-# common:--dump-tags
-## <generic comment>
-# sub:a
--quality 1080p
--a -b -c -dfff
-ggg
-# send
-
-# sub:b
--ggg
--(x,z)
-(h~i~j~k)
-# send
-
-# sub:c
--h -i -j -k
---(x,z)
-(l~m~n)
-# send
-
-# sub:d
---quality -+1080p
--l -m -n
---dfff
--quality 360p
--uvp always
-# send
-# end
-
-# rv
-# p5 s2
-# 5 9
-# downloader:D:/old/RV
-# common:-log info -timeout 15 -retries 50 -throttle 30 --dump-descriptions --dump-tags --dump-comments
-# sub:a
--quality 1080p
--search a
-# send
-
-# sub:b
-## --search -+a
--a
--search_tag b,c,d
--search_rule_tag any
-# send
-
-# sub:c
--any
--b -c -d
--(g,h,i)
--search_tag e,f
--search_rule_tag all
-# send
-# end
-
-### (IMAGES) ###
-# rx
-# 1 2
-# downloader:D:/ruxx/
-# common:-dmode 2
-# common:-module rx
 # sub:a
 a
-# send
-
-# sub:b
--+a
--a
-b
-(c~d)
-# send
-# end
-
-### (VIDEOS ) ###
-# nm
-# 1 2
-# downloader:D:/NM/
-# common:-dmode touch
-# common:--dump-tags
-## <generic comment>
-# sub:a
--quality 1080p
--a -b -c -dfff
-ggg
-# send
-
-# sub:b
--ggg
--(x,z)
-(h~i~j~k)
 # send
 # end
