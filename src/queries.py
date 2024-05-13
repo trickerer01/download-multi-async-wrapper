@@ -16,8 +16,7 @@ from typing import List, Dict, Optional, Tuple, Iterable
 from cmdargs import valid_dir_path
 from defs import (
     DownloadCollection, Wrapper, IntSequence, Config, StrPair, UTF8, DOWNLOADERS, MIN_IDS_SEQ_LENGTH, PATH_APPEND_DOWNLOAD_IDS,
-    PATH_APPEND_DOWNLOAD_PAGES, PATH_APPEND_UPDATE, RUXX_DOWNLOADERS, PAGE_DOWNLOADERS, PROXY_ARG, MAX_CATEGORY_NAME_LENGTH,
-    LOOKAHEAD_AMOUNTS, BOOL_STRS,
+    PATH_APPEND_DOWNLOAD_PAGES, PATH_APPEND_UPDATE, RUXX_DOWNLOADERS, PAGE_DOWNLOADERS, PROXY_ARG, MAX_CATEGORY_NAME_LENGTH, BOOL_STRS,
 )
 from executor import register_queries
 from logger import trace, open_logfile, ensure_logfile
@@ -32,7 +31,6 @@ re_dest_bak = re_compile(r'^### BAKPATH:.+?$')
 re_dest_run = re_compile(r'^### RUNPATH:.+?$')
 re_dest_log = re_compile(r'^### LOGPATH:.+?$')
 re_datesub = re_compile(r'^### DATESUB:.+?$')
-re_lookahead = re_compile(r'^### LOOKAHEAD:.+?$')
 re_update = re_compile(r'^### UPDATE:.+?$')
 re_category = re_compile(r'^### \(([A-zÀ-ʯА-я\d_+\-! ]+)\) ###$')
 re_comment = re_compile(r'^##[^#].*?$')
@@ -177,11 +175,6 @@ def prepare_queries() -> None:
                     datesub_str = line[line.find(':') + 1:]
                     trace(f'Parsed date subfolder flag value: \'{datesub_str}\'')
                     Config.datesub = BOOL_STRS[datesub_str]
-                    continue
-                if re_lookahead.fullmatch(line):
-                    lookahead_str = line[line.find(':') + 1:]
-                    trace(f'Parsed lookahead flag value: \'{lookahead_str}\'')
-                    Config.lookahead = BOOL_STRS[lookahead_str]
                     continue
                 if re_update.fullmatch(line):
                     update_str = line[line.find(':') + 1:]
@@ -356,9 +349,6 @@ def prepare_queries() -> None:
         maxids = fetch_maxids(needed_updates)
         for dt in needed_updates:
             maxid = int(maxids[dt][4:])
-            if Config.lookahead:
-                trace(f'Applying {dt} lookahead offset: {LOOKAHEAD_AMOUNTS[dt]:d}')
-                maxid += LOOKAHEAD_AMOUNTS[dt]
             for cat in autoupdate_seqs:
                 uidseq = autoupdate_seqs[cat][dt]  # type: Optional[IntSequence]
                 if uidseq:
@@ -376,8 +366,6 @@ def prepare_queries() -> None:
     trace('Validating sequences...\n')
     validate_sequences(sequences_ids, sequences_pages, sequences_paths, sequences_tags, sequences_subfolders)
     if not autoupdate_seqs:
-        if Config.lookahead:
-            trace('Warning: LOOKAHEAD flag is set but no downloaders need it!')
         validate_runners(sequences_paths, sequences_paths_update)
 
     trace('Sequences validated. Finalizing...\n')

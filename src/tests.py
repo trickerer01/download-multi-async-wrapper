@@ -11,6 +11,7 @@ from unittest import TestCase
 from cmdargs import parse_arglist
 from defs import Config, DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RC, DOWNLOADER_RN, DOWNLOADER_RX, DOWNLOADER_RS
 from executor import queries_all
+from logger import close_logfile
 from main import main_sync
 # noinspection PyProtectedMember
 from queries import (
@@ -43,6 +44,7 @@ args_argparse_str4 = (
 
 
 def set_up_test(log=False) -> None:
+    close_logfile()
     # noinspection PyProtectedMember
     Config._reset()
     Config.test = True
@@ -88,7 +90,6 @@ class QueriesFormTests(TestCase):
         prepare_queries()
         self.assertEqual('script_0', Config.title)
         self.assertTrue(Config.datesub)
-        self.assertTrue(Config.lookahead)
         self.assertTrue(Config.update)
         self.assertEqual('../bak/', Config.dest_bak_base)
         self.assertEqual('../run/', Config.dest_run_base)

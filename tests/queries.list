@@ -3,7 +3,6 @@
 ### RUNPATH:../run
 ### LOGPATH:../logs
 ### DATESUB:YES
-### LOOKAHEAD:YES
 ### UPDATE:YES
 ### PYTHON:python3
 ### (VIDEOS) ###
