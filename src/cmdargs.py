@@ -17,12 +17,12 @@ from defs import (
 from logger import trace
 from strings import normalize_path, unquote
 
-__all__ = ('parse_arglist',)
+__all__ = ('parse_arglist', 'valid_dir_path')
 
 
 def valid_dir_path(pathstr: str) -> str:
     try:
-        newpath = normalize_path(unquote(pathstr))
+        newpath = normalize_path(path.expanduser(unquote(pathstr)))
         assert path.isdir(newpath)
         return newpath
     except Exception:
@@ -31,7 +31,7 @@ def valid_dir_path(pathstr: str) -> str:
 
 def valid_file_path(pathstr: str) -> str:
     try:
-        newpath = normalize_path(unquote(pathstr), False)
+        newpath = normalize_path(path.expanduser(unquote(pathstr)), False)
         assert path.isfile(newpath)
         return newpath
     except Exception:

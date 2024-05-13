@@ -37,6 +37,14 @@ args_argparse_str2 = (
     '-bakpath ../bak'
 )
 
+args_argparse_str3 = (
+    '-script ../tests/queries2.list'
+)
+
+args_argparse_str4 = (
+    args_argparse_str3 + ' -path C:/'
+)
+
 
 def set_up_test(log=False) -> None:
     # noinspection PyProtectedMember
@@ -144,6 +152,22 @@ class QueriesFormTests(TestCase):
             'b: -quality 1080p -a -b -c -dfff -ggg -(x,z) (h~i~j~k)"',
             queries_all[cat_vid_][DOWNLOADER_NM][0]
         )
+        print(f'{self._testMethodName} passed')
+
+    def test_queries2(self) -> None:
+        set_up_test()
+        parse_arglist(args_argparse_str3.split())
+        read_queries_file()
+        prepare_queries()
+        self.assertEqual('script_2', Config.title)
+        self.assertEqual('P:/', Config.dest_base)
+        print(f'{self._testMethodName} passed')
+
+    def test_queries3(self) -> None:
+        set_up_test()
+        parse_arglist(args_argparse_str4.split())
+        read_queries_file()
+        self.assertRaises(AssertionError, prepare_queries)
         print(f'{self._testMethodName} passed')
 
 

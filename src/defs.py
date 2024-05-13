@@ -130,15 +130,17 @@ LOOKAHEAD_AMOUNTS = {
 
 
 class BaseConfig(object):
+    DEFAULT_PATH = './'
+
     def __init__(self, *, test=False, console_log=False) -> None:
         # arguments
         self.debug = False
         self.no_download = False
         self.downloaders = list()  # type: List[str]
-        self.dest_base = './'
-        self.dest_run_base = './'
-        self.dest_logs_base = './'
-        self.dest_bak_base = './'
+        self.dest_base = BaseConfig.DEFAULT_PATH
+        self.dest_run_base = BaseConfig.DEFAULT_PATH
+        self.dest_logs_base = BaseConfig.DEFAULT_PATH
+        self.dest_bak_base = BaseConfig.DEFAULT_PATH
         self.script_path = ''
         self.update = False
         self.ignore_download_mode = False
@@ -172,7 +174,7 @@ Config = BaseConfig()
 HELP_DEBUG = 'Run in debug mode (for development)'
 HELP_DOWNLOADERS = f'Enabled downloaders. Default is all: \'{",".join(DOWNLOADERS)}\''
 HELP_NO_DOWNLOAD = 'Boolean flag to skip actual download (do not launch downloaders)'
-HELP_PATH = 'Path to the folder where all the files / subfolders will be put'
+HELP_PATH = 'Path to the base destination folder where all the files / subfolders will be put'
 HELP_SCRIPT_PATH = 'Full path to the script (queries) file'
 HELP_RUN_PATH = 'Path to the folder where cmd run files will be put if needed'
 HELP_LOGS_PATH = 'Path to the folder where logs will be stored'

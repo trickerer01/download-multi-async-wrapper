@@ -13,6 +13,7 @@ from subprocess import check_output
 from threading import Thread, Lock as ThreadLock
 from typing import List, Dict, Optional, Tuple, Iterable
 
+from cmdargs import valid_dir_path
 from defs import (
     DownloadCollection, Wrapper, IntSequence, Config, StrPair, UTF8, DOWNLOADERS, MIN_IDS_SEQ_LENGTH, PATH_APPEND_DOWNLOAD_IDS,
     PATH_APPEND_DOWNLOAD_PAGES, PATH_APPEND_UPDATE, RUXX_DOWNLOADERS, PAGE_DOWNLOADERS, PROXY_ARG, MAX_CATEGORY_NAME_LENGTH,
@@ -26,6 +27,7 @@ from strings import SLASH, NEWLINE, datetime_str_nfull, all_tags_negative, all_t
 __all__ = ('read_queries_file', 'prepare_queries', 'update_next_ids', 'at_startup')
 
 re_title = re_compile(r'^### TITLE:[A-zÀ-ʯА-я\d_+\-!]{,20}$')
+re_dest_base = re_compile(r'^### DESTPATH:.+?$')
 re_datesub = re_compile(r'^### DATESUB:.+?$')
 re_lookahead = re_compile(r'^### LOOKAHEAD:.+?$')
 re_category = re_compile(r'^### \(([A-zÀ-ʯА-я\d_+\-! ]+)\) ###$')
@@ -137,10 +139,16 @@ def prepare_queries() -> None:
                 continue
             if line.startswith('###'):
                 if re_title.fullmatch(line):
-                    assert Config.title == '', 'Title can be declared only once!'
                     title_base = line[line.find(':') + 1:]
                     trace(f'Parsed title: \'{title_base}\'')
+                    assert Config.title == '', 'Title can only be declared once!'
                     Config.title = title_base
+                    continue
+                if re_dest_base.fullmatch(line):
+                    dest_base = line[line.find(':') + 1:]
+                    trace(f'Parsed dest base: \'{dest_base}\'')
+                    assert Config.dest_base == Config.DEFAULT_PATH, f'Destination can only be declared once! Was \'{Config.dest_base}\''
+                    Config.dest_base = valid_dir_path(dest_base)
                     continue
                 if re_datesub.fullmatch(line):
                     datesub_str = line[line.find(':') + 1:]
@@ -153,9 +161,10 @@ def prepare_queries() -> None:
                     Config.lookahead = {'YES': True, 'NO': False}[lookahead_str]
                     continue
                 if re_python_exec.fullmatch(line):
+                    python_str = line[line.find(':') + 1:]
+                    trace(f'Parsed python exexutable: \'{python_str}\'')
                     assert Config.python == '', 'Python executable must be declared exactly once!'
-                    Config.python = line[line.find(':') + 1:]
-                    trace(f'Parsed python exexutable: \'{Config.python}\'')
+                    Config.python = python_str
                     continue
                 cat_match = re_category.fullmatch(line)
                 assert cat_match, f'at line {i + 1:d}: invalid category header format: \'{line}\'!'
@@ -346,7 +355,7 @@ def prepare_queries() -> None:
     queries_final = form_queries(sequences_ids, sequences_pages, sequences_paths, sequences_tags, sequences_subfolders, sequences_common)
 
     if Config.debug:
-        trace('Unoptimized:')
+        trace('[DEBUG] Unoptimized:')
         report_unoptimized(sequences_ids, sequences_pages, sequences_paths, sequences_tags, sequences_subfolders, sequences_common)
         trace('\n\nFinals:')
 
