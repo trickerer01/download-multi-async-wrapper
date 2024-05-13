@@ -5,7 +5,7 @@
 ### (VIDEOS) ###
 # nm
 # 1 2
-# basepath:D:/NM/
+# downloader:D:/NM/
 # common:-dmode touch
 # common:--dump-tags
 ## <generic comment>
@@ -39,7 +39,7 @@ ggg
 # rv
 # p5 s2
 # 5 9
-# basepath:D:/old/RV
+# downloader:D:/old/RV
 # common:-log info -timeout 15 -retries 50 -throttle 30 --dump-descriptions --dump-tags --dump-comments
 # sub:a
 -quality 1080p
@@ -65,7 +65,7 @@ ggg
 ### (IMAGES) ###
 # rx
 # 1 2
-# basepath:D:/ruxx/
+# downloader:D:/ruxx/
 # common:-dmode 2
 # common:-module rx
 # sub:a
@@ -83,7 +83,7 @@ b
 ### (VIDEOS ) ###
 # nm
 # 1 2
-# basepath:D:/NM/
+# downloader:D:/NM/
 # common:-dmode touch
 # common:--dump-tags
 ## <generic comment>

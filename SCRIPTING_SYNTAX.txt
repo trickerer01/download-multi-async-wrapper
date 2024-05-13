@@ -11,7 +11,7 @@
 # nm                             <-- DOWNLOADER TYPE <REQUIRED>
 # 50000 51000                    <-- AT LEAST ONE OR TWO IDS FOR RANGE <REQUIRED>
                                      A SIGNLE ID MEANS FROM THIS AND UP (TILL CURRENT MAX ID)
-# basepath:D:/Projects/NM        <-- PATH TO THE DOWNLOADER BASE FOLDER <REQUIRED>
+# downloader:D:/Projects/NM      <-- PATH TO THE DOWNLOADER BASE FOLDER <REQUIRED>
 # common:-dmode touch            <-- ARGUMENTS TO ADD TO EVERY QUERY <OPTIONAL>
 # common:-log trace              <-- ARGUMENTS TO ADD TO EVERY QUERY <OPTIONAL>
 # common:--dump-tags             <-- ARGUMENTS TO ADD TO EVERY QUERY <OPTIONAL>
@@ -60,7 +60,7 @@ ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
 # rv
 # p10 s1                         <-- SWITCH TO PAGES SCAN INSTEAD OF IDS (PAGES NUMBER, STARTING PAGE) <OPTIONAL>
 # 3050000
-# basepath:D:/Projects/RV
+# downloader:D:/Projects/RV
 # common:-log info -timeout 30 -retries 100 -throttle 100 --dump-descriptions --dump-tags
 # sub:a
 -quality 1080p
@@ -97,7 +97,7 @@ ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
 
 # rn
 # 450000 451000
-# basepath:D:/Projects/Ruxx
+# downloader:D:/Projects/Ruxx
 # common:...
 # sub:...
 ...
@@ -106,7 +106,7 @@ ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
 
 # rx
 # 5050000 5051000
-# basepath:D:/Projects/Ruxx
+# downloader:D:/Projects/Ruxx
 # common:...
 # sub:...
 ...
@@ -116,7 +116,7 @@ ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
 ### (img) ###                    <-- SECOND CATEGORY MARKER (SUBFOLDER NAME: 'img')
 # rx
 # 5050000 5051000
-# basepath:D:/Projects/Ruxx
+# downloader:D:/Projects/Ruxx
 # common:...
 # sub:...
 ...
@@ -131,7 +131,7 @@ ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
                                      (SUBFOLDER NAME: 'vid')
 # nm
 # 50000 51000
-# basepath:D:/Projects/NM
+# downloader:D:/Projects/NM
 # common:-dmode touch
 # common:-log trace
 # common:--dump-tags
