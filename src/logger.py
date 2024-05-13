@@ -19,7 +19,8 @@ buffered_strings = [''] * 0
 
 
 def open_logfile() -> None:
-    log_basename = f'log_{datetime_str_nfull()}.log' if not Config.debug else 'log.log'
+    title_part = f'{Config.title}_' if Config.title else ''
+    log_basename = f'log_{title_part}{datetime_str_nfull()}.log' if not Config.debug else 'log.log'
     logfile.reset(open(f'{Config.dest_logs_base}{log_basename}', 'at', encoding=UTF8, buffering=1))
     if buffered_strings:
         trace('\n#^^Buffered strings dumped^^#\n', False)
