@@ -64,11 +64,11 @@ def parse_arglist(args: Sequence[str]) -> None:
     parser.add_argument('--help', action='help')
     parser.add_argument('--debug', action=ACTION_STORE_TRUE, help=HELP_DEBUG)
     parser.add_argument('--no-download', action=ACTION_STORE_TRUE, help=HELP_NO_DOWNLOAD)
+    parser.add_argument('--ignore-download-mode', action=ACTION_STORE_TRUE, help=HELP_IGNORE_DMODE)
+    parser.add_argument('--update', action=ACTION_STORE_TRUE, help=HELP_UPDATE)
     parser.add_argument('-downloaders', metavar='#L,I,S,T', default=DOWNLOADERS, help=HELP_DOWNLOADERS, type=valid_downloaders_list)
     parser.add_argument('-path', metavar='#PATH_TO_DIR', default=ncdir, help=HELP_PATH, type=valid_dir_path)
     parser.add_argument('-script', metavar='#PATH_TO_FILE', required=True, help=HELP_SCRIPT_PATH, type=valid_file_path)
-    parser.add_argument('--ignore-download-mode', action=ACTION_STORE_TRUE, help=HELP_IGNORE_DMODE)
-    parser.add_argument('--update', action=ACTION_STORE_TRUE, help=HELP_UPDATE)
     parser.add_argument('-runpath', metavar='#PATH_TO_DIR', default=ncdir, help=HELP_RUN_PATH, type=valid_dir_path)
     parser.add_argument('-logspath', metavar='#PATH_TO_DIR', default=ncdir, help=HELP_LOGS_PATH, type=valid_dir_path)
     parser.add_argument('-bakpath', metavar='#PATH_TO_DIR', default=ncdir, help=HELP_BAK_PATH, type=valid_dir_path)
@@ -76,11 +76,11 @@ def parse_arglist(args: Sequence[str]) -> None:
     parsed = parser.parse_args(args)
     Config.debug = parsed.debug
     Config.no_download = parsed.no_download
+    Config.ignore_download_mode = parsed.ignore_download_mode
+    Config.update = parsed.update
     Config.downloaders = parsed.downloaders
     Config.dest_base = parsed.path
     Config.script_path = parsed.script
-    Config.ignore_download_mode = parsed.ignore_download_mode
-    Config.update = parsed.update
     Config.dest_run_base = parsed.runpath
     Config.dest_logs_base = parsed.logspath
     Config.dest_bak_base = parsed.bakpath

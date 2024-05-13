@@ -136,14 +136,14 @@ class BaseConfig(object):
         # arguments
         self.debug = False
         self.no_download = False
+        self.ignore_download_mode = False
+        self.update = False
         self.downloaders = list()  # type: List[str]
         self.dest_base = BaseConfig.DEFAULT_PATH
         self.dest_run_base = BaseConfig.DEFAULT_PATH
         self.dest_logs_base = BaseConfig.DEFAULT_PATH
         self.dest_bak_base = BaseConfig.DEFAULT_PATH
         self.script_path = ''
-        self.update = False
-        self.ignore_download_mode = False
         # calculated
         self.max_cmd_len = MAX_CMD_LEN[OS_WINDOWS] // 2  # MAX_CMD_LEN.get(running_system())
         self.title = ''
