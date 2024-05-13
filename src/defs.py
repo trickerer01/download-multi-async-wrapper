@@ -133,6 +133,7 @@ class BaseConfig(object):
     def __init__(self, *, test=False, console_log=False) -> None:
         # arguments
         self.debug = False
+        self.no_download = False
         self.downloaders = list()  # type: List[str]
         self.dest_base = './'
         self.dest_run_base = './'
@@ -140,7 +141,6 @@ class BaseConfig(object):
         self.dest_bak_base = './'
         self.script_path = ''
         self.update = False
-        self.no_download = False
         self.ignore_download_mode = False
         # calculated
         self.max_cmd_len = MAX_CMD_LEN[OS_WINDOWS] // 2  # MAX_CMD_LEN.get(running_system())
@@ -171,13 +171,13 @@ Config = BaseConfig()
 
 HELP_DEBUG = 'Run in debug mode (for development)'
 HELP_DOWNLOADERS = f'Enabled downloaders. Default is all: \'{",".join(DOWNLOADERS)}\''
+HELP_NO_DOWNLOAD = 'Boolean flag to skip actual download (do not launch downloaders)'
 HELP_PATH = 'Path to the folder where all the files / subfolders will be put'
 HELP_SCRIPT_PATH = 'Full path to the script (queries) file'
 HELP_RUN_PATH = 'Path to the folder where cmd run files will be put if needed'
 HELP_LOGS_PATH = 'Path to the folder where logs will be stored'
 HELP_BAK_PATH = 'Path to the folder where script backup will be put before updating'
 HELP_UPDATE = 'Boolean flag to update script file with current max ids fetched from the websites'
-HELP_NO_DOWNLOAD = 'Boolean flag to skip actual download (do not launch downloaders)'
 HELP_IGNORE_DMODE = 'Boolean flag to ignore all \'-dmode\' arguments and always download files in full'
 
 PATH_APPEND_DOWNLOAD_RUXX = 'src/ruxx_cmd.py'
