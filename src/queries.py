@@ -7,6 +7,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 
 import sys
+from json import loads
 from os import chmod, path, stat
 from re import compile as re_compile
 from subprocess import check_output
@@ -32,11 +33,12 @@ re_dest_run = re_compile(r'^### RUNPATH:.+?$')
 re_dest_log = re_compile(r'^### LOGPATH:.+?$')
 re_datesub = re_compile(r'^### DATESUB:.+?$')
 re_update = re_compile(r'^### UPDATE:.+?$')
+re_update_offsets = re_compile(r'^### UPDATE_OFFSETS:.+?$')
 re_category = re_compile(r'^### \(([A-zÀ-ʯА-я\d_+\-! ]+)\) ###$')
 re_comment = re_compile(r'^##[^#].*?$')
 re_download_mode = re_compile(r'^.*[: ]-dmode .+?$')
 re_python_exec = re_compile(r'^### PYTHON:.+?$')
-re_downloader_type = re_compile(fr'^# (?:{"|".join(DOWNLOADERS)}).*?$')
+re_downloader_type = re_compile(fr'^# (?:{"|".join(DOWNLOADERS)}|{"|".join(DOWNLOADERS).upper()}).*?$')
 re_ids_list = re_compile(r'^#(?: \d+)+$')
 re_pages_list = re_compile(r'^# p\d+(?: s\d+)?$')
 re_downloader_basepath = re_compile(r'^# downloader:[A-Z/~].+?$')
@@ -187,6 +189,23 @@ def prepare_queries() -> None:
                     assert Config.python == '', 'Python executable must be declared exactly once!'
                     Config.python = python_str
                     continue
+                if re_update_offsets.fullmatch(line):
+                    offsets_str = line[line.find(':') + 1:]
+                    trace(f'Parsed update offsets value: \'{offsets_str}\'')
+                    assert Config.update_offsets == {}, f'Update offsets re-declaration! Was \'{str(Config.update_offsets)}\''
+                    Config.update_offsets = loads(offsets_str.lower())
+                    invalid_dts = [''] * 0
+                    for pdt in Config.update_offsets:
+                        if pdt not in DOWNLOADERS:
+                            invalid_dts.append(pdt)
+                            trace(f'Error: inavlid downloader type: \'{pdt}\'')
+                        try:
+                            int(Config.update_offsets[pdt])
+                        except ValueError:
+                            invalid_dts.append(pdt)
+                            trace(f'Error: invalid {pdt} offset int value: \'{Config.update_offsets[pdt]}\'')
+                    assert not invalid_dts, f'Invalid update offsets value: {offsets_str}'
+                    continue
                 ensure_logfile()
                 cat_match = re_category.fullmatch(line)
                 assert cat_match, f'at line {i + 1:d}: invalid category header format: \'{line}\'!'
@@ -218,7 +237,7 @@ def prepare_queries() -> None:
                         trace(f'Info: \'{line}\' download mode found at line {i + 1:d}. Ignored!')
                         continue
                 if re_downloader_type.fullmatch(line):
-                    cur_dwn = line.split(' ')[1]
+                    cur_dwn = line.split(' ')[1].lower()
                     assert cur_dwn in DOWNLOADERS
                     trace(f'Processing \'{cur_dl().upper()}\' arguments...')
                 elif re_ids_list.fullmatch(line):
@@ -344,8 +363,7 @@ def prepare_queries() -> None:
         validate_runners(sequences_paths, sequences_paths_update)
         trace('Running max ID autoupdates...\n')
         unsolved_idseqs = [''] * 0
-        needed_updates = [
-            dt for dt in DOWNLOADERS if any(dt in autoupdate_seqs[cat] for cat in autoupdate_seqs if autoupdate_seqs[cat][dt])]
+        needed_updates = [dt for dt in DOWNLOADERS if any(dt in autoupdate_seqs[c] for c in autoupdate_seqs if autoupdate_seqs[c][dt])]
         maxids = fetch_maxids(needed_updates)
         for dt in needed_updates:
             maxid = int(maxids[dt][4:])
@@ -418,6 +436,13 @@ def update_next_ids() -> None:
             trace(f'\nWriting updated queries to \'{queries_file_name}\'...')
             maxids = {dt: int(results[dt][4:]) for dt in results}  # type: Dict[str, int]
             maxids.update(maxid_fetched)
+            for dt in Config.update_offsets:
+                uoffset = Config.update_offsets[dt]
+                if dt in maxids:
+                    maxids[dt] += uoffset
+                    trace(f'Applying {dt.upper()} update offset {uoffset:d}: {maxids[dt] - uoffset:d} -> {maxids[dt]:d}')
+                else:
+                    trace(f'Warning: {dt.upper()} autoupdate offset ({uoffset:d}) was provided but its max id is not being updated')
             for cat in sequences_ids:
                 for i, dtseq in enumerate(sequences_ids[cat].items()):  # type: int, Tuple[str, Optional[IntSequence]]
                     dt, seq = dtseq

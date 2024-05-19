@@ -127,23 +127,26 @@ class BaseConfig(object):
 
     def __init__(self, *, test=False, console_log=False) -> None:
         # arguments
+        # cmd
         self.debug = False
         self.no_download = False
         self.ignore_download_mode = False
-        self.update = False
         self.downloaders = list()  # type: List[str]
+        self.script_path = ''
+        # script
         self.dest_base = BaseConfig.DEFAULT_PATH
         self.dest_run_base = BaseConfig.DEFAULT_PATH
         self.dest_logs_base = BaseConfig.DEFAULT_PATH
         self.dest_bak_base = BaseConfig.DEFAULT_PATH
-        self.script_path = ''
-        # calculated
-        self.max_cmd_len = MAX_CMD_LEN[OS_WINDOWS] // 2  # MAX_CMD_LEN.get(running_system())
         self.title = ''
         self.python = ''
         self.datesub = True
+        self.update = False
+        self.update_offsets = dict()  # type: Dict[str, int]
+        # calculated
+        self.max_cmd_len = MAX_CMD_LEN[OS_WINDOWS] // 2  # MAX_CMD_LEN.get(running_system())
         self.disabled_downloaders = dict()  # type: Dict[str, List[str]]
-        # non-cmd params
+        # internal
         self.test = test
         self.console_log = not (test and not console_log)
 

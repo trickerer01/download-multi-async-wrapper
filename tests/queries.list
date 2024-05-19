@@ -4,9 +4,10 @@
 ### LOGPATH:../logs
 ### DATESUB:YES
 ### UPDATE:YES
+### UPDATE_OFFSETS:{"NM":-100,"rc":-100,"RV":-800,"RS":-300}
 ### PYTHON:python3
 ### (VIDEOS) ###
-# nm
+# NM
 # 1 2
 # downloader:D:/NM/
 # common:-dmode touch

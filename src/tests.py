@@ -91,6 +91,7 @@ class QueriesFormTests(TestCase):
         self.assertEqual('script_0', Config.title)
         self.assertTrue(Config.datesub)
         self.assertTrue(Config.update)
+        self.assertEqual(Config.update_offsets, dict(nm=-100, rc=-100, rv=-800, rs=-300))
         self.assertEqual('../bak/', Config.dest_bak_base)
         self.assertEqual('../run/', Config.dest_run_base)
         self.assertEqual('../logs/', Config.dest_logs_base)
