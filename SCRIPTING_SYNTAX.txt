@@ -61,7 +61,7 @@ ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
                                       d: -a -b -c -ggg -h -i -j -k -l -m -n -quality 360p -uvp always"'
                                  <-- WHICH DOWNLOADS MATCHING VIDEOS TO 4 DIFFERENT FOLDERS IN A SINGLE PASS
 
-# rv
+# RV                             <-- DOWNLOADER TYPE CAN BE UPPERCASE TOO
 # p10 s1                         <-- SWITCH TO PAGES SCAN INSTEAD OF IDS (PAGES NUMBER, STARTING PAGE) <OPTIONAL>
 # 3050000
 # downloader:D:/Projects/RV
@@ -73,7 +73,7 @@ ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
 
 # sub:b
 ##--search -+aaa                 <-- ONE WAY TO REMOVE PREVIOUS SEARCH STRING (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
--aaa                             <-- QUICKIER WAY TO REMOVE PREVIOUS SEARCH STRING (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
+-aaa                             <-- QUICKER WAY TO REMOVE PREVIOUS SEARCH STRING (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
                                      DOES NOT APPEND '-aaa' TO ARGUMENTS LIST
 -search_tag tag1,tag2,tag3       <-- SEARCH FOR 3 DIFFERENT TAGS <DOWNLOADER ARGUMENTS>
 -search_rule_tag any             <-- MATCHING ANY OF THEM <DOWNLOADER ARGUMENTS>
