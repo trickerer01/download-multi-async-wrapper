@@ -150,7 +150,7 @@ def prepare_queries() -> None:
                     continue
                 if re_dest_base.fullmatch(line):
                     dest_base = line[line.find(':') + 1:]
-                    trace(f'Parsed dest base: \'{dest_base}\'')
+                    trace(f'Parsed download dest base: \'{dest_base}\'')
                     assert Config.dest_base == Config.DEFAULT_PATH, f'Destination re-declaration! Was \'{Config.dest_base}\''
                     Config.dest_base = valid_dir_path(dest_base)
                     continue
@@ -185,7 +185,7 @@ def prepare_queries() -> None:
                     continue
                 if re_python_exec.fullmatch(line):
                     python_str = line[line.find(':') + 1:]
-                    trace(f'Parsed python exexutable: \'{python_str}\'')
+                    trace(f'Parsed python executable: \'{python_str}\'')
                     assert Config.python == '', 'Python executable must be declared exactly once!'
                     Config.python = python_str
                     continue
