@@ -32,7 +32,10 @@ MAX_CMD_LEN = {
     OS_MACOS: 65000,
 }
 
-BOOL_STRS = {'YES': True, 'NO': False}
+BOOL_STRS = ({y: v for y, v in zip(
+    ('YES', 'Yes', 'yes', 'TRUE', 'True', 'true', '1', 'Y', 'y', 'NO', 'No', 'no', 'FALSE', 'False', 'false', '0', 'N', 'n'),
+    (True,) * 9 + (False,) * 9
+)})  # type: Dict[str, bool]
 
 
 def unused_argument(arg: Any) -> None:
