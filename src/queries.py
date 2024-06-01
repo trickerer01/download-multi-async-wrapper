@@ -73,10 +73,10 @@ def fetch_maxids(dts: Iterable[str]) -> Dict[str, str]:
 
         def get_max_id(dtype: str) -> None:
             update_file_path = sequences_paths_update[dtype]
-            module_arguments = ['-module', dtype, '-timeout', '30'] if dtype in RUXX_DOWNLOADERS else ([''] * 0)
+            module_arguments = ['-module', dtype] if dtype in RUXX_DOWNLOADERS else ([''] * 0)
             if dtype in proxies_update and proxies_update[dtype]:
                 module_arguments += [proxies_update[dtype].first, proxies_update[dtype].second]
-            arguments = [Config.python, update_file_path, '-get_maxid'] + module_arguments
+            arguments = [Config.python, update_file_path, '-get_maxid', '-timeout', '30'] + module_arguments
             res = check_output(arguments.copy()).decode(errors='replace').strip()
             with rlock:
                 results[dtype] = res[res.rfind('\n') + 1:]
