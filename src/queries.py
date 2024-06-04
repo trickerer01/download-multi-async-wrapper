@@ -49,16 +49,16 @@ re_downloader_finalize = re_compile(r'^# end$')
 
 queries_file_lines = Wrapper([''] * 0)
 
-sequences_ids = DownloadCollection()  # type: DownloadCollection[IntSequence]
-sequences_pages = DownloadCollection()  # type: DownloadCollection[IntSequence]
-sequences_paths = DownloadCollection()  # type: DownloadCollection[str]
-sequences_common = DownloadCollection()  # type: DownloadCollection[List[str]]
-sequences_tags = DownloadCollection()  # type: DownloadCollection[List[List[str]]]
-sequences_subfolders = DownloadCollection()  # type: DownloadCollection[List[str]]
+sequences_ids: DownloadCollection[IntSequence] = DownloadCollection()
+sequences_pages: DownloadCollection[IntSequence] = DownloadCollection()
+sequences_paths: DownloadCollection[str] = DownloadCollection()
+sequences_common: DownloadCollection[List[str]] = DownloadCollection()
+sequences_tags: DownloadCollection[List[List[str]]] = DownloadCollection()
+sequences_subfolders: DownloadCollection[List[str]] = DownloadCollection()
 
-sequences_paths_update = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[str]]
-proxies_update = {dt: None for dt in DOWNLOADERS}  # type: Dict[str, Optional[StrPair]]
-maxid_fetched = dict()  # type: Dict[str, int]
+sequences_paths_update: Dict[str, Optional[str]] = {dt: None for dt in DOWNLOADERS}
+proxies_update: Dict[str, Optional[StrPair]] = {dt: None for dt in DOWNLOADERS}
+maxid_fetched: Dict[str, int] = dict()
 
 
 def fetch_maxids(dts: Iterable[str]) -> Dict[str, str]:
@@ -68,7 +68,7 @@ def fetch_maxids(dts: Iterable[str]) -> Dict[str, str]:
         trace('Fetching max ids...')
         re_maxid_fetch_result = re_compile(r'^[A-Z]{2}: \d+$')
         grab_threads = []
-        results = {dt: '' for dt in dts if sequences_paths_update[dt] is not None}  # type: Dict[str, str]
+        results: Dict[str, str] = {dt: '' for dt in dts if sequences_paths_update[dt] is not None}
         rlock = ThreadLock()
 
         def get_max_id(dtype: str) -> None:
@@ -131,12 +131,14 @@ def prepare_queries() -> None:
             raise
 
     cur_dwn = ''
-    cur_tags_list = list()  # type: List[str]
-    autoupdate_seqs = DownloadCollection()  # type: DownloadCollection[IntSequence]
+    cur_tags_list: List[str] = list()
+    autoupdate_seqs: DownloadCollection[IntSequence] = DownloadCollection()
 
     trace('Analyzing queries file strings...')
 
-    for i, line in enumerate(queries_file_lines()):  # type: int, str
+    i: int
+    line: str
+    for i, line in enumerate(queries_file_lines()):
         try:
             line = line.strip(' \n\ufeff')  # remove BOM too
             if line == '':
@@ -328,7 +330,8 @@ def prepare_queries() -> None:
                         tags_search = ','.join(tags_split)
                         start_idx = 1 if split_len > 1 else 0
                         end_idx = -1 if split_len > 1 else None
-                        for j in reversed(range(len(cur_tags_list))):  # type: int
+                        j: int
+                        for j in reversed(range(len(cur_tags_list))):
                             cur_tag = cur_tags_list[j]
                             prev_tag = cur_tags_list[j - 1] if j > 0 else ''
                             try_match_search = j > 0 and prev_tag.startswith('-search')
@@ -368,7 +371,7 @@ def prepare_queries() -> None:
         for dt in needed_updates:
             maxid = int(maxids[dt][4:])
             for cat in autoupdate_seqs:
-                uidseq = autoupdate_seqs[cat][dt]  # type: Optional[IntSequence]
+                uidseq: Optional[IntSequence] = autoupdate_seqs[cat][dt]
                 if uidseq:
                     update_str_base = f'{cat}:{dt} id sequence extended from {str(uidseq.ints)} to '
                     uidseq.ints.append(maxid)
@@ -434,7 +437,7 @@ def update_next_ids() -> None:
                 trace('Warning: permissions not updated, manual fix required')
 
             trace(f'\nWriting updated queries to \'{queries_file_name}\'...')
-            maxids = {dt: int(results[dt][4:]) for dt in results}  # type: Dict[str, int]
+            maxids: Dict[str, int] = {dt: int(results[dt][4:]) for dt in results}
             maxids.update(maxid_fetched)
             for dt in Config.update_offsets:
                 uoffset = Config.update_offsets[dt]
@@ -444,7 +447,9 @@ def update_next_ids() -> None:
                 else:
                     trace(f'Warning: {dt.upper()} autoupdate offset ({uoffset:d}) was provided but its max id is not being updated')
             for cat in sequences_ids:
-                for i, dtseq in enumerate(sequences_ids[cat].items()):  # type: int, Tuple[str, Optional[IntSequence]]
+                i: int
+                dtseq: Tuple[str, Optional[IntSequence]]
+                for i, dtseq in enumerate(sequences_ids[cat].items()):
                     dt, seq = dtseq
                     line_n = (seq.line_num - 1) if seq and dt in maxids else None
                     trace(f'{"W" if line_n else "Not w"}riting {cat}:{dt} ids at idx {i:d}, line {line_n + 1 if line_n else -1:d}...')

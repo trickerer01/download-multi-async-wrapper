@@ -14,7 +14,7 @@ from strings import datetime_str_nfull, timestamped_string
 
 __all__ = ('open_logfile', 'ensure_logfile', 'close_logfile', 'log_to', 'trace')
 
-logfile = Wrapper()  # type: Wrapper[Optional[TextIO]]
+logfile: Wrapper[Optional[TextIO]] = Wrapper()
 buffered_strings = [''] * 0
 
 

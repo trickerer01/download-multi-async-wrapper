@@ -26,9 +26,9 @@ class DummyResultProtocol(SubprocessProtocol):
         self.future.set_result(True)
 
 
-executor_event_loop = Wrapper()  # type: Wrapper[Optional[AbstractEventLoop]]
+executor_event_loop: Wrapper[Optional[AbstractEventLoop]] = Wrapper()
 
-queries_all = DownloadCollection()  # type: DownloadCollection[List[str]]
+queries_all: DownloadCollection[List[str]] = DownloadCollection()
 dtqn_fmt = Wrapper('02d')
 
 
@@ -107,7 +107,7 @@ async def run_dt_cmds(dt: str, qts: Sequence[str], queries: Sequence[str]) -> No
         return
 
     qt_skips = set()
-    qns = {qt: 0 for qt in qts}  # type: Dict[str, int]
+    qns: Dict[str, int] = {qt: 0 for qt in qts}
     for qi, qt in enumerate(qts):
         qns[qt] += 1
         if Config.test:

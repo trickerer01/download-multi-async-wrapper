@@ -35,11 +35,11 @@ def validate_runners(sequences_paths: DownloadCollection[str], sequences_paths_u
         raise IOError
     if Config.test is True:
         return
-    checked_paths = set()  # type: Set[str]
+    checked_paths: Set[str] = set()
     if not Config.no_download:
         for cat in sequences_paths:
             for dtd in sequences_paths[cat]:
-                dpath = sequences_paths[cat][dtd]  # type: Optional[str]
+                dpath: Optional[str] = sequences_paths[cat][dtd]
                 if not dpath or dtd not in Config.downloaders:
                     continue
                 dtype = ('pages' if dpath.endswith(PATH_APPEND_DOWNLOAD_PAGES[dtd]) else
@@ -88,7 +88,7 @@ def validate_sequences(
         raise IOError
     for dt in DOWNLOADERS:
         for cat in sequences_ids:
-            intseq = sequences_ids[cat][dt]  # type: Optional[IntSequence]
+            intseq: Optional[IntSequence] = sequences_ids[cat][dt]
             ivlist = list(intseq.ints if intseq else [])
             for iv in range(1, len(ivlist)):
                 if ivlist[iv - 1] >= ivlist[iv]:
@@ -127,11 +127,13 @@ def _get_base_qs(
     def page_ids(cat: str, cdt: str) -> bool:
         return has_ids(cat, cdt) and has_pages(cat, cdt)
 
-    base_qs = DownloadCollection()  # type: DownloadCollection[str]
+    base_qs: DownloadCollection[str] = DownloadCollection()
     ri, rp, rpi = RANGE_TEMPLATE_IDS, RANGE_TEMPLATE_PAGES, RANGE_TEMPLATE_PAGE_IDS
+    irngs: Dict[str, Dict[str, IntPair]]
+    prngs: Dict[str, Dict[str, IntPair]]
     irngs, prngs = ({
         k: {dt: IntPair(ipseqs[k][dt][:2]) for dt in DOWNLOADERS if ipseqs[k][dt]} for k in ipseqs
-    } for ipseqs in (sequences_ids, sequences_pages))  # type: Dict[str, Dict[str, IntPair]]
+    } for ipseqs in (sequences_ids, sequences_pages))
     [base_qs.update({
         k: {
             dt: (f'{Config.python} "{sequences_paths[k][dt]}" '
@@ -152,7 +154,7 @@ def form_queries(
 ) -> DownloadCollection[List[str]]:
     stags, ssubs, scomms = sequences_tags, sequences_subfolders, sequences_common
     base_qs = _get_base_qs(sequences_ids, sequences_pages, sequences_paths)
-    queries_final = DownloadCollection()  # type: DownloadCollection[List[str]]
+    queries_final: DownloadCollection[List[str]] = DownloadCollection()
     [queries_final.update({
         k: {
             dt: ([f'{base_qs[k][dt]} {path_args(Config.dest_base, k, ssubs[k][dt][i], Config.datesub)} '
@@ -179,7 +181,7 @@ def report_unoptimized(
 ) -> None:
     stags, ssubs, scomms = sequences_tags, sequences_subfolders, sequences_common
     base_qs = _get_base_qs(sequences_ids, sequences_pages, sequences_paths)
-    queries = DownloadCollection()  # type: DownloadCollection[List[str]]
+    queries: DownloadCollection[List[str]] = DownloadCollection()
     [queries.update({
         k: {
             dt: ([f'{base_qs[k][dt]} {path_args(Config.dest_base, k, ssubs[k][dt][i], Config.datesub)} '

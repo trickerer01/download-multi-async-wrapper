@@ -32,10 +32,10 @@ MAX_CMD_LEN = {
     OS_MACOS: 65000,
 }
 
-BOOL_STRS = ({y: v for y, v in zip(
+BOOL_STRS: Dict[str, bool] = ({y: v for y, v in zip(
     ('YES', 'Yes', 'yes', 'TRUE', 'True', 'true', '1', 'Y', 'y', 'NO', 'No', 'no', 'FALSE', 'False', 'false', '0', 'N', 'n'),
     (True,) * 9 + (False,) * 9
-)})  # type: Dict[str, bool]
+)})
 
 
 def unused_argument(arg: Any) -> None:
@@ -134,7 +134,7 @@ class BaseConfig(object):
         self.debug = False
         self.no_download = False
         self.ignore_download_mode = False
-        self.downloaders = list()  # type: List[str]
+        self.downloaders: List[str] = list()
         self.script_path = ''
         # script
         self.dest_base = BaseConfig.DEFAULT_PATH
@@ -145,10 +145,10 @@ class BaseConfig(object):
         self.python = ''
         self.datesub = True
         self.update = False
-        self.update_offsets = dict()  # type: Dict[str, int]
+        self.update_offsets: Dict[str, int] = dict()
         # calculated
         self.max_cmd_len = MAX_CMD_LEN[OS_WINDOWS] // 2  # MAX_CMD_LEN.get(running_system())
-        self.disabled_downloaders = dict()  # type: Dict[str, List[str]]
+        self.disabled_downloaders: Dict[str, List[str]] = dict()
         # internal
         self.test = test
         self.console_log = not (test and not console_log)
