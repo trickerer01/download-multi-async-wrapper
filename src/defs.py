@@ -249,10 +249,10 @@ class DownloadCollection(Dict[str, Dict[str, Optional[DT]]]):
         self[cat] = {dt: self._make_init_value(init_type) for dt in DOWNLOADERS}
 
     def cur(self) -> Dict[str, Optional[DT]]:
-        return reversed(self.values()).__next__()
+        return list(self.values())[-1]
 
     def cur_key(self) -> str:
-        return reversed(self.keys()).__next__()
+        return list(self.keys())[-1]
 
     @staticmethod
     def _make_init_value(init_type: Type[DT]) -> DT:
