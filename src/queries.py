@@ -175,12 +175,12 @@ def prepare_queries() -> None:
                     continue
                 if re_datesub.fullmatch(line):
                     datesub_str = line[line.find(':') + 1:]
-                    trace(f'Parsed date subfolder flag value: \'{datesub_str}\'')
+                    trace(f'Parsed date subfolder flag value: \'{datesub_str}\' ({str(BOOL_STRS.get(datesub_str))})')
                     Config.datesub = BOOL_STRS[datesub_str]
                     continue
                 if re_update.fullmatch(line):
                     update_str = line[line.find(':') + 1:]
-                    trace(f'Parsed update flag value: \'{update_str}\'')
+                    trace(f'Parsed update flag value: \'{update_str}\' ({str(BOOL_STRS.get(update_str))})')
                     Config.update = BOOL_STRS[update_str]
                     continue
                 if re_python_exec.fullmatch(line):
