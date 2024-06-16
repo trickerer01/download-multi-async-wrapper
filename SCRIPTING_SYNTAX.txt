@@ -18,8 +18,7 @@
                                      A SIGNLE ID MEANS FROM THIS AND UP (TILL CURRENT MAX ID)
 # downloader:D:/Projects/NM      <-- PATH TO THE DOWNLOADER BASE FOLDER <REQUIRED>
 # common:-dmode touch            <-- ARGUMENTS TO ADD TO EVERY QUERY <OPTIONAL>
-# common:-log trace              <-- ARGUMENTS TO ADD TO EVERY QUERY <OPTIONAL>
-# common:--dump-tags             <-- ARGUMENTS TO ADD TO EVERY QUERY <OPTIONAL>
+# common:-log trace --dump-tags  <-- ARGUMENTS TO ADD TO EVERY QUERY <OPTIONAL>
 # sub:a                          <-- SUBFOLDER FOR QUERY (NEW QUERY MARKER) <REQUIRED>
 -quality 1080p                   <-- QUERY ARGUMENT (QUALITY) <DOWNLOADER ARGUMENTS>
 -a -b -c -dfff                   <-- EXCLUDED TAGS <DOWNLOADER ARGUMENTS>
@@ -49,8 +48,8 @@ ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
 -l -m -n                         <-- REMOVE PREVIOUS TAGS GROUP AND EXCLUDE THEM (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
 --dfff                           <-- REMOVE PREVIOUS EXCLUDED SINGLE TAG (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
 -quality 360p                    <-- QUERY ARGUMENT (QUALITY) <DOWNLOADER ARGUMENTS>
--uvp always                      <-- QUERY ARGUMENT (UNLISTED VIDEOS DOWNLOAD POLICY) <DOWNLOADER ARGUMENTS>
-# send                           <-- '<cmdline base...> -a -b -c -ggg -h -i -j -k -l -m -n -quality 360p -uvp always'
+-utp always                      <-- QUERY ARGUMENT (UNLISTED VIDEOS DOWNLOAD POLICY) <DOWNLOADER ARGUMENTS>
+# send                           <-- '<cmdline base...> -a -b -c -ggg -h -i -j -k -l -m -n -quality 360p -utp always'
 # end                            <-- DOWNLOADER QUERIES FINISH MARKER <REQUIRED>
 
                                  <-- AT THIS POINT 4 NM QUERIES WERE CREATED WHICH WILL BE THEN COMBINED INTO A SINGLE DOWNLOAD SCRIPT
@@ -59,7 +58,7 @@ ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
                                      "a: -quality 1080p -a -b -c -dfff ggg;
                                       b: -quality 1080p -a -b -c -dfff -ggg -(x,z) (h~i~j~k);
                                       c: -quality 1080p -a -b -c -dfff -ggg -h -i -j -k (l~m~n);
-                                      d: -a -b -c -ggg -h -i -j -k -l -m -n -quality 360p -uvp always"'
+                                      d: -a -b -c -ggg -h -i -j -k -l -m -n -quality 360p -utp always"'
                                  <-- WHICH DOWNLOADS MATCHING VIDEOS TO 4 DIFFERENT FOLDERS IN A SINGLE PASS
 
 # RV                             <-- DOWNLOADER TYPE CAN BE UPPERCASE TOO

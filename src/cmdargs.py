@@ -64,16 +64,16 @@ def parse_arglist(args: Sequence[str]) -> None:
     parser.add_argument('--no-download', action=ACTION_STORE_TRUE, help=HELP_NO_DOWNLOAD)
     parser.add_argument('--ignore-download-mode', action=ACTION_STORE_TRUE, help=HELP_IGNORE_DMODE)
     parser.add_argument('-downloaders', metavar='#L,I,S,T', default=DOWNLOADERS, help=HELP_DOWNLOADERS, type=valid_downloaders_list)
-    parser.add_argument('-path', metavar='#PATH_TO_DIR', default=normalize_path(path.curdir), help=HELP_PATH, type=valid_dir_path)
     parser.add_argument('-script', metavar='#PATH_TO_FILE', required=True, help=HELP_SCRIPT_PATH, type=valid_file_path)
+    parser.add_argument('-path', metavar='#PATH_TO_DIR', default=normalize_path(path.curdir), help=HELP_PATH, type=valid_dir_path)
 
     parsed = parser.parse_args(args)
     Config.debug = parsed.debug
     Config.no_download = parsed.no_download
     Config.ignore_download_mode = parsed.ignore_download_mode
     Config.downloaders = parsed.downloaders
-    Config.dest_base = parsed.path
     Config.script_path = parsed.script
+    Config.dest_base = parsed.path
 
 #
 #

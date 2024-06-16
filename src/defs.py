@@ -136,8 +136,9 @@ class BaseConfig(object):
         self.ignore_download_mode = False
         self.downloaders: List[str] = list()
         self.script_path = ''
-        # script
+        # mixed
         self.dest_base = BaseConfig.DEFAULT_PATH
+        # script
         self.dest_run_base = BaseConfig.DEFAULT_PATH
         self.dest_logs_base = BaseConfig.DEFAULT_PATH
         self.dest_bak_base = BaseConfig.DEFAULT_PATH
