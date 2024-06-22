@@ -110,7 +110,7 @@ class QueriesFormTests(TestCase):
         self.assertEqual(0, len(queries_all[cat_img][DOWNLOADER_RS]))
         self.assertEqual(1, len(queries_all[cat_vid_][DOWNLOADER_NM]))
         self.assertEqual(0, len(queries_all[cat_vid_][DOWNLOADER_RV]))
-        self.assertEqual(0, len(queries_all[cat_vid_][DOWNLOADER_RC]))
+        self.assertEqual(1, len(queries_all[cat_vid_][DOWNLOADER_RC]))
         self.assertEqual(0, len(queries_all[cat_vid_][DOWNLOADER_RN]))
         self.assertEqual(0, len(queries_all[cat_vid_][DOWNLOADER_RX]))
         self.assertEqual(0, len(queries_all[cat_vid_][DOWNLOADER_RS]))

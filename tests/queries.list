@@ -103,3 +103,14 @@ ggg
 (h~i~j~k)
 # send
 # end
+
+# rc
+# p50
+# -2000
+# downloader:D:/RC/
+# common:-dmode touch
+# common:--dump-tags
+# sub:a
+aaa
+# send
+# end

@@ -14,8 +14,7 @@
 ### PYTHON:python3               <-- PATH TO PYTHON EXECUTABLE (NORMALLY PRESENT IN PATH) <REQUIRED>
 ### (vid) ###                    <-- CATEGORY MARKER, AT LEAST 1 SYMBOL (SUBFOLDER NAME: 'vid') <REQUIRED>
 # nm                             <-- DOWNLOADER TYPE <REQUIRED>
-# 50000 51000                    <-- AT LEAST ONE OR TWO IDS FOR RANGE <REQUIRED>
-                                     A SIGNLE ID MEANS FROM THIS AND UP (TILL CURRENT MAX ID)
+# 50000 51000                    <-- AT LEAST ONE OR TWO IDS FOR RANGE (SEE BELOW) <REQUIRED>
 # downloader:D:/Projects/NM      <-- PATH TO THE DOWNLOADER BASE FOLDER <REQUIRED>
 # common:-dmode touch            <-- ARGUMENTS TO ADD TO EVERY QUERY <OPTIONAL>
 # common:-log trace --dump-tags  <-- ARGUMENTS TO ADD TO EVERY QUERY <OPTIONAL>
@@ -63,7 +62,7 @@ ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
 
 # RV                             <-- DOWNLOADER TYPE CAN BE UPPERCASE TOO
 # p10 s1                         <-- SWITCH TO PAGES SCAN INSTEAD OF IDS (PAGES NUMBER, STARTING PAGE) <OPTIONAL>
-# 3050000
+# 3050000                        <-- A SIGNLE ID MEANS FROM THIS AND UP (TILL CURRENT MAX ID)
 # downloader:D:/Projects/RV
 # common:-log info -timeout 30 -retries 100 -throttle 100 --dump-descriptions --dump-tags
 # sub:a
@@ -100,7 +99,7 @@ ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
                                      -quality 1080p -tag1 -tag2 -tag3 -search_tag tag4,tag5 -search_rule_tag all'
 
 # rn
-# 450000 451000
+# -10000                         <-- A SINGLE NEGATIVE ID MEANS "LAST X POSTS"
 # downloader:D:/Projects/Ruxx
 # common:...
 # sub:...

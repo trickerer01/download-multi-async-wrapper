@@ -39,7 +39,7 @@ re_comment = re_compile(r'^##[^#].*?$')
 re_download_mode = re_compile(r'^.*[: ]-dmode .+?$')
 re_python_exec = re_compile(r'^### PYTHON:.+?$')
 re_downloader_type = re_compile(fr'^# (?:{"|".join(DOWNLOADERS)}|{"|".join(DOWNLOADERS).upper()}).*?$')
-re_ids_list = re_compile(r'^#(?: \d+)+$')
+re_ids_list = re_compile(r'^#(?:(?: \d+)+| -\d+)$')
 re_pages_list = re_compile(r'^# p\d+(?: s\d+)?$')
 re_downloader_basepath = re_compile(r'^# downloader:[A-Z/~].+?$')
 re_common_arg = re_compile(r'^# common:-.+?$')
@@ -251,7 +251,8 @@ def prepare_queries() -> None:
                     sequences_ids.cur()[cdt] = idseq
                     if len(idseq) < MIN_IDS_SEQ_LENGTH:
                         if cdt in Config.downloaders:
-                            trace(f'{cdt} at line {i + 1:d} provides a single id hence requires maxid autoupdate')
+                            negative_str = ' NEGATIVE' if idseq[0] < 0 else ''
+                            trace(f'{cdt} at line {i + 1:d} provides a single{negative_str} id hence requires maxid autoupdate')
                             if cat not in autoupdate_seqs:
                                 autoupdate_seqs.add_category(cat)
                             autoupdate_seqs[cat][cdt] = idseq
@@ -374,7 +375,12 @@ def prepare_queries() -> None:
                 uidseq: Optional[IntSequence] = autoupdate_seqs[cat][dt]
                 if uidseq:
                     update_str_base = f'{cat}:{dt} id sequence extended from {str(uidseq.ints)} to '
-                    uidseq.ints.append(maxid)
+                    if len(uidseq) == 1 and uidseq[0] < 0:
+                        delta = uidseq.ints[0]
+                        uidseq.ints.clear()
+                        uidseq.ints.extend((maxid + delta, maxid))
+                    else:
+                        uidseq.ints.append(maxid)
                     trace(f'{update_str_base}{str(uidseq.ints)}')
                     maxid_fetched[dt] = maxid
         for cat in sequences_ids:
