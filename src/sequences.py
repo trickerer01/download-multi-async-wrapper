@@ -15,7 +15,7 @@ from defs import (
     RUXX_DOWNLOADERS, APP_NAMES, unused_argument, PATH_APPEND_DOWNLOAD_IDS, PATH_APPEND_DOWNLOAD_PAGES
 )
 from logger import trace
-from strings import NEWLINE, normalize_ruxx_tag, path_args
+from strings import NEWLINE, path_args
 
 __all__ = ('validate_runners', 'validate_sequences', 'form_queries', 'report_queries', 'report_unoptimized')
 
@@ -158,16 +158,14 @@ def form_queries(
     [queries_final.update({
         k: {
             dt: ([f'{base_qs[k][dt]} {path_args(Config.dest_base, k, ssubs[k][dt][i], Config.datesub)} '
-                  f'{" ".join(normalize_ruxx_tag(tag) if dt in RUXX_DOWNLOADERS else tag for tag in scomms[k][dt])} '
-                  f'{" ".join(normalize_ruxx_tag(tag) if dt in RUXX_DOWNLOADERS else tag for tag in staglist)}'
-                  for i, staglist in enumerate(stags[k][dt]) if staglist]
-                 ) if dt in RUXX_DOWNLOADERS or any(any(sarg.startswith('-search') for sarg in slist) for slist in stags[k][dt]) else
+                  f'{" ".join(scomms[k][dt])} {" ".join(staglist)}'
+                  for i, staglist in enumerate(stags[k][dt]) if staglist])
+            if dt in RUXX_DOWNLOADERS or any(any(sarg.startswith('-search') for sarg in slist) for slist in stags[k][dt]) else
                 ([f'{base_qs[k][dt]} {path_args(Config.dest_base, k, "", Config.datesub)} '
                   f'{" ".join(scomms[k][dt])} '
                   f'-script "'
                   f'{"; ".join(" ".join([f"{ssubs[k][dt][i]}:"] + staglist) for i, staglist in enumerate(stags[k][dt]))}'
-                  f'"'] if stags[k][dt] else []
-                 )
+                  f'"'] if stags[k][dt] else [])
             for dt in DOWNLOADERS
         }
     }) for k in sequences_paths]
@@ -185,9 +183,9 @@ def report_unoptimized(
     [queries.update({
         k: {
             dt: ([f'{base_qs[k][dt]} {path_args(Config.dest_base, k, ssubs[k][dt][i], Config.datesub)} '
-                  f'{" ".join(normalize_ruxx_tag(tag) if dt in RUXX_DOWNLOADERS else tag for tag in scomms[k][dt])} '
-                  f'{" ".join(normalize_ruxx_tag(tag) if dt in RUXX_DOWNLOADERS else tag for tag in staglist)}'
-                  for i, staglist in enumerate(stags[k][dt]) if staglist]) for dt in DOWNLOADERS
+                  f'{" ".join(scomms[k][dt])} {" ".join(staglist)}'
+                  for i, staglist in enumerate(stags[k][dt]) if staglist])
+            for dt in DOWNLOADERS
         }
     }) for k in sequences_paths]
     report_queries(queries)

@@ -42,13 +42,6 @@ def all_tags_positive(taglist: Iterable[str]) -> bool:
     return all_pos
 
 
-def normalize_ruxx_tag(tag: str) -> str:
-    tag = tag.replace('+', '%2b')
-    if tag[::len(tag) - 1 or 1] == '()' and '~' in tag:
-        tag = f'(+{"+~+".join(part for part in tag[1:-1].split("~"))}+)'
-    return tag
-
-
 def path_args(dest_base: str, cat: str, sub: str, datepath: bool) -> str:
     return f'-path "{dest_base}{f"{date_str_md(cat.strip())}/" if datepath else ""}{f"{sub}/" if sub else ""}"'
 

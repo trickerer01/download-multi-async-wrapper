@@ -145,7 +145,7 @@ class QueriesFormTests(TestCase):
             queries_all[cat_img][DOWNLOADER_RX][0]
         )
         self.assertEqual(
-            f'python3 "D:/ruxx/src/ruxx_cmd.py" id:>=1 id:<=1 -path "../tests/{date_str_md(cat_img)}/b/" -module rx -a b (+c+~+d+)',
+            f'python3 "D:/ruxx/src/ruxx_cmd.py" id:>=1 id:<=1 -path "../tests/{date_str_md(cat_img)}/b/" -module rx -a b (c~d)',
             queries_all[cat_img][DOWNLOADER_RX][1]
         )
         self.assertEqual(  # same dest for 'vid' and 'vid_' categories
