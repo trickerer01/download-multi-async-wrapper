@@ -246,8 +246,11 @@ WT = TypeVar('WT')
 
 
 class DownloadCollection(Dict[str, Dict[str, Optional[DT]]]):
-    def add_category(self, cat: str, init_type: Type[DT] = None) -> None:
-        self[cat] = {dt: self._make_init_value(init_type) for dt in DOWNLOADERS}
+    def __init__(self) -> None:
+        super().__init__()
+
+    def add_category(self, cat: str, init_type: Type[DT] = None, *args, **kwargs) -> None:
+        self[cat] = {dt: self._make_init_value(init_type, *args, **kwargs) for dt in DOWNLOADERS}
 
     def cur(self) -> Dict[str, Optional[DT]]:
         return list(self.values())[-1]
@@ -256,8 +259,8 @@ class DownloadCollection(Dict[str, Dict[str, Optional[DT]]]):
         return list(self.keys())[-1]
 
     @staticmethod
-    def _make_init_value(init_type: Type[DT]) -> DT:
-        return init_type() if init_type else None
+    def _make_init_value(init_type: Type[DT], *args, **kwargs) -> DT:
+        return init_type(*args, **kwargs) if init_type else None
 
     def _sub_to_str(self, cat: str) -> str:
         return f'\'{self[cat]}\': {",".join(f"{dt}[{len(self[cat][dt])}]" for dt in self[cat] if self[cat][dt]) or "None"}'

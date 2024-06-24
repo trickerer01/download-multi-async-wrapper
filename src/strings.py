@@ -28,18 +28,19 @@ def timestamped_string(msg: str, timestamp: str) -> str:
     return msg.replace('\n', f'\n[{timestamp}] ') if msg[0] == '\n' else (f'[{timestamp}] ' + msg.replace('\n', f'\n[{timestamp}] '))
 
 
-def all_tags_negative(taglist: Iterable[str]) -> bool:
-    all_neg = True
+def all_tags_same_sign(taglist: Iterable[str], negative: bool) -> bool:
+    all_same_sign = True
     for tag in taglist:
-        all_neg = all_neg and tag.startswith('-')
-    return all_neg
+        all_same_sign = all_same_sign and (tag.startswith('-') is negative)
+    return all_same_sign
+
+
+def all_tags_negative(taglist: Iterable[str]) -> bool:
+    return all_tags_same_sign(taglist, True)
 
 
 def all_tags_positive(taglist: Iterable[str]) -> bool:
-    all_pos = True
-    for tag in taglist:
-        all_pos = all_pos and not tag.startswith('-')
-    return all_pos
+    return all_tags_same_sign(taglist, False)
 
 
 def path_args(dest_base: str, cat: str, sub: str, datepath: bool) -> str:
