@@ -72,7 +72,7 @@ async def run_cmd(query: str, dt: str, qn: int, qt: str, qtn: int) -> None:
     suffix = f'{Config.title}_' if Config.title else ''
     begin_msg = f'\n[{Config.title}] Executing \'{qt}\' {dt} query {qtn:d} ({dt} query {qn:d}):\n{query}'
     log_file_name = f'{Config.dest_logs_base}log_{suffix}{dt}{qn:{dtqn_fmt()}}_{qt.strip()}{qtn:{dtqn_fmt()}}_{exec_time}.log'
-    with open(log_file_name, 'at', encoding=UTF8, buffering=1) as log_file:
+    with open(log_file_name, 'wt+', encoding=UTF8, errors='replace', buffering=1) as log_file:
         trace(begin_msg)
         log_to(begin_msg, log_file)
         cmd_args = split_into_args(query)
@@ -91,8 +91,8 @@ async def run_cmd(query: str, dt: str, qn: int, qt: str, qtn: int) -> None:
         tr, _ = await executor_event_loop().subprocess_exec(lambda: DummyResultProtocol(ef), *cmd_args, stderr=log_file, stdout=log_file)
         await ef
         tr.close()
-    with open(log_file_name, 'rt', encoding=UTF8, errors='replace', buffering=1) as completed_log_file:
-        trace(f'\n{"".join(completed_log_file.readlines())}')
+        log_file.seek(0)
+        trace(f'\n{log_file.read()}')
 
 
 async def run_dt_cmds(dt: str, qts: Sequence[str], queries: Sequence[str]) -> None:
