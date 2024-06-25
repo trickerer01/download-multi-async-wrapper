@@ -175,6 +175,12 @@ def prepare_queries() -> None:
                     trace(f'Parsed title increment: \'{title_incr_base}\'')
                     assert Config.title_increment == 0, 'Title increment can only be declared once!'
                     Config.title_increment = positive_int(title_incr_base)
+                    if Config.title_increment > 0:
+                        if not Config.title:
+                            trace('Warning: title suffix increment is defined but no title set!')
+                        else:
+                            trace('Calculating title suffix...')
+                            calculate_title_suffix()
                     continue
                 if re_dest_base.fullmatch(line):
                     dest_base = line[line.find(':') + 1:]
@@ -415,13 +421,6 @@ def prepare_queries() -> None:
                     unsolved_idseqs.append(f'{cat}:{dt}')
                     trace(f'{cat}:{dt} sequence is not fixed! \'{str(sequences_ids[cat][dt])}\'')
         assert len(unsolved_idseqs) == 0
-
-    if Config.title_increment > 0:
-        if not Config.title:
-            trace('Warning: title suffix increment is defined but no title set!')
-        else:
-            trace('Calculating title suffix...')
-            calculate_title_suffix()
 
     trace('Validating sequences...\n')
     validate_sequences(sequences_ids, sequences_pages, sequences_paths, sequences_tags, sequences_subfolders)
