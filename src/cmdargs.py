@@ -16,7 +16,7 @@ from defs import (
 from logger import trace
 from strings import normalize_path, unquote
 
-__all__ = ('parse_arglist', 'valid_dir_path')
+__all__ = ('parse_arglist', 'valid_dir_path', 'positive_int')
 
 
 def valid_dir_path(pathstr: str) -> str:
@@ -35,6 +35,20 @@ def valid_file_path(pathstr: str) -> str:
         return newpath
     except Exception:
         raise ArgumentError
+
+
+def valid_int(val: str, *, lb: int = None, ub: int = None) -> int:
+    try:
+        val = int(val)
+        assert lb is None or val >= lb
+        assert ub is None or val <= ub
+        return val
+    except Exception:
+        raise ArgumentError
+
+
+def positive_int(val: str) -> int:
+    return valid_int(val, lb=0)
 
 
 def valid_downloaders_list(downloaders_str: str) -> List[str]:

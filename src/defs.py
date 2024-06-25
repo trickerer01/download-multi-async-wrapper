@@ -143,6 +143,8 @@ class BaseConfig(object):
         self.dest_logs_base = BaseConfig.DEFAULT_PATH
         self.dest_bak_base = BaseConfig.DEFAULT_PATH
         self.title = ''
+        self.title_increment = 0
+        self.title_increment_value = ''
         self.python = ''
         self.datesub = True
         self.update = False
@@ -156,6 +158,10 @@ class BaseConfig(object):
 
     def _reset(self) -> None:
         self.__init__(test=self.test, console_log=self.console_log)
+
+    @property
+    def fulltitle(self) -> str:
+        return f'{self.title}{self.title_increment_value}'
 
     def __str__(self) -> str:
         return (

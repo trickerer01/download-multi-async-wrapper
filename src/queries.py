@@ -8,13 +8,13 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 
 import sys
 from json import loads
-from os import chmod, path, stat
+from os import chmod, path, stat, listdir
 from re import compile as re_compile
 from subprocess import check_output
 from threading import Thread, Lock as ThreadLock
 from typing import List, Dict, Optional, Tuple, Iterable
 
-from cmdargs import valid_dir_path
+from cmdargs import valid_dir_path, positive_int
 from defs import (
     DownloadCollection, Wrapper, IntSequence, Config, StrPair, UTF8, DOWNLOADERS, MIN_IDS_SEQ_LENGTH, PATH_APPEND_DOWNLOAD_IDS,
     PATH_APPEND_DOWNLOAD_PAGES, PATH_APPEND_UPDATE, RUXX_DOWNLOADERS, PAGE_DOWNLOADERS, PROXY_ARG, MAX_CATEGORY_NAME_LENGTH, BOOL_STRS,
@@ -27,6 +27,7 @@ from strings import SLASH, NEWLINE, datetime_str_nfull, all_tags_negative, all_t
 __all__ = ('read_queries_file', 'prepare_queries', 'update_next_ids', 'at_startup')
 
 re_title = re_compile(r'^### TITLE:[A-zÀ-ʯА-я\d_+\-!]{,20}$')
+re_title_incr = re_compile(r'^### TITLEINCREMENT:\d$')
 re_dest_base = re_compile(r'^### DESTPATH:.+?$')
 re_dest_bak = re_compile(r'^### BAKPATH:.+?$')
 re_dest_run = re_compile(r'^### RUNPATH:.+?$')
@@ -59,6 +60,25 @@ sequences_subfolders: DownloadCollection[List[str]] = DownloadCollection()
 sequences_paths_update: Dict[str, Optional[str]] = {dt: None for dt in DOWNLOADERS}
 proxies_update: Dict[str, Optional[StrPair]] = {dt: None for dt in DOWNLOADERS}
 maxid_fetched: Dict[str, int] = dict()
+
+
+def calculate_title_suffix() -> None:
+    lbdir = Config.dest_logs_base
+    logsdir_all: List[str] = listdir(lbdir) if path.isdir(lbdir) else []
+    logsdir_files = list(filter(
+        lambda x: x.startswith((f'log_{Config.title}', f'run_{Config.title}')) and path.isfile(f'{lbdir}{x}'), logsdir_all
+    ))
+    max_suffix_len = Config.title_increment
+    max_suffix_val = 0
+    base_idx = len(f'log_{Config.title}')
+    for fname in logsdir_files:
+        sep_idx = fname.find('_', base_idx)
+        if sep_idx > base_idx:
+            suffix_val = fname[base_idx:sep_idx]
+            if suffix_val.isnumeric():
+                max_suffix_len = max(max_suffix_len, len(suffix_val))
+                max_suffix_val = max(max_suffix_val, int(suffix_val))
+    Config.title_increment_value = f'{max_suffix_val + 1:0{max_suffix_len:d}d}'
 
 
 def fetch_maxids(dts: Iterable[str]) -> Dict[str, str]:
@@ -149,6 +169,12 @@ def prepare_queries() -> None:
                     trace(f'Parsed title: \'{title_base}\'')
                     assert Config.title == '', 'Title can only be declared once!'
                     Config.title = title_base
+                    continue
+                if re_title_incr.fullmatch(line):
+                    title_incr_base = line[line.find(':') + 1:]
+                    trace(f'Parsed title increment: \'{title_incr_base}\'')
+                    assert Config.title_increment == 0, 'Title increment can only be declared once!'
+                    Config.title_increment = positive_int(title_incr_base)
                     continue
                 if re_dest_base.fullmatch(line):
                     dest_base = line[line.find(':') + 1:]
@@ -389,6 +415,13 @@ def prepare_queries() -> None:
                     unsolved_idseqs.append(f'{cat}:{dt}')
                     trace(f'{cat}:{dt} sequence is not fixed! \'{str(sequences_ids[cat][dt])}\'')
         assert len(unsolved_idseqs) == 0
+
+    if Config.title_increment > 0:
+        if not Config.title:
+            trace('Warning: title suffix increment is defined but no title set!')
+        else:
+            trace('Calculating title suffix...')
+            calculate_title_suffix()
 
     trace('Validating sequences...\n')
     validate_sequences(sequences_ids, sequences_pages, sequences_paths, sequences_tags, sequences_subfolders)
