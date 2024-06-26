@@ -20,7 +20,7 @@ from defs import (
     PATH_APPEND_DOWNLOAD_PAGES, PATH_APPEND_UPDATE, RUXX_DOWNLOADERS, PAGE_DOWNLOADERS, PROXY_ARG, MAX_CATEGORY_NAME_LENGTH, BOOL_STRS,
 )
 from executor import register_queries
-from logger import trace, open_logfile, ensure_logfile
+from logger import trace, ensure_logfile
 from sequences import validate_sequences, form_queries, report_queries, validate_runners, report_unoptimized
 from strings import SLASH, NEWLINE, datetime_str_nfull, all_tags_negative, all_tags_positive, normalize_path
 
@@ -60,6 +60,17 @@ sequences_subfolders: DownloadCollection[List[str]] = DownloadCollection()
 sequences_paths_update: Dict[str, Optional[str]] = {dt: None for dt in DOWNLOADERS}
 proxies_update: Dict[str, Optional[StrPair]] = {dt: None for dt in DOWNLOADERS}
 maxid_fetched: Dict[str, int] = dict()
+
+
+def ensure_logfile_wrapper() -> None:
+    if Config.title_increment > 0 and not Config.title_increment_value:
+        if not Config.title:
+            trace('Warning: title suffix increment is defined but no title set!')
+        else:
+            if Config.dest_logs_base == Config.DEFAULT_PATH:
+                trace('Warning: logs path is unset, title suffix increment will use base path to look for log files')
+            calculate_title_suffix()
+    ensure_logfile()
 
 
 def calculate_title_suffix() -> None:
@@ -177,11 +188,6 @@ def prepare_queries() -> None:
                     trace(f'Parsed title increment: \'{title_incr_base}\'')
                     assert Config.title_increment == 0, 'Title increment can only be declared once!'
                     Config.title_increment = positive_int(title_incr_base)
-                    if Config.title_increment > 0:
-                        if not Config.title:
-                            trace('Warning: title suffix increment is defined but no title set!')
-                        else:
-                            calculate_title_suffix()
                     continue
                 if re_dest_base.fullmatch(line):
                     dest_base = line[line.find(':') + 1:]
@@ -206,7 +212,6 @@ def prepare_queries() -> None:
                     trace(f'Parsed logs dest base: \'{dest_log}\'')
                     assert Config.dest_logs_base == Config.DEFAULT_PATH, f'Logs path re-declaration! Was \'{Config.dest_logs_base}\''
                     Config.dest_logs_base = valid_dir_path(dest_log)
-                    open_logfile()
                     continue
                 if re_datesub.fullmatch(line):
                     datesub_str = line[line.find(':') + 1:]
@@ -241,7 +246,7 @@ def prepare_queries() -> None:
                             trace(f'Error: invalid {pdt} offset int value: \'{Config.update_offsets[pdt]}\'')
                     assert not invalid_dts, f'Invalid update offsets value: {offsets_str}'
                     continue
-                ensure_logfile()
+                ensure_logfile_wrapper()
                 cat_match = re_category.fullmatch(line)
                 assert cat_match, f'at line {i + 1:d}: invalid category header format: \'{line}\'!'
                 cur_cat = cat_match.group(1)

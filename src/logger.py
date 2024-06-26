@@ -12,7 +12,7 @@ from typing import TextIO, Optional
 from defs import Wrapper, Config, UTF8
 from strings import datetime_str_nfull, timestamped_string
 
-__all__ = ('open_logfile', 'ensure_logfile', 'close_logfile', 'log_to', 'trace')
+__all__ = ('ensure_logfile', 'close_logfile', 'log_to', 'trace')
 
 logfile: Wrapper[Optional[TextIO]] = Wrapper()
 buffered_strings = [''] * 0
@@ -59,8 +59,7 @@ def trace(msg: str, add_timestamp=True) -> None:
             print('<Message was not logged due to UnicodeError>')
     if logfile:
         if buffered_strings:
-            for buffered in buffered_strings:
-                logfile().write(buffered)
+            logfile().writelines(buffered_strings)
             buffered_strings.clear()
         logfile().write(t_msg)
     else:
