@@ -39,6 +39,10 @@ def close_logfile() -> None:
             from os import remove
             remove(logfile().name)
         logfile.reset()
+    elif buffered_strings:
+        n = '\n'
+        trace(f'\nWarning: buffered log messages were never dumped! Contents:\n{n.join(buffered_strings)}')
+        buffered_strings.clear()
 
 
 def log_to(msg: str, log_file: TextIO, add_timestamp=True) -> None:
