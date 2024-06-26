@@ -63,6 +63,7 @@ maxid_fetched: Dict[str, int] = dict()
 
 
 def calculate_title_suffix() -> None:
+    trace('Calculating title suffix...')
     lbdir = Config.dest_logs_base
     logsdir_all: List[str] = listdir(lbdir) if path.isdir(lbdir) else []
     logsdir_files = list(filter(
@@ -79,6 +80,7 @@ def calculate_title_suffix() -> None:
                 max_suffix_len = max(max_suffix_len, len(suffix_val))
                 max_suffix_val = max(max_suffix_val, int(suffix_val))
     Config.title_increment_value = f'{max_suffix_val + 1:0{max_suffix_len:d}d}'
+    trace(f'Suffix calculated: \'{Config.title_increment_value}\'. Full title: \'{Config.fulltitle}\'')
 
 
 def fetch_maxids(dts: Iterable[str]) -> Dict[str, str]:
@@ -179,7 +181,6 @@ def prepare_queries() -> None:
                         if not Config.title:
                             trace('Warning: title suffix increment is defined but no title set!')
                         else:
-                            trace('Calculating title suffix...')
                             calculate_title_suffix()
                     continue
                 if re_dest_base.fullmatch(line):
