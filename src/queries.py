@@ -126,7 +126,7 @@ def fetch_maxids(dts: Iterable[str]) -> Dict[str, str]:
             except Exception:
                 res_errors.append(f'Error in fetch \'{dt}\' max id result!')
                 continue
-        assert len(res_errors) == 0
+        assert len(res_errors) == 0, '\n'.join(res_errors)
 
         trace(NEWLINE.join(results[dt] for dt in results))
         return results
