@@ -50,7 +50,7 @@ def assert_notnull(obj: Any) -> Any:
 class IntSequence:
     def __init__(self, ints: Iterable[int], line_num: int) -> None:
         self.ints = list(ints or [])
-        self.line_num = line_num or 0
+        self.line_num = line_num or -1
 
     def __str__(self) -> str:
         return f'{str(self.ints)} (found at line {self.line_num:d})'
@@ -73,7 +73,7 @@ class Pair(ABC):
     @abstractmethod
     def __init__(self, vals: Tuple[PT, PT]) -> None:
         self._first, self._second = vals
-        self._fmt = {int: 'd', bool: 'd', float: '.2f', oct: 'o'}.get(type(self._first), '')
+        self._fmt = {int: 'd', bool: 'd', float: '.2f'}.get(type(self._first), '')
 
     @property
     def first(self) -> PT:
