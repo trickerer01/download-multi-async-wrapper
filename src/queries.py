@@ -512,7 +512,7 @@ def update_next_ids() -> None:
 
 
 def at_startup() -> None:
-    trace(f'Python {sys.version}\nCommand-line args: {" ".join(sys.argv)}')
+    trace(f'Python {sys.version}\nCommand-line args: {" ".join(sys.argv)}\nEnabled downloaders: {",".join(Config.downloaders)}')
 
 #
 #
