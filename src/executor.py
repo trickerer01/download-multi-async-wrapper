@@ -45,7 +45,11 @@ def register_queries(queries: DownloadCollection[List[str]]) -> None:
 
 
 def split_into_args(query: str) -> List[str]:
-    """'a "b c" d "e" f g' -> ['a', 'b c', 'd', 'e', 'f', 'g']"""
+    r"""'a "b c" d "e" f g "{\\"h\\":\\"j\\",\\"k\\":\\"l\\"}"' -> ['a', 'b c', 'd', 'e', 'f', 'g', '{"h":"j","k":"l"}]"""
+    def append_result(res_str: str) -> None:
+        res_str = unquote(res_str.replace('\\"', '\u2033')).replace('\u2033', '"')
+        result.append(res_str)
+
     result = []
     idx1 = idx2 = idxdq = 0
     while idx2 < len(query):
@@ -54,15 +58,16 @@ def split_into_args(query: str) -> List[str]:
             result.append(unquote(query[idx1:]))
             break
         if query[idx2] == '"':
-            if idxdq != 0:
-                idx2 += 1
-                result.append(unquote(query[idxdq:idx2]))
-                idxdq = 0
-                idx1 = idx2 + 1
-            else:
-                idxdq = idx2
+            if idx2 == 0 or query[idx2 - 1] != '\\':
+                if idxdq != 0:
+                    idx2 += 1
+                    append_result(query[idxdq:idx2])
+                    idxdq = 0
+                    idx1 = idx2 + 1
+                else:
+                    idxdq = idx2
         elif query[idx2] == ' ' and idxdq == 0:
-            result.append(unquote(query[idx1:idx2]))
+            append_result(query[idx1:idx2])
             idx1 = idx2 + 1
     return result
 
