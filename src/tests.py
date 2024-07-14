@@ -10,7 +10,8 @@ from unittest import TestCase
 
 from cmdargs import parse_arglist
 from defs import Config, DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RC, DOWNLOADER_RN, DOWNLOADER_RX, DOWNLOADER_RS
-from executor import queries_all
+# noinspection PyProtectedMember
+from executor import queries_all, split_into_args
 from logger import close_logfile
 from main import main_sync
 # noinspection PyProtectedMember
@@ -118,13 +119,22 @@ class QueriesFormTests(TestCase):
         self.assertEqual(0, len(queries_all[cat_vid_][DOWNLOADER_RX]))
         self.assertEqual(0, len(queries_all[cat_vid_][DOWNLOADER_RS]))
         self.assertEqual(
-            f'python3 "D:/NM/src/ids.py" -start 1 -end 1 -path "../tests/{date_str_md(cat_vid)}/" --dump-tags -script "'
+            f'python3 "D:/NM/src/ids.py" -start 1 -end 1 -path "../tests/{date_str_md(cat_vid)}/" --dump-tags '
+            '-cookies "{\\"User-Agent\\":\\"NM 1.8\\", \\"shm_user\\":\\"su\\", \\"shm_session\\":\\"su_session_hash\\"}" -script "'
             'a: -quality 1080p -a -b -c -dfff ggg; '
             'b: -quality 1080p -a -b -c -dfff -ggg -(x,z) (h~i~j~k); '
             'c: -quality 1080p -a -b -c -dfff -ggg -h -i -j -k (l~m~n); '
             'd: -a -b -c -ggg -h -i -j -k -l -m -n -quality 360p -uvp always"',
             queries_all[cat_vid][DOWNLOADER_NM][0]
         )
+        self.assertEqual([
+            'python3', 'D:/NM/src/ids.py', '-start', '1', '-end', '1', '-path', f'../tests/{date_str_md(cat_vid)}/', '--dump-tags',
+            '-cookies', '{"User-Agent":"NM 1.8", "shm_user":"su", "shm_session":"su_session_hash"}', '-script',
+            'a: -quality 1080p -a -b -c -dfff ggg; '
+            'b: -quality 1080p -a -b -c -dfff -ggg -(x,z) (h~i~j~k); '
+            'c: -quality 1080p -a -b -c -dfff -ggg -h -i -j -k (l~m~n); '
+            'd: -a -b -c -ggg -h -i -j -k -l -m -n -quality 360p -uvp always'
+        ], split_into_args(queries_all[cat_vid][DOWNLOADER_NM][0]))
         self.assertEqual(
             f'python3 "D:/old/RV/src/pages.py" -pages 5 -start 2 -stop_id 5 -begin_id 8 -path "../tests/{date_str_md(cat_vid)}/a/" '
             '-log info -timeout 15 -retries 50 -throttle 30 --dump-descriptions --dump-tags --dump-comments '
