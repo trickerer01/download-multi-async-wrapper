@@ -12,6 +12,7 @@ from typing import List, Union, Tuple, Iterable, Type, TypeVar, Dict, Optional, 
 
 UTF8 = 'utf-8'
 ACTION_STORE_TRUE = 'store_true'
+ACTION_APPEND = 'append'
 PROXY_ARG = '-proxy'
 MIN_IDS_SEQ_LENGTH = 2
 MAX_CATEGORY_NAME_LENGTH = 10
@@ -99,6 +100,30 @@ class StrPair(Pair):
         super().__init__(vals)
 
 
+class IgnoredArg:
+    def __init__(self, ignored_fmt: str) -> None:
+        try:
+            ignored_name, ignored_num = tuple(ignored_fmt.split(',', 1))
+            assert ignored_name and ' ' not in ignored_name and int(ignored_num) in (1, 2)
+            self._name = ignored_name
+            self._len = int(ignored_num)
+        except Exception:
+            raise ValueError(f'Invalid ignored arg format: \'{ignored_fmt}\'')
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def len(self) -> int:
+        return self._len
+
+    def __str__(self) -> str:
+        return f'{self._name}({self._len:d})'
+
+    __repr__ = __str__
+
+
 DOWNLOADER_NM = 'nm'
 DOWNLOADER_RV = 'rv'
 DOWNLOADER_RC = 'rc'
@@ -133,7 +158,7 @@ class BaseConfig(object):
         # cmd
         self.debug = False
         self.no_download = False
-        self.ignore_download_mode = False
+        self.ignored_args: List[IgnoredArg] = list()
         self.downloaders: List[str] = list()
         self.script_path = ''
         # mixed
@@ -167,7 +192,7 @@ class BaseConfig(object):
         return (
             f'debug: {self.debug}, downloaders: {str(self.downloaders)}, script: {self.script_path}, dest: {self.dest_base}, '
             f'run: {self.dest_run_base}, logs: {self.dest_logs_base}, bak: {self.dest_bak_base}, update: {self.update}, '
-            f'no_download: {self.no_download}, ignore_download_mode: {self.ignore_download_mode}, '
+            f'no_download: {self.no_download}, ignored_args: {str(self.ignored_args)}, '
             f'max_cmd_len: {self.max_cmd_len}'
         )
 
@@ -185,7 +210,11 @@ HELP_RUN_PATH = 'Path to the folder where cmd run files will be put if needed'
 HELP_LOGS_PATH = 'Path to the folder where logs will be stored'
 HELP_BAK_PATH = 'Path to the folder where script backup will be put before updating'
 HELP_UPDATE = 'Boolean flag to update script file with current max ids fetched from the websites'
-HELP_IGNORE_DMODE = 'Boolean flag to ignore all \'-dmode\' arguments and always download files in full'
+HELP_IGNORE_ARGUMENT = (
+    'Script one-line cmd argument to ignore, format: \'<NAME>,<COUNT>\''
+    ' where <NAME> is argument name (dash prefix must be omitted) and <COUNT> is a number of arguments to skip (1 or 2).'
+    ' Skips the entire line! Can be used multiple times'
+)
 
 PATH_APPEND_DOWNLOAD_RUXX = 'src/ruxx_cmd.py'
 PATH_APPEND_DOWNLOAD_NRVC_IDS = 'src/ids.py'

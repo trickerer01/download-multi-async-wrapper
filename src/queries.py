@@ -37,7 +37,6 @@ re_update = re_compile(r'^### UPDATE:.+?$')
 re_update_offsets = re_compile(r'^### UPDATE_OFFSETS:.+?$')
 re_category = re_compile(r'^### \(([A-zÀ-ʯА-я\d_+\-! ]+)\) ###$')
 re_comment = re_compile(r'^##[^#].*?$')
-re_download_mode = re_compile(r'^.*[: ]-dmode .+?$')
 re_python_exec = re_compile(r'^### PYTHON:.+?$')
 re_downloader_type = re_compile(fr'^# (?:{"|".join(DOWNLOADERS)}|{"|".join(DOWNLOADERS).upper()}).*?$')
 re_ids_list = re_compile(r'^#(?:(?: \d+)+| -\d+)$')
@@ -272,10 +271,17 @@ def prepare_queries() -> None:
                 if re_comment.fullmatch(line):
                     # trace(f'Ignoring commented out line {i + 1:d}: \'{line}\'')
                     continue
-                if re_download_mode.fullmatch(line):
-                    if Config.ignore_download_mode is True:
-                        trace(f'Info: \'{line}\' download mode found at line {i + 1:d}. Ignored!')
-                        continue
+                skipped_idx = -1
+                for ignored_idx, ignored in enumerate(Config.ignored_args):
+                    start_idx = line.find(': ') + 2 if ': ' in line else 0
+                    start_idx = line.find(ignored.name, start_idx)
+                    if start_idx > 0 and line[start_idx - 1] == '-':
+                        if ignored.len < 2 or line.find(' ', start_idx + len(ignored.name)) > start_idx:
+                            skipped_idx = ignored_idx
+                            break
+                if skipped_idx >= 0:
+                    trace(f'Info: ignoring argument \'{str(Config.ignored_args[skipped_idx])}\' found at line {i + 1:d}. line: \'{line}\'')
+                    continue
                 if re_downloader_type.fullmatch(line):
                     cur_dwn = line.split(' ')[1].lower()
                     assert cur_dwn in DOWNLOADERS
@@ -512,7 +518,10 @@ def update_next_ids() -> None:
 
 
 def at_startup() -> None:
-    trace(f'Python {sys.version}\nCommand-line args: {" ".join(sys.argv)}\nEnabled downloaders: {",".join(Config.downloaders)}')
+    trace(
+        f'Python {sys.version}\nCommand-line args: {" ".join(sys.argv)}\nEnabled downloaders: {",".join(Config.downloaders)}'
+        f'\nIgnored arguments: {",".join(str(ign) for ign in Config.ignored_args) or "[]"}'
+    )
 
 #
 #

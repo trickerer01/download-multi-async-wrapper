@@ -29,7 +29,7 @@ args_argparse_str1 = (
 
 args_argparse_str2 = (
     '--debug '
-    '--ignore-download-mode '
+    '-ignore dmode,2 '
     '-downloaders rv,rx,rn,rs '
     '-path ../tests '
     '-script "../tests/queries.list"'
@@ -64,18 +64,18 @@ class ArgParseTests(TestCase):
         parse_arglist(args_argparse_str1.split())
         self.assertEqual(
             'debug: False, downloaders: [\'nm\', \'rv\', \'rc\', \'rn\', \'rx\', \'rs\'], script: ../tests/queries.list, dest: ./, '
-            'run: ./, logs: ./, bak: ./, update: False, no_download: False, ignore_download_mode: False, '
+            'run: ./, logs: ./, bak: ./, update: False, no_download: False, ignored_args: [], '
             'max_cmd_len: 16000',
             str(Config)
         )
         print(f'{self._testMethodName} passed')
 
     def test_argparse2(self) -> None:
-        set_up_test()
+        set_up_test(True)
         parse_arglist(args_argparse_str2.split())
         self.assertEqual(
             'debug: True, downloaders: [\'rv\', \'rn\', \'rx\', \'rs\'], script: ../tests/queries.list, dest: ../tests/, '
-            'run: ./, logs: ./, bak: ./, update: False, no_download: False, ignore_download_mode: True, '
+            'run: ./, logs: ./, bak: ./, update: False, no_download: False, ignored_args: [dmode(2)], '
             'max_cmd_len: 16000',
             str(Config)
         )
