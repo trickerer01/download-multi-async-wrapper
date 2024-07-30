@@ -86,6 +86,23 @@ b
 # send
 # end
 
+# rz
+# 5 6
+# downloader:D:/ruxx/
+# common:-dmode 1
+# common:-module rz
+# sub:z
+z
+# send
+
+# sub:x
+-+z
+-z
+x
+(y~w)
+# send
+# end
+
 ### (VIDEOS ) ###
 # nm
 # 1 2
