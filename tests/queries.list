@@ -103,6 +103,16 @@ x
 # send
 # end
 
+# rp
+# 7 9
+# downloader:D:/ruxx/
+# common:-dmode 0
+# common:-module rp
+# sub:g
+g
+# send
+# end
+
 ### (VIDEOS ) ###
 # nm
 # 1 2
