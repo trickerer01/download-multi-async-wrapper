@@ -163,7 +163,7 @@ def prepare_queries() -> None:
             raise
 
     cur_dwn = ''
-    cur_tags_list: List[str] = list()
+    cur_tags_list = list()
     autoupdate_seqs: DownloadCollection[IntSequence] = DownloadCollection()
 
     trace('Analyzing queries file strings...')
@@ -283,8 +283,9 @@ def prepare_queries() -> None:
                     trace(f'Info: ignoring argument \'{str(Config.ignored_args[skipped_idx])}\' found at line {i + 1:d}. line: \'{line}\'')
                     continue
                 if re_downloader_type.fullmatch(line):
+                    assert not cur_tags_list, f'at line {i + 1:d}: unclosed previous downloader section \'{cur_dwn}\'!'
                     cur_dwn = line.split(' ')[1].lower()
-                    assert cur_dwn in DOWNLOADERS
+                    assert cur_dwn in DOWNLOADERS, f'at line {i + 1:d}: unknown downloader \'{cur_dwn}\'!'
                     trace(f'Processing \'{cur_dl().upper()}\' arguments...')
                 elif re_ids_list.fullmatch(line):
                     cdt = cur_dl()
@@ -400,7 +401,7 @@ def prepare_queries() -> None:
                         trace(f'Warning (W2): mixed positive / negative tags at line {i + 1:d}, '
                               f'{"param" if param_like else "error"}? Line: \'{line}\'')
                 if need_append:
-                    cur_tags_list += line.split(' ')
+                    cur_tags_list.extend(line.split(' '))
         except Exception:
             trace(f'Error: issue encountered while parsing queries file at line {i + 1:d}!')
             raise
