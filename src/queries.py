@@ -402,8 +402,8 @@ def prepare_queries() -> None:
                               f'{"param" if param_like else "error"}? Line: \'{line}\'')
                 if need_append:
                     cur_tags_list.extend(line.split(' '))
-        except Exception:
-            trace(f'Error: issue encountered while parsing queries file at line {i + 1:d}!')
+        except Exception as e:
+            trace(f'Error: issue encountered while parsing queries file at line {i + 1:d}!\n - {str(e)}')
             raise
 
     trace('Sequences parsed successfully\n')
