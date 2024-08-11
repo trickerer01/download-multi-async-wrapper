@@ -290,6 +290,8 @@ RANGE_TEMPLATE_PAGE_IDS = {
 # must have __len__() defined
 DT = TypeVar('DT', str, list, IntSequence)
 WT = TypeVar('WT')
+for _ in DT.__constraints__:
+    assert hasattr(_, '__len__') and callable(getattr(_, '__len__')), f'DT class \'{_.__name__}\' doesn\'t have len() method!'
 
 
 class DownloadCollection(Dict[str, Dict[str, Optional[DT]]]):
