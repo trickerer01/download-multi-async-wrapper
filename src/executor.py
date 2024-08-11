@@ -111,6 +111,8 @@ async def run_dt_cmds(dt: str, qts: Sequence[str], queries: Sequence[str]) -> No
         trace(f'\n{dt.upper()} SKIPPED\n')
         return
 
+    dt_qt_num = len(list(filter(None, [not not queries_all[dcat][dt] for dcat in queries_all])))
+
     qt_skips = set()
     qns: Dict[str, int] = {qt: 0 for qt in qts}
     for qi, qt in enumerate(qts):
@@ -124,7 +126,7 @@ async def run_dt_cmds(dt: str, qts: Sequence[str], queries: Sequence[str]) -> No
                 trace(f'{dt.upper()} category \'{qt}\' was disabled! Skipped!\n')
             continue
         await run_cmd(queries[qi], dt, qi + 1, qt, qns[qt])
-    trace(f'{dt.upper()} COMPLETED ({len(queries_all) - len(qt_skips):d} / {len(queries_all):d} categories processed)\n')
+    trace(f'{dt.upper()} COMPLETED ({dt_qt_num - len(qt_skips):d} / {dt_qt_num:d} categories processed)\n')
 
 
 async def run_all_cmds() -> None:
