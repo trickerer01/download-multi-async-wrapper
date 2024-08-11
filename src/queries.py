@@ -47,7 +47,7 @@ re_sub_begin = re_compile(r'^# sub:[^ ].*?$')
 re_sub_end = re_compile(r'^# send$')
 re_downloader_finalize = re_compile(r'^# end$')
 
-queries_file_lines = Wrapper([''] * 0)
+queries_file_lines: Wrapper[List[str]] = Wrapper()
 
 sequences_ids: DownloadCollection[IntSequence] = DownloadCollection()
 sequences_pages: DownloadCollection[IntSequence] = DownloadCollection()
@@ -105,7 +105,7 @@ def fetch_maxids(dts: Iterable[str]) -> Dict[str, str]:
 
         def get_max_id(dtype: str) -> None:
             update_file_path = sequences_paths_update[dtype]
-            module_arguments = ['-module', dtype] if dtype in RUXX_DOWNLOADERS else ([''] * 0)
+            module_arguments: List[str] = ['-module', dtype] if dtype in RUXX_DOWNLOADERS else list()
             if dtype in proxies_update and proxies_update[dtype]:
                 module_arguments += [proxies_update[dtype].first, proxies_update[dtype].second]
             arguments = [Config.python, update_file_path, '-get_maxid', '-timeout', '30'] + module_arguments
@@ -233,7 +233,7 @@ def prepare_queries() -> None:
                     trace(f'Parsed update offsets value: \'{offsets_str}\'')
                     assert Config.update_offsets == {}, f'Update offsets re-declaration! Was \'{str(Config.update_offsets)}\''
                     Config.update_offsets = loads(offsets_str.lower())
-                    invalid_dts = [''] * 0
+                    invalid_dts = list()
                     for pdt in Config.update_offsets:
                         if pdt not in DOWNLOADERS:
                             invalid_dts.append(pdt)
@@ -411,7 +411,7 @@ def prepare_queries() -> None:
         trace('[Autoupdate] validating runners...\n')
         validate_runners(sequences_paths, sequences_paths_update)
         trace('Running max ID autoupdates...\n')
-        unsolved_idseqs = [''] * 0
+        unsolved_idseqs = list()
         needed_updates = [dt for dt in DOWNLOADERS if any(dt in autoupdate_seqs[c] for c in autoupdate_seqs if autoupdate_seqs[c][dt])]
         maxids = fetch_maxids(needed_updates)
         for dt in needed_updates:
@@ -503,11 +503,11 @@ def update_next_ids() -> None:
                 for i, dtseq in enumerate(sequences_ids[cat].items()):
                     dt, seq = dtseq
                     line_n = (seq.line_num - 1) if seq and dt in maxids else None
-                    trace(f'{"W" if line_n else "Not w"}riting {cat}:{dt} ids at idx {i:d}, line {line_n + 1 if line_n else -1:d}...')
+                    trace(f'{"W" if line_n else "Not w"}riting \'{cat}:{dt}\' ids at idx {i:d}, line {line_n + 1 if line_n else -1:d}...')
                     if line_n:
                         ids_at_line = queries_file_lines()[line_n].strip().split(' ')
                         queries_file_lines()[line_n] = ' '.join([ids_at_line[0]] + ids_at_line[2:] + [f'{maxids[dt]:d}\n'])
-                trace(f'Writing {cat} ids done')
+                trace(f'Writing \'{cat}\' ids done')
             with open(Config.script_path, 'wt', encoding=UTF8, buffering=1) as outfile:
                 outfile.writelines(queries_file_lines())
             trace('Writing done\n\nNext ids update successfully completed')

@@ -7,15 +7,15 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 
 from locale import getpreferredencoding
-from typing import TextIO, Optional
+from typing import TextIO, Optional, List
 
 from defs import Wrapper, Config, UTF8
-from strings import datetime_str_nfull, timestamped_string
+from strings import NEWLINE, datetime_str_nfull, timestamped_string
 
 __all__ = ('ensure_logfile', 'close_logfile', 'log_to', 'trace')
 
 logfile: Wrapper[Optional[TextIO]] = Wrapper()
-buffered_strings = [''] * 0
+buffered_strings: List[str] = list()
 
 
 def open_logfile() -> None:
@@ -40,19 +40,18 @@ def close_logfile() -> None:
             remove(logfile().name)
         logfile.reset()
     elif buffered_strings:
-        n = '\n'
-        trace(f'\nWarning: buffered log messages were never dumped! Contents:\n{n.join(buffered_strings)}')
+        trace(f'\nWarning: buffered log messages were never dumped! Contents:\n{NEWLINE.join(buffered_strings)}')
         buffered_strings.clear()
 
 
 def log_to(msg: str, log_file: TextIO, add_timestamp=True) -> None:
     if log_file:
-        t_msg = f'{timestamped_string(msg, datetime_str_nfull()) if add_timestamp else msg}\n'
+        t_msg = f'{timestamped_string(msg) if add_timestamp else msg}\n'
         log_file.write(t_msg)
 
 
 def trace(msg: str, add_timestamp=True) -> None:
-    t_msg = f'{timestamped_string(msg, datetime_str_nfull()) if add_timestamp else msg}\n'
+    t_msg = f'{timestamped_string(msg) if add_timestamp else msg}\n'
     try:
         if Config.console_log:
             print(t_msg, end='')

@@ -24,8 +24,10 @@ def normalize_path(basepath: str, append_slash=True) -> str:
     return f'{normalized_path}{SLASH}' if need_slash else normalized_path
 
 
-def timestamped_string(msg: str, timestamp: str) -> str:
-    return msg.replace('\n', f'\n[{timestamp}] ') if msg[0] == '\n' else (f'[{timestamp}] ' + msg.replace('\n', f'\n[{timestamp}] '))
+def timestamped_string(msg: str) -> str:
+    ts = f'[{datetime_str_nfull()}] '
+    nts = f'{NEWLINE}{ts}'
+    return msg.replace(NEWLINE, nts) if msg.startswith(NEWLINE) else f'{ts}{msg.replace(NEWLINE, nts)}'
 
 
 def all_tags_same_sign(taglist: Iterable[str], negative: bool) -> bool:
