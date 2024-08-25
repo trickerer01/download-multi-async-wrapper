@@ -54,6 +54,7 @@ def validate_runners(sequences_paths: DownloadCollection[str], sequences_paths_u
                     out_d_str = out_d.decode().strip()
                     out_d_str = out_d_str[out_d_str.rfind('\n') + 1:]
                     assert out_d_str.startswith(APP_NAMES[dtd]), f'Unexpected output for {dtd}: {out_d_str[:min(len(out_d_str), 20)]}!'
+                    trace(f'Found \'{dpath}\'')
                 except Exception:
                     trace(f'Error: invalid {dtd} {dtype} downloader found at: \'{dpath}\' ({cat})!')
                     raise IOError
@@ -71,6 +72,7 @@ def validate_runners(sequences_paths: DownloadCollection[str], sequences_paths_u
                 out_u_str = out_u.decode().strip()
                 out_u_str = out_u_str[out_u_str.rfind('\n') + 1:]
                 assert out_u_str.startswith(APP_NAMES[dtu]), f'Unexpected output for {dtu}: {out_u_str[:min(len(out_u_str), 20)]}!'
+                trace(f'Found \'{upath}\'')
             except Exception:
                 trace(f'Error: invalid {dtu} updater found at: \'{upath}\'!')
                 raise IOError
