@@ -137,7 +137,7 @@ def _get_base_qs(
     [base_qs.update({
         k: {
             dt: (f'{Config.python} "{sequences_paths[k][dt]}" '
-                 f'{(ri[dt].first % irngs[k][dt].first) if pure_ids(k, dt) else (rp[dt].first % prngs[k][dt].first)} '
+                 f'{(ri[dt].first % irngs[k][dt].first) if pure_ids(k, dt) else (rp[dt].first % prngs[k][dt].first)}'
                  f'{(ri[dt].second % (irngs[k][dt].second - 1)) if pure_ids(k, dt) else (rp[dt].second % prngs[k][dt].second)}'
                  f'{f" {rpi[dt].first % irngs[k][dt].first}" if page_ids(k, dt) and irngs[k][dt].first else ""}'
                  f'{f" {rpi[dt].second % (irngs[k][dt].second - 1)}" if page_ids(k, dt) and irngs[k][dt].second else ""}')

@@ -11,6 +11,7 @@ from unittest import TestCase
 from cmdargs import parse_arglist
 from defs import (
     Config, DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RC, DOWNLOADER_RN, DOWNLOADER_RX, DOWNLOADER_RS, DOWNLOADER_RZ, DOWNLOADER_RP,
+    DOWNLOADER_EN,
 )
 # noinspection PyProtectedMember
 from executor import queries_all, split_into_args
@@ -65,7 +66,7 @@ class ArgParseTests(TestCase):
         set_up_test()
         parse_arglist(args_argparse_str1.split())
         self.assertEqual(
-            'debug: False, downloaders: [\'nm\', \'rv\', \'rc\', \'rn\', \'rx\', \'rs\', \'rz\', \'rp\'], '
+            'debug: False, downloaders: [\'nm\', \'rv\', \'rc\', \'rn\', \'rx\', \'rs\', \'rz\', \'rp\', \'en\'], '
             'script: ../tests/queries.list, dest: ./, run: ./, logs: ./, bak: ./, update: False, no_download: False, ignored_args: [], '
             'max_cmd_len: 16000',
             str(Config)
@@ -93,7 +94,7 @@ class QueriesFormTests(TestCase):
         prepare_queries()
         self.assertEqual('script_0', Config.title)
         self.assertEqual(4, Config.title_increment)
-        self.assertEqual(f'0001', Config.title_increment_value)
+        self.assertEqual('0001', Config.title_increment_value)
         self.assertEqual(f'{Config.title}0001', Config.fulltitle)
         self.assertTrue(Config.datesub)
         self.assertTrue(Config.update)
@@ -110,6 +111,7 @@ class QueriesFormTests(TestCase):
         self.assertEqual(0, len(queries_all[cat_vid][DOWNLOADER_RS]))
         self.assertEqual(0, len(queries_all[cat_vid][DOWNLOADER_RZ]))
         self.assertEqual(0, len(queries_all[cat_vid][DOWNLOADER_RP]))
+        self.assertEqual(2, len(queries_all[cat_vid][DOWNLOADER_EN]))
         self.assertEqual(0, len(queries_all[cat_img][DOWNLOADER_NM]))
         self.assertEqual(0, len(queries_all[cat_img][DOWNLOADER_RV]))
         self.assertEqual(0, len(queries_all[cat_img][DOWNLOADER_RC]))
@@ -118,6 +120,7 @@ class QueriesFormTests(TestCase):
         self.assertEqual(0, len(queries_all[cat_img][DOWNLOADER_RS]))
         self.assertEqual(2, len(queries_all[cat_img][DOWNLOADER_RZ]))
         self.assertEqual(1, len(queries_all[cat_img][DOWNLOADER_RP]))
+        self.assertEqual(0, len(queries_all[cat_img][DOWNLOADER_EN]))
         self.assertEqual(1, len(queries_all[cat_vid_][DOWNLOADER_NM]))
         self.assertEqual(0, len(queries_all[cat_vid_][DOWNLOADER_RV]))
         self.assertEqual(1, len(queries_all[cat_vid_][DOWNLOADER_RC]))
@@ -126,6 +129,7 @@ class QueriesFormTests(TestCase):
         self.assertEqual(0, len(queries_all[cat_vid_][DOWNLOADER_RS]))
         self.assertEqual(0, len(queries_all[cat_vid_][DOWNLOADER_RZ]))
         self.assertEqual(0, len(queries_all[cat_vid_][DOWNLOADER_RP]))
+        self.assertEqual(0, len(queries_all[cat_vid_][DOWNLOADER_EN]))
         self.assertEqual(
             f'python3 "D:/NM/src/ids.py" -start 1 -end 1 -path "../tests/{date_str_md(cat_vid)}/" --dump-tags '
             '-cookies "{\\"User-Agent\\":\\"NM 1.8\\", \\"shm_user\\":\\"su\\", \\"shm_session\\":\\"su_session_hash\\"}" -script "'
@@ -160,6 +164,14 @@ class QueriesFormTests(TestCase):
             '-log info -timeout 15 -retries 50 -throttle 30 --dump-descriptions --dump-tags --dump-comments '
             '-quality 1080p -b -c -d -(g,h,i) -search_tag e,f -search_rule_tag all',
             queries_all[cat_vid][DOWNLOADER_RV][2]
+        )
+        self.assertEqual(
+            f'python3 "D:/old/ruxx/src/ruxx_cmd.py" id:2..7 -path "../tests/{date_str_md(cat_vid)}/k/" -module en k',
+            queries_all[cat_vid][DOWNLOADER_EN][0]
+        )
+        self.assertEqual(
+            f'python3 "D:/old/ruxx/src/ruxx_cmd.py" id:2..7 -path "../tests/{date_str_md(cat_vid)}/pb/" -module en -k p b (o~q)',
+            queries_all[cat_vid][DOWNLOADER_EN][1]
         )
         self.assertEqual(
             f'python3 "D:/ruxx/src/ruxx_cmd.py" id:>=1 id:<=1 -path "../tests/{date_str_md(cat_img)}/a/" -module rx a',
