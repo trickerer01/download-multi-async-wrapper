@@ -8,7 +8,13 @@ Dependencies:
   - https://github.com/trickerer01/RV
   - https://github.com/trickerer01/NM
   - https://github.com/trickerer01/RC
-- Libraries: None
+  - Notes:
+    - only downloaders listed within the script need to be cloned
+- Libraries:
+  - wrapper itself has no dependencies
+  - downloaders have their respective dependencies which have to be installed to wrapper's environment in order to enable wrapper to launch said downloaders. Check respective downloaders Readme are `requirements.txt`. Notes:
+    - RV, NM and RC dependencies are always the same
+    - Ruxx dependencies are python version dependent
 
 See [SCRIPTING_SYNTAX.txt](https://github.com/trickerer01/download-multi-async-wrapper/blob/master/SCRIPTING_SYNTAX.txt) for script composition guidelines and tips  
 Invoke `python main.py --help` to list cmdline arguments

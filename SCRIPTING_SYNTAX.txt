@@ -12,7 +12,7 @@
                                      CAN ALSO USE OTHER VALUES: 'False', 'true', 'No', 'YES', 'N', 'y', '0', '1', etc.
 ### UPDATE:YES                   <-- ID RANGE (SEE BELOW) UPDATE WITH FETCHED MAX ID FLAG, DEFAULT: 'NO' <OPTIONAL>
 ### UPDATE_OFFSETS:{"rc":-500}   <-- MAX ID UPDATE OFFSET PER DOWNLOADER (USUALLY NEGATIVE) <OPTIONAL>
-### PYTHON:python3               <-- PATH TO PYTHON EXECUTABLE (NORMALLY PRESENT IN PATH) <REQUIRED>
+### PYTHON:python3               <-- PATH TO PYTHON EXECUTABLE (NORMALLY PRESENT IN SYSTEM PATH VARIABLE) <REQUIRED>
 ### (vid) ###                    <-- CATEGORY MARKER, AT LEAST 1 SYMBOL (SUBFOLDER NAME: 'vid') <REQUIRED>
 # nm                             <-- DOWNLOADER TYPE <REQUIRED>
 # 50000 51000                    <-- AT LEAST ONE OR TWO IDS FOR RANGE (SEE BELOW) <REQUIRED>
@@ -62,7 +62,7 @@ ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
                                  <-- WHICH DOWNLOADS MATCHING VIDEOS TO 4 DIFFERENT FOLDERS IN A SINGLE PASS
 
 # RV                             <-- DOWNLOADER TYPE CAN BE UPPERCASE TOO
-# p10 s1                         <-- SWITCH TO PAGES SCAN INSTEAD OF IDS (PAGES NUMBER, STARTING PAGE) <OPTIONAL>
+# p10 s1                         <-- SWITCH TO PAGES SCAN INSTEAD OF IDS (PAGES COUNT, STARTING PAGE) <OPTIONAL>
 # 3050000                        <-- A SIGNLE ID MEANS FROM THIS AND UP (TILL CURRENT MAX ID)
 # downloader:D:/Projects/RV
 # common:-log info -timeout 30 -retries 100 -throttle 100 --dump-descriptions --dump-tags
