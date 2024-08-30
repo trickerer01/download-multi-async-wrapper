@@ -333,7 +333,7 @@ def prepare_queries() -> None:
                     if proxy_idx >= 0:
                         assert len(common_args) > proxy_idx + 1
                         proxies_update[cur_dl()] = StrPair((common_args[proxy_idx], common_args[proxy_idx + 1]))
-                    sequences_common.cur()[cur_dl()] += common_args
+                    sequences_common.cur()[cur_dl()].extend(common_args)
                 elif re_sub_begin.fullmatch(line):
                     cdt = cur_dl()
                     assert len(sequences_subfolders.cur()[cdt]) == len(sequences_tags.cur()[cdt]), f'Error: unclosed {cdt} sub!'
