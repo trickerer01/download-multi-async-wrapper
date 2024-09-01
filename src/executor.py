@@ -7,9 +7,8 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 
 from asyncio import AbstractEventLoop, Future, SubprocessProtocol, new_event_loop, sleep, as_completed
-from locale import getpreferredencoding
 from math import log10, ceil
-from os import path
+from os import path, environ
 from typing import Dict, List, Optional, Sequence, Iterable, Any
 
 from defs import DownloadCollection, Wrapper, Config, UTF8, DOWNLOADERS, RUN_FILE_DOWNLOADERS
@@ -78,7 +77,7 @@ async def run_cmd(query: str, dt: str, qn: int, qt: str, qtn: int) -> None:
     suffix = f'{Config.fulltitle}_' if Config.title else ''
     begin_msg = f'\n[{Config.fulltitle}] Executing \'{qt}\' {dt} query {qtn:d} ({dt} query {qn:d}):\n{query}'
     log_file_name = f'{Config.dest_logs_base}log_{suffix}{dt}{qn:{dtqn_fmt()}}_{qt.strip()}{qtn:{dtqn_fmt()}}_{exec_time}.log'
-    with open(log_file_name, 'wt+', encoding=getpreferredencoding(), errors='replace', buffering=1) as log_file:
+    with open(log_file_name, 'wt+', encoding=UTF8, errors='replace', buffering=1) as log_file:
         trace(begin_msg)
         log_to(begin_msg, log_file)
         cmd_args = split_into_args(query)
@@ -94,7 +93,8 @@ async def run_cmd(query: str, dt: str, qn: int, qt: str, qtn: int) -> None:
             with open(run_file_abspath, 'wt', encoding=UTF8, buffering=1) as run_file:
                 run_file.write('\n'.join(cmd_args_new))
         ef = Future(loop=executor_event_loop())
-        tr, _ = await executor_event_loop().subprocess_exec(lambda: DummyResultProtocol(ef), *cmd_args, stderr=log_file, stdout=log_file)
+        tr, _ = await executor_event_loop().subprocess_exec(lambda: DummyResultProtocol(ef), *cmd_args, stderr=log_file, stdout=log_file,
+                                                            env={**environ, **{'PYTHONIOENCODING': UTF8, 'PYTHONUNBUFFERED': '1'}})
         await ef
         tr.close()
         log_file.seek(0)
