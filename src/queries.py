@@ -18,6 +18,7 @@ from cmdargs import valid_dir_path, positive_int
 from defs import (
     DownloadCollection, Wrapper, IntSequence, Config, StrPair, UTF8, DOWNLOADERS, MIN_IDS_SEQ_LENGTH, PATH_APPEND_DOWNLOAD_IDS,
     PATH_APPEND_DOWNLOAD_PAGES, PATH_APPEND_UPDATE, RUXX_DOWNLOADERS, PAGE_DOWNLOADERS, PROXY_ARG, MAX_CATEGORY_NAME_LENGTH, BOOL_STRS,
+    COLOR_LOG_DOWNLOADERS,
 )
 from executor import register_queries
 from logger import trace, ensure_logfile
@@ -287,6 +288,8 @@ def prepare_queries() -> None:
                     cur_dwn = line.split(' ')[1].lower()
                     assert cur_dwn in DOWNLOADERS, f'at line {i + 1:d}: unknown downloader \'{cur_dwn}\'!'
                     trace(f'Processing \'{cur_dl().upper()}\' arguments...')
+                    if cur_dl() in COLOR_LOG_DOWNLOADERS:
+                        sequences_common.cur()[cur_dl()].append('--disable-log-colors')
                 elif re_ids_list.fullmatch(line):
                     cdt = cur_dl()
                     cat = cur_category()

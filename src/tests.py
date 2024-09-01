@@ -131,7 +131,7 @@ class QueriesFormTests(TestCase):
         self.assertEqual(0, len(queries_all[cat_vid_][DOWNLOADER_RP]))
         self.assertEqual(0, len(queries_all[cat_vid_][DOWNLOADER_EN]))
         self.assertEqual(
-            f'python3 "D:/NM/src/ids.py" -start 1 -end 1 -path "../tests/{date_str_md(cat_vid)}/" --dump-tags '
+            f'python3 "D:/NM/src/ids.py" -start 1 -end 1 -path "../tests/{date_str_md(cat_vid)}/" --disable-log-colors --dump-tags '
             '-cookies "{\\"User-Agent\\":\\"NM 1.8\\", \\"shm_user\\":\\"su\\", \\"shm_session\\":\\"su_session_hash\\"}" -script "'
             'a: -quality 1080p -a -b -c -dfff ggg; '
             'b: -quality 1080p -a -b -c -dfff -ggg -(x,z) (h~i~j~k); '
@@ -140,7 +140,8 @@ class QueriesFormTests(TestCase):
             queries_all[cat_vid][DOWNLOADER_NM][0]
         )
         self.assertEqual([
-            'python3', 'D:/NM/src/ids.py', '-start', '1', '-end', '1', '-path', f'../tests/{date_str_md(cat_vid)}/', '--dump-tags',
+            'python3', 'D:/NM/src/ids.py', '-start', '1', '-end', '1', '-path', f'../tests/{date_str_md(cat_vid)}/',
+            '--disable-log-colors', '--dump-tags',
             '-cookies', '{"User-Agent":"NM 1.8", "shm_user":"su", "shm_session":"su_session_hash"}', '-script',
             'a: -quality 1080p -a -b -c -dfff ggg; '
             'b: -quality 1080p -a -b -c -dfff -ggg -(x,z) (h~i~j~k); '
@@ -149,19 +150,19 @@ class QueriesFormTests(TestCase):
         ], split_into_args(queries_all[cat_vid][DOWNLOADER_NM][0]))
         self.assertEqual(
             f'python3 "D:/old/RV/src/pages.py" -pages 5 -start 2 -stop_id 5 -begin_id 8 -path "../tests/{date_str_md(cat_vid)}/a/" '
-            '-log info -timeout 15 -retries 50 -throttle 30 --dump-descriptions --dump-tags --dump-comments '
+            '--disable-log-colors -log info -timeout 15 -retries 50 -throttle 30 --dump-descriptions --dump-tags --dump-comments '
             '-quality 1080p -search a',
             queries_all[cat_vid][DOWNLOADER_RV][0]
         )
         self.assertEqual(
             f'python3 "D:/old/RV/src/pages.py" -pages 5 -start 2 -stop_id 5 -begin_id 8 -path "../tests/{date_str_md(cat_vid)}/b/" '
-            '-log info -timeout 15 -retries 50 -throttle 30 --dump-descriptions --dump-tags --dump-comments '
+            '--disable-log-colors -log info -timeout 15 -retries 50 -throttle 30 --dump-descriptions --dump-tags --dump-comments '
             '-quality 1080p -search_tag b,c,d -search_rule_tag any',
             queries_all[cat_vid][DOWNLOADER_RV][1]
         )
         self.assertEqual(
             f'python3 "D:/old/RV/src/pages.py" -pages 5 -start 2 -stop_id 5 -begin_id 8 -path "../tests/{date_str_md(cat_vid)}/c/" '
-            '-log info -timeout 15 -retries 50 -throttle 30 --dump-descriptions --dump-tags --dump-comments '
+            '--disable-log-colors -log info -timeout 15 -retries 50 -throttle 30 --dump-descriptions --dump-tags --dump-comments '
             '-quality 1080p -b -c -d -(g,h,i) -search_tag e,f -search_rule_tag all',
             queries_all[cat_vid][DOWNLOADER_RV][2]
         )
@@ -194,7 +195,8 @@ class QueriesFormTests(TestCase):
             queries_all[cat_img][DOWNLOADER_RP][0]
         )
         self.assertEqual(  # same dest for 'vid' and 'vid_' categories
-            f'python3 "D:/NM/src/ids.py" -start 1 -end 1 -path "../tests/{date_str_md(cat_vid)}/" --dump-tags -script "'
+            f'python3 "D:/NM/src/ids.py" -start 1 -end 1 -path "../tests/{date_str_md(cat_vid)}/" --disable-log-colors --dump-tags '
+            '-script "'
             'a: -quality 1080p -a -b -c -dfff ggg; '
             'b: -quality 1080p -a -b -c -dfff -ggg -(x,z) (h~i~j~k)"',
             queries_all[cat_vid_][DOWNLOADER_NM][0]
