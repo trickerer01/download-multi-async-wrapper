@@ -32,6 +32,7 @@ args_argparse_str1 = (
 
 args_argparse_str2 = (
     '--debug '
+    '--no-update '
     '-ignore dmode,2 '
     '-downloaders rv,rx,rn,rs '
     '-path ../tests '
@@ -67,8 +68,8 @@ class ArgParseTests(TestCase):
         parse_arglist(args_argparse_str1.split())
         self.assertEqual(
             'debug: False, downloaders: [\'nm\', \'rv\', \'rc\', \'rn\', \'rx\', \'rs\', \'rz\', \'rp\', \'en\'], '
-            'script: ../tests/queries.list, dest: ./, run: ./, logs: ./, bak: ./, update: False, no_download: False, ignored_args: [], '
-            'max_cmd_len: 16000',
+            'script: ../tests/queries.list, dest: ./, run: ./, logs: ./, bak: ./, update: False, '
+            'no_download: False, no_update: False, ignored_args: [], max_cmd_len: 16000',
             str(Config)
         )
         print(f'{self._testMethodName} passed')
@@ -77,9 +78,9 @@ class ArgParseTests(TestCase):
         set_up_test(True)
         parse_arglist(args_argparse_str2.split())
         self.assertEqual(
-            'debug: True, downloaders: [\'rv\', \'rn\', \'rx\', \'rs\'], script: ../tests/queries.list, dest: ../tests/, '
-            'run: ./, logs: ./, bak: ./, update: False, no_download: False, ignored_args: [dmode(2)], '
-            'max_cmd_len: 16000',
+            'debug: True, downloaders: [\'rv\', \'rn\', \'rx\', \'rs\'], '
+            'script: ../tests/queries.list, dest: ../tests/, run: ./, logs: ./, bak: ./, update: False, '
+            'no_download: False, no_update: True, ignored_args: [dmode(2)], max_cmd_len: 16000',
             str(Config)
         )
         print(f'{self._testMethodName} passed')
@@ -97,7 +98,8 @@ class QueriesFormTests(TestCase):
         self.assertEqual('0001', Config.title_increment_value)
         self.assertEqual(f'{Config.title}0001', Config.fulltitle)
         self.assertTrue(Config.datesub)
-        self.assertTrue(Config.update)
+        self.assertTrue(Config.no_update)
+        self.assertFalse(Config.update)
         self.assertEqual(Config.update_offsets, dict(nm=-100, rc=-100, rv=-800, rs=-300))
         self.assertEqual('../bak/', Config.dest_bak_base)
         self.assertEqual('../run/', Config.dest_run_base)
@@ -227,7 +229,7 @@ class RunTests(TestCase):
     def test_main1(self) -> None:
         set_up_test()
         main_sync(('-script', '"../tests/queries.list"',
-                   '--debug', '--no-download', '-downloaders', 'rx,nm,rn,rs'))
+                   '--debug', '--no-download', '--no-update', '-downloaders', 'rx,nm,rn,rs'))
         print(f'{self._testMethodName} passed')
 
     def test_main2(self) -> None:

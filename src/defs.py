@@ -167,6 +167,7 @@ class BaseConfig(object):
         # cmd
         self.debug = False
         self.no_download = False
+        self.no_update = False
         self.ignored_args: List[IgnoredArg] = list()
         self.downloaders: List[str] = list()
         self.script_path = ''
@@ -201,7 +202,7 @@ class BaseConfig(object):
         return (
             f'debug: {self.debug}, downloaders: {str(self.downloaders)}, script: {self.script_path}, dest: {self.dest_base}, '
             f'run: {self.dest_run_base}, logs: {self.dest_logs_base}, bak: {self.dest_bak_base}, update: {self.update}, '
-            f'no_download: {self.no_download}, ignored_args: {str(self.ignored_args)}, '
+            f'no_download: {self.no_download}, no_update: {self.no_update}, ignored_args: {str(self.ignored_args)}, '
             f'max_cmd_len: {self.max_cmd_len}'
         )
 
@@ -213,6 +214,7 @@ Config = BaseConfig()
 HELP_DEBUG = 'Run in debug mode (for development)'
 HELP_DOWNLOADERS = f'Enabled downloaders. Default is all: \'{",".join(DOWNLOADERS)}\''
 HELP_NO_DOWNLOAD = 'Boolean flag to skip actual download (do not launch downloaders)'
+HELP_NO_UPDATE = 'Boolean flag to skip script ids update regardless of script update flag being set or not'
 HELP_PATH = 'Path to the base destination folder where all the files / subfolders will be put'
 HELP_SCRIPT_PATH = 'Full path to the script (queries) file'
 HELP_RUN_PATH = 'Path to the folder where cmd run files will be put if needed'

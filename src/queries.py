@@ -221,7 +221,11 @@ def prepare_queries() -> None:
                 if re_update.fullmatch(line):
                     update_str = line[line.find(':') + 1:]
                     trace(f'Parsed update flag value: \'{update_str}\' ({str(BOOL_STRS.get(update_str))})')
-                    Config.update = BOOL_STRS[update_str]
+                    if Config.no_update:
+                        trace(f'UPDATE FLAG IS IGNORED DUE TO no_update FLAG')
+                        assert Config.update is False
+                    else:
+                        Config.update = BOOL_STRS[update_str]
                     continue
                 if re_python_exec.fullmatch(line):
                     python_str = line[line.find(':') + 1:]

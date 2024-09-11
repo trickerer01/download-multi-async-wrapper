@@ -12,7 +12,7 @@ from typing import List, Sequence
 
 from defs import (
     Config, IgnoredArg, DOWNLOADERS, ACTION_STORE_TRUE, ACTION_APPEND, HELP_DEBUG, HELP_DOWNLOADERS, HELP_PATH, HELP_SCRIPT_PATH,
-    HELP_NO_DOWNLOAD, HELP_IGNORE_ARGUMENT,
+    HELP_NO_DOWNLOAD, HELP_NO_UPDATE, HELP_IGNORE_ARGUMENT,
 )
 from logger import trace
 from strings import normalize_path, unquote
@@ -77,6 +77,7 @@ def parse_arglist(args: Sequence[str]) -> None:
     parser.add_argument('--help', action='help')
     parser.add_argument('--debug', action=ACTION_STORE_TRUE, help=HELP_DEBUG)
     parser.add_argument('--no-download', action=ACTION_STORE_TRUE, help=HELP_NO_DOWNLOAD)
+    parser.add_argument('--no-update', action=ACTION_STORE_TRUE, help=HELP_NO_UPDATE)
     parser.add_argument('-ignore', metavar='#ARG,LEN', default=[], action=ACTION_APPEND, help=HELP_IGNORE_ARGUMENT, type=IgnoredArg)
     parser.add_argument('-downloaders', metavar='#L,I,S,T', default=DOWNLOADERS, help=HELP_DOWNLOADERS, type=valid_downloaders_list)
     parser.add_argument('-script', metavar='#PATH_TO_FILE', required=True, help=HELP_SCRIPT_PATH, type=valid_file_path)
@@ -85,6 +86,7 @@ def parse_arglist(args: Sequence[str]) -> None:
     parsed = parser.parse_args(args)
     Config.debug = parsed.debug
     Config.no_download = parsed.no_download
+    Config.no_update = parsed.no_update
     Config.ignored_args = parsed.ignore
     Config.downloaders = parsed.downloaders
     Config.script_path = parsed.script
