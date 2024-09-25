@@ -20,7 +20,11 @@ from strings import NEWLINE, path_args
 __all__ = ('validate_runners', 'validate_sequences', 'form_queries', 'report_queries', 'report_unoptimized')
 
 
-def validate_runners(sequences_paths: DownloadCollection[str], sequences_paths_update: Dict[str, Optional[str]]) -> None:
+def validate_runners(
+    sequences_paths: DownloadCollection[str],
+    sequences_paths_reqs: Dict[str, Optional[str]],
+    sequences_paths_update: Dict[str, Optional[str]]
+) -> None:
     try:
         trace('Looking for python executable...')
         re_py_ver = re_compile(r'^[Pp]ython (\d)\.(\d{1,2})\.(\d+)$')
@@ -35,6 +39,22 @@ def validate_runners(sequences_paths: DownloadCollection[str], sequences_paths_u
         raise IOError
     if Config.test is True:
         return
+    checked_reqs: Set[str] = set()
+    if Config.install:
+        for dtr, rpath in sequences_paths_reqs.items():
+            if not rpath or dtr not in Config.downloaders:
+                continue
+            if rpath in checked_reqs:
+                trace(f'{dtr} requirements path is already checked!')
+                continue
+            checked_reqs.add(rpath)
+            try:
+                trace(f'Installing {dtr} requirements...')
+                trace(check_output((Config.python, '-m', 'pip', 'install', '-r', rpath), universal_newlines=True).strip())
+                trace(f'Done')
+            except Exception:
+                trace(f'Error: invalid {dtr} requirements path found: \'{rpath}\'!')
+                raise IOError
     checked_paths: Set[str] = set()
     if not Config.no_download:
         for cat in sequences_paths:

@@ -17,8 +17,8 @@ from typing import List, Dict, Optional, Tuple, Iterable
 from cmdargs import valid_dir_path, positive_int
 from defs import (
     DownloadCollection, Wrapper, IntSequence, Config, StrPair, UTF8, DOWNLOADERS, MIN_IDS_SEQ_LENGTH, PATH_APPEND_DOWNLOAD_IDS,
-    PATH_APPEND_DOWNLOAD_PAGES, PATH_APPEND_UPDATE, RUXX_DOWNLOADERS, PAGE_DOWNLOADERS, PROXY_ARG, MAX_CATEGORY_NAME_LENGTH, BOOL_STRS,
-    COLOR_LOG_DOWNLOADERS,
+    PATH_APPEND_DOWNLOAD_PAGES, PATH_APPEND_UPDATE, PATH_APPEND_REQUIREMENTS, RUXX_DOWNLOADERS, PAGE_DOWNLOADERS, PROXY_ARG,
+    MAX_CATEGORY_NAME_LENGTH, BOOL_STRS, COLOR_LOG_DOWNLOADERS,
 )
 from executor import register_queries
 from logger import trace, ensure_logfile
@@ -57,6 +57,7 @@ sequences_common: DownloadCollection[List[str]] = DownloadCollection()
 sequences_tags: DownloadCollection[List[List[str]]] = DownloadCollection()
 sequences_subfolders: DownloadCollection[List[str]] = DownloadCollection()
 
+sequences_paths_reqs: Dict[str, Optional[str]] = {dt: None for dt in DOWNLOADERS}
 sequences_paths_update: Dict[str, Optional[str]] = {dt: None for dt in DOWNLOADERS}
 proxies_update: Dict[str, Optional[StrPair]] = {dt: None for dt in DOWNLOADERS}
 maxid_fetched: Dict[str, int] = dict()
@@ -338,13 +339,17 @@ def prepare_queries() -> None:
                     basepath_n = normalize_path(basepath)
                     path_append = PATH_APPEND_DOWNLOAD_PAGES if sequences_pages.cur()[cdt] else PATH_APPEND_DOWNLOAD_IDS
                     path_downloader = f'{basepath_n}{path_append[cdt]}'
+                    path_requirements = f'{basepath_n}{PATH_APPEND_REQUIREMENTS}'
                     path_updater = f'{basepath_n}{PATH_APPEND_UPDATE[cdt]}'
                     if Config.test is False:
                         assert path.isdir(basepath)
                         assert path.isfile(path_downloader)
+                        if Config.install:
+                            assert path.isfile(path_requirements)
                         if Config.update:
                             assert path.isfile(path_updater)
                     sequences_paths.cur()[cur_dl()] = path_downloader
+                    sequences_paths_reqs[cur_dl()] = path_requirements
                     sequences_paths_update[cur_dl()] = normalize_path(path.abspath(path_updater), False)
                 elif re_common_arg.fullmatch(line):
                     common_args = line[line.find(':') + 1:].split(' ')
@@ -428,7 +433,7 @@ def prepare_queries() -> None:
     trace('Sequences parsed successfully\n')
     if autoupdate_seqs:
         trace('[Autoupdate] validating runners...\n')
-        validate_runners(sequences_paths, sequences_paths_update)
+        validate_runners(sequences_paths, sequences_paths_reqs, sequences_paths_update)
         trace('Running max ID autoupdates...\n')
         unsolved_idseqs = list()
         needed_updates = [dt for dt in DOWNLOADERS if any(dt in autoupdate_seqs[c] for c in autoupdate_seqs if autoupdate_seqs[c][dt])]
@@ -457,7 +462,7 @@ def prepare_queries() -> None:
     trace('Validating sequences...\n')
     validate_sequences(sequences_ids, sequences_pages, sequences_paths, sequences_tags, sequences_subfolders)
     if not autoupdate_seqs:
-        validate_runners(sequences_paths, sequences_paths_update)
+        validate_runners(sequences_paths, sequences_paths_reqs, sequences_paths_update)
 
     trace('Sequences validated. Finalizing...\n')
     queries_final = form_queries(sequences_ids, sequences_pages, sequences_paths, sequences_tags, sequences_subfolders, sequences_common)

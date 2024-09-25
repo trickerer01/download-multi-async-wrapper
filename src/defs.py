@@ -168,6 +168,7 @@ class BaseConfig(object):
         self.debug = False
         self.no_download = False
         self.no_update = False
+        self.install = False
         self.ignored_args: List[IgnoredArg] = list()
         self.downloaders: List[str] = list()
         self.script_path = ''
@@ -215,6 +216,7 @@ HELP_DEBUG = 'Run in debug mode (for development)'
 HELP_DOWNLOADERS = f'Enabled downloaders. Default is all: \'{",".join(DOWNLOADERS)}\''
 HELP_NO_DOWNLOAD = 'Boolean flag to skip actual download (do not launch downloaders)'
 HELP_NO_UPDATE = 'Boolean flag to skip script ids update regardless of script update flag being set or not'
+HELP_INSTALL = 'Force install dependencies from enabled downloaders to selected Python\'s environment'
 HELP_PATH = 'Path to the base destination folder where all the files / subfolders will be put'
 HELP_SCRIPT_PATH = 'Full path to the script (queries) file'
 HELP_RUN_PATH = 'Path to the folder where cmd run files will be put if needed'
@@ -232,6 +234,7 @@ PATH_APPEND_DOWNLOAD_NRVC_IDS = 'src/ids.py'
 PATH_APPEND_DOWNLOAD_NRVC_PAGES = 'src/pages.py'
 PATH_APPEND_UPDATE_RUXX = 'src/ruxx_cmd.py'
 PATH_APPEND_UPDATE_NRVC = 'src/pages.py'
+PATH_APPEND_REQUIREMENTS = 'requirements.txt'
 
 PATH_APPEND_DOWNLOAD_IDS = {
     DOWNLOADER_NM: PATH_APPEND_DOWNLOAD_NRVC_IDS,
