@@ -33,6 +33,9 @@ def run_main(args: Sequence[str]) -> int:
         execute()
         update_next_ids()
         trace(f'\n# Finished at {datetime_str_full()} #')
+    except (KeyboardInterrupt, SystemExit):
+        trace('Warning: catched KeyboardInterrupt/SystemExit...')
+        result = -4
     except Exception:
         import traceback
         traceback.print_exc()
