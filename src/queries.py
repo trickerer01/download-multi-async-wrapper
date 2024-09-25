@@ -10,7 +10,7 @@ import sys
 from json import loads
 from os import chmod, path, stat, listdir
 from re import compile as re_compile
-from subprocess import check_output
+from subprocess import CalledProcessError, check_output
 from threading import Thread, Lock as ThreadLock
 from typing import List, Dict, Optional, Tuple, Iterable
 
@@ -100,7 +100,7 @@ def fetch_maxids(dts: Iterable[str]) -> Dict[str, str]:
             return {}
         trace('Fetching max ids...')
         re_maxid_fetch_result = re_compile(r'^[A-Z]{2}: \d+$')
-        grab_threads = []
+        grab_threads = list()
         results: Dict[str, str] = {dt: '' for dt in dts if sequences_paths_update[dt] is not None}
         rlock = ThreadLock()
 
@@ -110,27 +110,39 @@ def fetch_maxids(dts: Iterable[str]) -> Dict[str, str]:
             if dtype in proxies_update and proxies_update[dtype]:
                 module_arguments += [proxies_update[dtype].first, proxies_update[dtype].second]
             arguments = [Config.python, update_file_path, '-get_maxid', '-timeout', '30'] + module_arguments
-            res = check_output(arguments.copy()).decode(errors='replace').strip()
+            try:
+                res = check_output(arguments.copy()).decode(errors='replace').strip()
+            except (KeyboardInterrupt, CalledProcessError):
+                res = 'ERROR'
             with rlock:
                 results[dtype] = res[res.rfind('\n') + 1:]
 
         for dt in results:
             grab_threads.append(Thread(target=get_max_id, args=(dt,)))
             grab_threads[-1].start()
-        for thread in grab_threads:
-            thread.join()
+        while grab_threads:
+            thread = grab_threads.pop(-1)
+            while thread.is_alive():
+                try:
+                    thread.join()
+                except KeyboardInterrupt:
+                    # Race condition may prevent thread from joining: https://bugs.python.org/issue45274
+                    if sys.version_info < (3, 11):
+                        for threadx in [thread, *grab_threads]:
+                            if threadx._tstate_lock.locked(): threadx._tstate_lock.release()  # noqa
+                            threadx._stop()  # noqa
         res_errors = list()
         for dt in results:
             try:
                 assert re_maxid_fetch_result.fullmatch(results[dt])
-            except Exception:
+            except AssertionError:
                 res_errors.append(f'Error in fetch \'{dt}\' max id result!')
                 continue
-        assert len(res_errors) == 0, '\n'.join(res_errors)
+        assert len(res_errors) == 0, '\n ' + '\n '.join(res_errors)
 
         trace(NEWLINE.join(results[dt] for dt in results))
         return results
-    except Exception:
+    except AssertionError:
         trace('\nError: failed to fetch next ids!\n')
         raise
 
@@ -222,7 +234,7 @@ def prepare_queries() -> None:
                     update_str = line[line.find(':') + 1:]
                     trace(f'Parsed update flag value: \'{update_str}\' ({str(BOOL_STRS.get(update_str))})')
                     if Config.no_update:
-                        trace(f'UPDATE FLAG IS IGNORED DUE TO no_update FLAG')
+                        trace('UPDATE FLAG IS IGNORED DUE TO no_update FLAG')
                         assert Config.update is False
                     else:
                         Config.update = BOOL_STRS[update_str]
