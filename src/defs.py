@@ -8,7 +8,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 
 from abc import ABC, abstractmethod
-from typing import List, Union, Tuple, Iterable, Type, TypeVar, Dict, Optional, Any, Generic
+from typing import List, Union, Tuple, Iterable, Type, TypeVar, Dict, Optional, Any, Generic, Set
 
 UTF8 = 'utf-8'
 ACTION_STORE_TRUE = 'store_true'
@@ -171,6 +171,7 @@ class BaseConfig(object):
         self.install = False
         self.ignored_args: List[IgnoredArg] = list()
         self.downloaders: List[str] = list()
+        self.categories: List[str] = list()
         self.script_path = ''
         # mixed
         self.dest_base = BaseConfig.DEFAULT_PATH
@@ -187,7 +188,7 @@ class BaseConfig(object):
         self.update_offsets: Dict[str, int] = dict()
         # calculated
         self.max_cmd_len = MAX_CMD_LEN[OS_WINDOWS] // 2  # MAX_CMD_LEN.get(running_system())
-        self.disabled_downloaders: Dict[str, List[str]] = dict()
+        self.disabled_downloaders: Dict[str, Set[str]] = dict()
         # internal
         self.test = test
         self.console_log = not (test and not console_log)
@@ -214,6 +215,7 @@ Config = BaseConfig()
 
 HELP_DEBUG = 'Run in debug mode (for development)'
 HELP_DOWNLOADERS = f'Enabled downloaders. Default is all: \'{",".join(DOWNLOADERS)}\''
+HELP_CATEGORIES = 'Enabled categories. Default is all'
 HELP_NO_DOWNLOAD = 'Boolean flag to skip actual download (do not launch downloaders)'
 HELP_NO_UPDATE = 'Boolean flag to skip script ids update regardless of script update flag being set or not'
 HELP_INSTALL = 'Force install dependencies from enabled downloaders to selected Python\'s environment'

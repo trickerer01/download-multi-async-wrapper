@@ -269,7 +269,7 @@ def prepare_queries() -> None:
                 cur_cat = cat_match.group(1)
                 if len(cur_cat) > MAX_CATEGORY_NAME_LENGTH:
                     cur_cat = cur_cat[:MAX_CATEGORY_NAME_LENGTH]
-                    trace(f'Category name \'{cat_match.group(1)}\' is too long ({len(cur_cat)})! Shrinked.')
+                    trace(f'Category name \'{cat_match.group(1)}\' is too long ({len(cat_match.group(1))} > {len(cur_cat)})! Shrinked.')
                 if cur_cat != cur_cat.strip():
                     trace(f'Category name \'{cur_cat}\' will become \'{cur_cat.strip()}\' after stripping!')
                 assert cur_cat not in sequences_paths, f'Category \'{cur_cat}\' already exists. Aborted!'
@@ -544,7 +544,9 @@ def update_next_ids() -> None:
 
 def at_startup() -> None:
     trace(
-        f'Python {sys.version}\nCommand-line args: {" ".join(sys.argv)}\nEnabled downloaders: {",".join(Config.downloaders)}'
+        f'Python {sys.version}\nCommand-line args: {" ".join(sys.argv)}'
+        f'\nEnabled downloaders: "{",".join(Config.downloaders) or "all"}"'
+        f'\nEnabled categories: "{",".join(Config.categories) or "all"}"'
         f'\nIgnored arguments: {",".join(str(ign) for ign in Config.ignored_args) or "[]"}'
     )
 

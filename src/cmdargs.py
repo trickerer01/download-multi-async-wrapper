@@ -11,8 +11,8 @@ from os import path
 from typing import List, Sequence
 
 from defs import (
-    Config, IgnoredArg, DOWNLOADERS, ACTION_STORE_TRUE, ACTION_APPEND, HELP_DEBUG, HELP_DOWNLOADERS, HELP_SCRIPT_PATH, HELP_NO_DOWNLOAD,
-    HELP_NO_UPDATE, HELP_INSTALL, HELP_IGNORE_ARGUMENT,
+    Config, IgnoredArg, DOWNLOADERS, ACTION_STORE_TRUE, ACTION_APPEND, HELP_DEBUG, HELP_DOWNLOADERS, HELP_CATEGORIES,
+    HELP_SCRIPT_PATH, HELP_NO_DOWNLOAD, HELP_NO_UPDATE, HELP_INSTALL, HELP_IGNORE_ARGUMENT,
 )
 from logger import trace
 from strings import normalize_path, unquote
@@ -72,6 +72,20 @@ def valid_downloaders_list(downloaders_str: str) -> List[str]:
         raise ArgumentError
 
 
+def valid_categories_list(categories_str: str) -> List[str]:
+    try:
+        listed_categories = list()
+        if len(categories_str) == 0:
+            return listed_categories
+        lctl = categories_str.split(',')
+        for d in lctl:
+            assert d not in listed_categories
+            listed_categories.append(d)
+        return listed_categories
+    except Exception:
+        raise ArgumentError
+
+
 def parse_arglist(args: Sequence[str]) -> None:
     parser = ArgumentParser(add_help=False)
     parser.add_argument('--help', action='help')
@@ -80,6 +94,7 @@ def parse_arglist(args: Sequence[str]) -> None:
     parser.add_argument('--no-update', action=ACTION_STORE_TRUE, help=HELP_NO_UPDATE)
     parser.add_argument('--install', action=ACTION_STORE_TRUE, help=HELP_INSTALL)
     parser.add_argument('-ignore', metavar='#ARG,LEN', default=[], action=ACTION_APPEND, help=HELP_IGNORE_ARGUMENT, type=IgnoredArg)
+    parser.add_argument('-categories', metavar='#L,I,S,T', default=[], help=HELP_CATEGORIES, type=valid_categories_list)
     parser.add_argument('-downloaders', metavar='#L,I,S,T', default=DOWNLOADERS, help=HELP_DOWNLOADERS, type=valid_downloaders_list)
     parser.add_argument('-script', metavar='#PATH_TO_FILE', required=True, help=HELP_SCRIPT_PATH, type=valid_file_path)
 
@@ -90,6 +105,7 @@ def parse_arglist(args: Sequence[str]) -> None:
     Config.install = parsed.install
     Config.ignored_args = parsed.ignore
     Config.downloaders = parsed.downloaders
+    Config.categories = parsed.categories
     Config.script_path = parsed.script
 
 #

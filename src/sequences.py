@@ -108,6 +108,13 @@ def validate_sequences(
     if not Config.python:
         trace('Error: python executable was not declared!')
         raise IOError
+    if Config.categories:
+        for cat in sequences_subfolders:
+            if cat not in Config.categories:
+                trace(f'Warning: category \'{cat}\' is not in enabled categories list! Will be skipped!')
+                if cat not in Config.disabled_downloaders:
+                    Config.disabled_downloaders[cat] = set()
+                [Config.disabled_downloaders[cat].add(dt) for dt in DOWNLOADERS]
     for dt in DOWNLOADERS:
         for cat in sequences_ids:
             intseq: Optional[IntSequence] = sequences_ids[cat][dt]
@@ -120,8 +127,8 @@ def validate_sequences(
                     else:
                         trace(f'{cat}:{dt} ids sequence forms zero-length range {ivlist[iv - 1]:d}-{ivlist[iv] - 1:d}! Will be skipped!')
                         if cat not in Config.disabled_downloaders:
-                            Config.disabled_downloaders[cat] = list()
-                        Config.disabled_downloaders[cat].append(dt)
+                            Config.disabled_downloaders[cat] = set()
+                        Config.disabled_downloaders[cat].add(dt)
         for cat in sequences_paths:
             if (not not sequences_paths[cat][dt]) != (not not (sequences_ids[cat][dt] or sequences_tags[cat][dt])):
                 trace(f'Error: sequence list existance for {cat}:{dt} tags/ids mismatch!')
