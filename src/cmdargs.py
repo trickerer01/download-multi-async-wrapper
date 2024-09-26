@@ -11,8 +11,8 @@ from os import path
 from typing import List, Sequence
 
 from defs import (
-    Config, IgnoredArg, DOWNLOADERS, ACTION_STORE_TRUE, ACTION_APPEND, HELP_DEBUG, HELP_DOWNLOADERS, HELP_CATEGORIES,
-    HELP_SCRIPT_PATH, HELP_NO_DOWNLOAD, HELP_NO_UPDATE, HELP_INSTALL, HELP_IGNORE_ARGUMENT,
+    Config, IgnoredArg, CatDwnIds, DOWNLOADERS, ACTION_STORE_TRUE, ACTION_APPEND, HELP_DEBUG, HELP_DOWNLOADERS, HELP_CATEGORIES,
+    HELP_SCRIPT_PATH, HELP_NO_DOWNLOAD, HELP_NO_UPDATE, HELP_INSTALL, HELP_IGNORE_ARGUMENT, HELP_IDLIST,
 )
 from logger import trace
 from strings import normalize_path, unquote
@@ -94,6 +94,7 @@ def parse_arglist(args: Sequence[str]) -> None:
     parser.add_argument('--no-update', action=ACTION_STORE_TRUE, help=HELP_NO_UPDATE)
     parser.add_argument('--install', action=ACTION_STORE_TRUE, help=HELP_INSTALL)
     parser.add_argument('-ignore', metavar='#ARG,LEN', default=[], action=ACTION_APPEND, help=HELP_IGNORE_ARGUMENT, type=IgnoredArg)
+    parser.add_argument('-idlist', metavar='#CAT,DWN,IDS', default=[], action=ACTION_APPEND, help=HELP_IDLIST, type=CatDwnIds)
     parser.add_argument('-categories', metavar='#L,I,S,T', default=[], help=HELP_CATEGORIES, type=valid_categories_list)
     parser.add_argument('-downloaders', metavar='#L,I,S,T', default=DOWNLOADERS, help=HELP_DOWNLOADERS, type=valid_downloaders_list)
     parser.add_argument('-script', metavar='#PATH_TO_FILE', required=True, help=HELP_SCRIPT_PATH, type=valid_file_path)
@@ -104,6 +105,7 @@ def parse_arglist(args: Sequence[str]) -> None:
     Config.no_update = parsed.no_update
     Config.install = parsed.install
     Config.ignored_args = parsed.ignore
+    Config.override_ids = parsed.idlist
     Config.downloaders = parsed.downloaders
     Config.categories = parsed.categories
     Config.script_path = parsed.script

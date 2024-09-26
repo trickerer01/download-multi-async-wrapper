@@ -64,7 +64,7 @@ class ArgParseTests(TestCase):
         self.assertEqual(
             'debug: False, downloaders: [\'nm\', \'rv\', \'rc\', \'rn\', \'rx\', \'rs\', \'rz\', \'rp\', \'en\'], '
             'script: ../tests/queries.list, dest: ./, run: ./, logs: ./, bak: ./, update: False, '
-            'no_download: False, no_update: False, ignored_args: [], max_cmd_len: 16000',
+            'no_download: False, no_update: False, ignored_args: [], id_overrides: [], max_cmd_len: 16000',
             str(Config)
         )
         print(f'{self._testMethodName} passed')
@@ -75,7 +75,7 @@ class ArgParseTests(TestCase):
         self.assertEqual(
             'debug: True, downloaders: [\'rv\', \'rn\', \'rx\', \'rs\'], '
             'script: ../tests/queries.list, dest: ./, run: ./, logs: ./, bak: ./, update: False, '
-            'no_download: False, no_update: True, ignored_args: [dmode(2)], max_cmd_len: 16000',
+            'no_download: False, no_update: True, ignored_args: [dmode(2)], id_overrides: [], max_cmd_len: 16000',
             str(Config)
         )
         print(f'{self._testMethodName} passed')

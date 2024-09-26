@@ -311,6 +311,11 @@ def prepare_queries() -> None:
                     cdt = cur_dl()
                     cat = cur_category()
                     idseq = IntSequence([int(num) for num in line.split(' ')[1:]], i + 1)
+                    for ids_override in Config.override_ids:
+                        if ids_override.name == f'{cat}:{cdt}':
+                            idseq_temp = IntSequence(ids_override.ids, i + 1)
+                            trace(f'Using \'{cat}:{cdt}\' ids override: {str(idseq)} -> {str(idseq_temp)}')
+                            idseq = idseq_temp
                     if sequences_pages.cur()[cdt]:
                         assert len(idseq) <= 2, f'{cdt} has pages but defines ids range of {len(idseq)} > 2!\n\tat line {i + 1}: {line}'
                     sequences_ids.cur()[cdt] = idseq
@@ -548,6 +553,7 @@ def at_startup() -> None:
         f'\nEnabled downloaders: "{",".join(Config.downloaders) or "all"}"'
         f'\nEnabled categories: "{",".join(Config.categories) or "all"}"'
         f'\nIgnored arguments: {",".join(str(ign) for ign in Config.ignored_args) or "[]"}'
+        f'\nIds overrides: {",".join(str(ove) for ove in Config.override_ids) or "[]"}'
     )
 
 #

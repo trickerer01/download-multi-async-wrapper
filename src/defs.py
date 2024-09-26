@@ -124,6 +124,36 @@ class IgnoredArg:
     __repr__ = __str__
 
 
+class CatDwnIds:
+    def __init__(self, cat_dwn_ids_fmt: str) -> None:
+        try:
+            cat, dt, ids = tuple(cat_dwn_ids_fmt.split(',', 2))
+            idlist = ids.split(' ')
+            assert cat and dt and idlist
+            assert all(int(_) for _ in idlist)
+            self._name = f'{cat}:{dt}'
+            self._idlist = idlist
+        except Exception:
+            raise ValueError(f'Invalid ids override format: \'{cat_dwn_ids_fmt}\'')
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def ids(self) -> List[int]:
+        return [int(_) for _ in self._idlist]
+
+    @property
+    def len(self) -> int:
+        return len(self._idlist)
+
+    def __str__(self) -> str:
+        return f'\'{self._name}\': \'{" ".join(self._idlist)}\' ({self.len:d})'
+
+    __repr__ = __str__
+
+
 DOWNLOADER_NM = 'nm'
 DOWNLOADER_RV = 'rv'
 DOWNLOADER_RC = 'rc'
@@ -170,12 +200,12 @@ class BaseConfig(object):
         self.no_update = False
         self.install = False
         self.ignored_args: List[IgnoredArg] = list()
+        self.override_ids: List[CatDwnIds] = list()
         self.downloaders: List[str] = list()
         self.categories: List[str] = list()
         self.script_path = ''
-        # mixed
-        self.dest_base = BaseConfig.DEFAULT_PATH
         # script
+        self.dest_base = BaseConfig.DEFAULT_PATH
         self.dest_run_base = BaseConfig.DEFAULT_PATH
         self.dest_logs_base = BaseConfig.DEFAULT_PATH
         self.dest_bak_base = BaseConfig.DEFAULT_PATH
@@ -205,7 +235,7 @@ class BaseConfig(object):
             f'debug: {self.debug}, downloaders: {str(self.downloaders)}, script: {self.script_path}, dest: {self.dest_base}, '
             f'run: {self.dest_run_base}, logs: {self.dest_logs_base}, bak: {self.dest_bak_base}, update: {self.update}, '
             f'no_download: {self.no_download}, no_update: {self.no_update}, ignored_args: {str(self.ignored_args)}, '
-            f'max_cmd_len: {self.max_cmd_len}'
+            f'id_overrides: {str(self.override_ids)}, max_cmd_len: {self.max_cmd_len}'
         )
 
     __repr__ = __str__
@@ -224,6 +254,11 @@ HELP_IGNORE_ARGUMENT = (
     'Script one-line cmd argument to ignore, format: \'<NAME>,<COUNT>\''
     ' where <NAME> is argument name (dash prefix must be omitted) and <COUNT> is a number of arguments to skip (1 or 2).'
     ' Skips the entire line! Can be used multiple times'
+)
+HELP_IDLIST = (
+    'Override id range script parameter for a given \'catergory:downloader\' combination.'
+    ' Example: \'vid,rx,50000 51000\' forces RX downloader to use 50000-51000 as ids range when processing \'vid\' category.'
+    ' Can be used multiple times'
 )
 
 PATH_APPEND_DOWNLOAD_RUXX = 'src/ruxx_cmd.py'
