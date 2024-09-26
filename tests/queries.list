@@ -1,5 +1,6 @@
 ### TITLE:script_0
 ### TITLEINCREMENT:4
+### DESTPATH:../tests
 ### BAKPATH:../bak
 ### RUNPATH:../run
 ### LOGPATH:../logs

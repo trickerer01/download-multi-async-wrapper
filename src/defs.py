@@ -217,12 +217,7 @@ HELP_DOWNLOADERS = f'Enabled downloaders. Default is all: \'{",".join(DOWNLOADER
 HELP_NO_DOWNLOAD = 'Boolean flag to skip actual download (do not launch downloaders)'
 HELP_NO_UPDATE = 'Boolean flag to skip script ids update regardless of script update flag being set or not'
 HELP_INSTALL = 'Force install dependencies from enabled downloaders to selected Python\'s environment'
-HELP_PATH = 'Path to the base destination folder where all the files / subfolders will be put'
 HELP_SCRIPT_PATH = 'Full path to the script (queries) file'
-HELP_RUN_PATH = 'Path to the folder where cmd run files will be put if needed'
-HELP_LOGS_PATH = 'Path to the folder where logs will be stored'
-HELP_BAK_PATH = 'Path to the folder where script backup will be put before updating'
-HELP_UPDATE = 'Boolean flag to update script file with current max ids fetched from the websites'
 HELP_IGNORE_ARGUMENT = (
     'Script one-line cmd argument to ignore, format: \'<NAME>,<COUNT>\''
     ' where <NAME> is argument name (dash prefix must be omitted) and <COUNT> is a number of arguments to skip (1 or 2).'

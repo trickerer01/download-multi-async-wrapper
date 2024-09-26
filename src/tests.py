@@ -35,16 +35,11 @@ args_argparse_str2 = (
     '--no-update '
     '-ignore dmode,2 '
     '-downloaders rv,rx,rn,rs '
-    '-path ../tests '
     '-script "../tests/queries.list"'
 )
 
 args_argparse_str3 = (
     '-script ../tests/queries2.list'
-)
-
-args_argparse_str4 = (
-    args_argparse_str3 + ' -path C:/'
 )
 
 
@@ -79,7 +74,7 @@ class ArgParseTests(TestCase):
         parse_arglist(args_argparse_str2.split())
         self.assertEqual(
             'debug: True, downloaders: [\'rv\', \'rn\', \'rx\', \'rs\'], '
-            'script: ../tests/queries.list, dest: ../tests/, run: ./, logs: ./, bak: ./, update: False, '
+            'script: ../tests/queries.list, dest: ./, run: ./, logs: ./, bak: ./, update: False, '
             'no_download: False, no_update: True, ignored_args: [dmode(2)], max_cmd_len: 16000',
             str(Config)
         )
@@ -101,6 +96,7 @@ class QueriesFormTests(TestCase):
         self.assertTrue(Config.no_update)
         self.assertFalse(Config.update)
         self.assertEqual(Config.update_offsets, dict(nm=-100, rc=-100, rv=-800, rs=-300))
+        self.assertEqual('../tests/', Config.dest_base)
         self.assertEqual('../bak/', Config.dest_bak_base)
         self.assertEqual('../run/', Config.dest_run_base)
         self.assertEqual('../logs/', Config.dest_logs_base)
@@ -215,13 +211,6 @@ class QueriesFormTests(TestCase):
         self.assertEqual('C:/', Config.dest_bak_base)
         self.assertEqual('C:/', Config.dest_run_base)
         self.assertEqual('C:/', Config.dest_logs_base)
-        print(f'{self._testMethodName} passed')
-
-    def test_queries3(self) -> None:
-        set_up_test()
-        parse_arglist(args_argparse_str4.split())
-        read_queries_file()
-        self.assertRaises(AssertionError, prepare_queries)
         print(f'{self._testMethodName} passed')
 
 
