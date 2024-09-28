@@ -46,7 +46,7 @@ def run_main(args: Sequence[str]) -> int:
 
 
 def main_sync(args: Sequence[str]) -> int:
-    assert sys.version_info >= (3, 7), 'Minimum python version required is 3.7!'
+    assert sys.version_info >= (3, 9), 'Minimum python version required is 3.9!'
     assert running_system() in SUPPORTED_SYSTEMS, f'Unsupported system \'{running_system()}\''
     return run_main(args)
 
