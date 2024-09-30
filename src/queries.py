@@ -6,13 +6,14 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
+from __future__ import annotations
 import sys
+from collections.abc import Iterable
 from json import loads
 from os import chmod, path, stat, listdir
 from re import compile as re_compile
 from subprocess import CalledProcessError, check_output
 from threading import Thread, Lock as ThreadLock
-from typing import List, Dict, Optional, Tuple, Iterable
 
 from cmdargs import valid_dir_path, positive_int
 from defs import (
@@ -48,19 +49,19 @@ re_sub_begin = re_compile(r'^# sub:[^ ].*?$')
 re_sub_end = re_compile(r'^# send$')
 re_downloader_finalize = re_compile(r'^# end$')
 
-queries_file_lines: Wrapper[List[str]] = Wrapper()
+queries_file_lines: Wrapper[list[str]] = Wrapper()
 
 sequences_ids: DownloadCollection[IntSequence] = DownloadCollection()
 sequences_pages: DownloadCollection[IntSequence] = DownloadCollection()
 sequences_paths: DownloadCollection[str] = DownloadCollection()
-sequences_common: DownloadCollection[List[str]] = DownloadCollection()
-sequences_tags: DownloadCollection[List[List[str]]] = DownloadCollection()
-sequences_subfolders: DownloadCollection[List[str]] = DownloadCollection()
+sequences_common: DownloadCollection[list[str]] = DownloadCollection()
+sequences_tags: DownloadCollection[list[list[str]]] = DownloadCollection()
+sequences_subfolders: DownloadCollection[list[str]] = DownloadCollection()
 
-sequences_paths_reqs: Dict[str, Optional[str]] = {dt: None for dt in DOWNLOADERS}
-sequences_paths_update: Dict[str, Optional[str]] = {dt: None for dt in DOWNLOADERS}
-proxies_update: Dict[str, Optional[StrPair]] = {dt: None for dt in DOWNLOADERS}
-maxid_fetched: Dict[str, int] = dict()
+sequences_paths_reqs: dict[str, str | None] = {dt: None for dt in DOWNLOADERS}
+sequences_paths_update: dict[str, str | None] = {dt: None for dt in DOWNLOADERS}
+proxies_update: dict[str, StrPair | None] = {dt: None for dt in DOWNLOADERS}
+maxid_fetched: dict[str, int] = dict()
 
 
 def ensure_logfile_wrapper() -> None:
@@ -77,7 +78,7 @@ def ensure_logfile_wrapper() -> None:
 def calculate_title_suffix() -> None:
     trace('Calculating title suffix...')
     lbdir = Config.dest_logs_base
-    logsdir_all: List[str] = listdir(lbdir) if path.isdir(lbdir) else []
+    logsdir_all: list[str] = listdir(lbdir) if path.isdir(lbdir) else []
     logsdir_files = list(filter(
         lambda x: x.startswith((f'log_{Config.title}', f'run_{Config.title}')) and path.isfile(f'{lbdir}{x}'), logsdir_all
     ))
@@ -95,19 +96,19 @@ def calculate_title_suffix() -> None:
     trace(f'Suffix calculated: \'{Config.title_increment_value}\'. Full title: \'{Config.fulltitle}\'')
 
 
-def fetch_maxids(dts: Iterable[str]) -> Dict[str, str]:
+def fetch_maxids(dts: Iterable[str]) -> dict[str, str]:
     try:
         if not dts:
             return {}
         trace('Fetching max ids...')
         re_maxid_fetch_result = re_compile(r'^[A-Z]{2}: \d+$')
         grab_threads = list()
-        results: Dict[str, str] = {dt: '' for dt in dts if sequences_paths_update[dt] is not None}
+        results: dict[str, str] = {dt: '' for dt in dts if sequences_paths_update[dt] is not None}
         rlock = ThreadLock()
 
         def get_max_id(dtype: str) -> None:
             update_file_path = sequences_paths_update[dtype]
-            module_arguments: List[str] = ['-module', dtype] if dtype in RUXX_DOWNLOADERS else list()
+            module_arguments: list[str] = ['-module', dtype] if dtype in RUXX_DOWNLOADERS else list()
             if dtype in proxies_update and proxies_update[dtype]:
                 module_arguments += [proxies_update[dtype].first, proxies_update[dtype].second]
             arguments = [Config.python, update_file_path, '-get_maxid', '-timeout', '30'] + module_arguments
@@ -446,7 +447,7 @@ def prepare_queries() -> None:
         for dt in needed_updates:
             maxid = int(maxids[dt][4:])
             for cat in autoupdate_seqs:
-                uidseq: Optional[IntSequence] = autoupdate_seqs[cat][dt]
+                uidseq: IntSequence | None = autoupdate_seqs[cat][dt]
                 if uidseq:
                     update_str_base = f'{cat}:{dt} id sequence extended from {str(uidseq.ints)} to '
                     if len(uidseq) == 1 and uidseq[0] < 0:
@@ -517,7 +518,7 @@ def update_next_ids() -> None:
                 trace('Warning: permissions not updated, manual fix required')
 
             trace(f'\nWriting updated queries to \'{queries_file_name}\'...')
-            maxids: Dict[str, int] = {dt: int(results[dt][4:]) for dt in results}
+            maxids: dict[str, int] = {dt: int(results[dt][4:]) for dt in results}
             maxids.update(maxid_fetched)
             for dt in Config.update_offsets:
                 uoffset = Config.update_offsets[dt]
@@ -528,7 +529,7 @@ def update_next_ids() -> None:
                     trace(f'Warning: {dt.upper()} autoupdate offset ({uoffset:d}) was provided but its max id is not being updated')
             for cat in sequences_ids:
                 i: int
-                dtseq: Tuple[str, Optional[IntSequence]]
+                dtseq: tuple[str, IntSequence | None]
                 for i, dtseq in enumerate(sequences_ids[cat].items()):
                     dt, seq = dtseq
                     line_n = (seq.line_num - 1) if seq and dt in maxids else None

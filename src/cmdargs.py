@@ -7,8 +7,8 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 
 from argparse import ArgumentParser, ArgumentError
+from collections.abc import Sequence
 from os import path
-from typing import List, Sequence
 
 from defs import (
     Config, IgnoredArg, CatDwnIds, DOWNLOADERS, ACTION_STORE_TRUE, ACTION_APPEND, HELP_DEBUG, HELP_DOWNLOADERS, HELP_CATEGORIES,
@@ -52,7 +52,7 @@ def positive_int(val: str) -> int:
     return valid_int(val, lb=0)
 
 
-def valid_downloaders_list(downloaders_str: str) -> List[str]:
+def valid_downloaders_list(downloaders_str: str) -> list[str]:
     try:
         if len(downloaders_str) == 0:
             trace('Downloaders list can\'t be empty, use --no-download instead!')
@@ -72,7 +72,7 @@ def valid_downloaders_list(downloaders_str: str) -> List[str]:
         raise ArgumentError
 
 
-def valid_categories_list(categories_str: str) -> List[str]:
+def valid_categories_list(categories_str: str) -> list[str]:
     try:
         listed_categories = list()
         if len(categories_str) == 0:

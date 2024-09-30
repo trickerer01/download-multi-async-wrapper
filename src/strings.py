@@ -7,8 +7,8 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 # PROJECT-LEVEL IMPORTS ARE RESTRICTED
 #
 
+from collections.abc import Iterable
 from datetime import datetime
-from typing import Iterable
 
 SLASH = '/'
 NEWLINE = '\n'

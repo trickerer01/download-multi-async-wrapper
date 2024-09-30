@@ -6,10 +6,11 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
+from __future__ import annotations
 from asyncio import AbstractEventLoop, Future, SubprocessProtocol, new_event_loop, sleep, as_completed
+from collections.abc import Iterable, Sequence
 from math import log10, ceil
 from os import path, environ
-from typing import Dict, List, Optional, Sequence, Iterable, Any
 
 from defs import DownloadCollection, Wrapper, Config, UTF8, DOWNLOADERS, RUN_FILE_DOWNLOADERS
 from logger import trace, log_to
@@ -26,25 +27,25 @@ class DummyResultProtocol(SubprocessProtocol):
         self.future.set_result(True)
 
 
-executor_event_loop: Wrapper[Optional[AbstractEventLoop]] = Wrapper()
+executor_event_loop: Wrapper[AbstractEventLoop | None] = Wrapper()
 
-queries_all: DownloadCollection[List[str]] = DownloadCollection()
+queries_all: DownloadCollection[list[str]] = DownloadCollection()
 dtqn_fmt = Wrapper('02d')
 
 
-def sum_lists(lists: Iterable[Iterable[Any]]) -> list:
+def sum_lists(lists: Iterable[Iterable]) -> list:
     total = list()
     [total.extend(li) for li in lists]
     return total
 
 
-def register_queries(queries: DownloadCollection[List[str]]) -> None:
+def register_queries(queries: DownloadCollection[list[str]]) -> None:
     queries_all.update(queries)
     max_queries_per_downloader = max(sum(len(queries[cat][dt]) for cat in queries) for dt in DOWNLOADERS)
     dtqn_fmt.reset(f'0{int(ceil(log10(max_queries_per_downloader + 1))):d}d')
 
 
-def split_into_args(query: str) -> List[str]:
+def split_into_args(query: str) -> list[str]:
     r"""'a "b c" d "e" f g "{\\"h\\":\\"j\\",\\"k\\":\\"l\\"}"' -> ['a', 'b c', 'd', 'e', 'f', 'g', '{"h":"j","k":"l"}]"""
     def append_result(res_str: str) -> None:
         res_str = unquote(res_str.replace('\\"', '\u2033')).replace('\u2033', '"')
@@ -115,7 +116,7 @@ async def run_dt_cmds(dt: str, qts: Sequence[str], queries: Sequence[str]) -> No
     dt_qt_num = len(list(filter(None, [not not queries_all[dcat][dt] for dcat in queries_all])))
 
     qt_skips = set()
-    qns: Dict[str, int] = {qt: 0 for qt in qts}
+    qns: dict[str, int] = {qt: 0 for qt in qts}
     for qi, qt in enumerate(qts):
         qns[qt] += 1
         if Config.test:

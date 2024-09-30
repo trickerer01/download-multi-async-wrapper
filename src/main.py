@@ -7,8 +7,8 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 
 import sys
+from collections.abc import Sequence
 from platform import system as running_system
-from typing import Sequence
 
 from cmdargs import parse_arglist
 from defs import SUPPORTED_SYSTEMS

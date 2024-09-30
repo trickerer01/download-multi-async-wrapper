@@ -7,8 +7,9 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 # PROJECT-LEVEL IMPORTS ARE RESTRICTED
 #
 
+from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import List, Union, Tuple, Iterable, Type, TypeVar, Dict, Optional, Any, Generic, Set
+from typing import Iterable, Type, TypeVar, Dict, Optional, Any, Generic
 
 UTF8 = 'utf-8'
 ACTION_STORE_TRUE = 'store_true'
@@ -33,7 +34,7 @@ MAX_CMD_LEN = {
     OS_MACOS: 65000,
 }
 
-BOOL_STRS: Dict[str, bool] = ({y: v for y, v in zip(
+BOOL_STRS: dict[str, bool] = ({y: v for y, v in zip(
     ('YES', 'Yes', 'yes', 'TRUE', 'True', 'true', '1', 'Y', 'y', 'NO', 'No', 'no', 'FALSE', 'False', 'false', '0', 'N', 'n'),
     (True,) * 9 + (False,) * 9
 )})
@@ -59,10 +60,10 @@ class IntSequence:
     def __len__(self) -> int:
         return len(self.ints)
 
-    def __getitem__(self, item: Union[int, slice]) -> Union[int, List[int]]:
+    def __getitem__(self, item: int | slice) -> int | list[int]:
         return self.ints.__getitem__(item)
 
-    def __setitem__(self, key: Union[int, slice], value: Union[int, Iterable[int]]) -> None:
+    def __setitem__(self, key: int | slice, value: int | Iterable[int]) -> None:
         self.ints.__setitem__(key, value)
 
     __repr__ = __str__
@@ -72,7 +73,7 @@ class Pair(ABC):
     PT = TypeVar('PT')
 
     @abstractmethod
-    def __init__(self, vals: Tuple[PT, PT]) -> None:
+    def __init__(self, vals: tuple[PT, PT]) -> None:
         self._first, self._second = vals
         self._fmt = {int: 'd', bool: 'd', float: '.2f'}.get(type(self._first), '')
 
@@ -91,12 +92,12 @@ class Pair(ABC):
 
 
 class IntPair(Pair):
-    def __init__(self, vals: Tuple[int, int]) -> None:
+    def __init__(self, vals: tuple[int, int]) -> None:
         super().__init__(vals)
 
 
 class StrPair(Pair):
-    def __init__(self, vals: Tuple[str, str]) -> None:
+    def __init__(self, vals: tuple[str, str]) -> None:
         super().__init__(vals)
 
 
@@ -141,7 +142,7 @@ class CatDwnIds:
         return self._name
 
     @property
-    def ids(self) -> List[int]:
+    def ids(self) -> list[int]:
         return [int(_) for _ in self._idlist]
 
     @property
@@ -199,10 +200,10 @@ class BaseConfig(object):
         self.no_download = False
         self.no_update = False
         self.install = False
-        self.ignored_args: List[IgnoredArg] = list()
-        self.override_ids: List[CatDwnIds] = list()
-        self.downloaders: List[str] = list()
-        self.categories: List[str] = list()
+        self.ignored_args: list[IgnoredArg] = list()
+        self.override_ids: list[CatDwnIds] = list()
+        self.downloaders: list[str] = list()
+        self.categories: list[str] = list()
         self.script_path = ''
         # script
         self.dest_base = BaseConfig.DEFAULT_PATH
@@ -215,10 +216,10 @@ class BaseConfig(object):
         self.python = ''
         self.datesub = True
         self.update = False
-        self.update_offsets: Dict[str, int] = dict()
+        self.update_offsets: dict[str, int] = dict()
         # calculated
         self.max_cmd_len = MAX_CMD_LEN[OS_WINDOWS] // 2  # MAX_CMD_LEN.get(running_system())
-        self.disabled_downloaders: Dict[str, Set[str]] = dict()
+        self.disabled_downloaders: dict[str, set[str]] = dict()
         # internal
         self.test = test
         self.console_log = not (test and not console_log)
@@ -341,7 +342,7 @@ for _ in DT.__constraints__:
     assert hasattr(_, '__len__') and callable(getattr(_, '__len__')), f'DT class \'{_.__name__}\' doesn\'t have len() method!'
 
 
-class DownloadCollection(Dict[str, Dict[str, Optional[DT]]]):
+class DownloadCollection(Dict[str, dict[str, Optional[DT]]]):
     """
     DownloadCollection is a dict which stores data of type **DT** per download module per download category
     """
@@ -351,7 +352,7 @@ class DownloadCollection(Dict[str, Dict[str, Optional[DT]]]):
     def add_category(self, cat: str, init_type: Type[DT] = None, *args, **kwargs) -> None:
         self[cat] = {dt: self._make_init_value(init_type, *args, **kwargs) for dt in DOWNLOADERS}
 
-    def cur(self) -> Dict[str, Optional[DT]]:
+    def cur(self) -> dict[str, DT | None]:
         return list(self.values())[-1]
 
     def cur_key(self) -> str:

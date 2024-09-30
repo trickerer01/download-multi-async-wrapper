@@ -6,16 +6,17 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
+from __future__ import annotations
 from locale import getpreferredencoding
-from typing import TextIO, Optional, List
+from typing import TextIO
 
 from defs import Wrapper, Config, UTF8
 from strings import NEWLINE, datetime_str_nfull, timestamped_string
 
 __all__ = ('ensure_logfile', 'close_logfile', 'log_to', 'trace')
 
-logfile: Wrapper[Optional[TextIO]] = Wrapper()
-buffered_strings: List[str] = list()
+logfile: Wrapper[TextIO | None] = Wrapper()
+buffered_strings: list[str] = list()
 
 
 def open_logfile() -> None:
