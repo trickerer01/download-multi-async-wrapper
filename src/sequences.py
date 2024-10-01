@@ -109,6 +109,7 @@ def validate_sequences(
     if not Config.python:
         trace('Error: python executable was not declared!')
         raise IOError
+    cat: str
     if Config.categories:
         for cat in sequences_subfolders:
             if cat not in Config.categories:

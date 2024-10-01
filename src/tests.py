@@ -91,7 +91,7 @@ class QueriesFormTests(TestCase):
         self.assertEqual('script_0', Config.title)
         self.assertEqual(4, Config.title_increment)
         self.assertEqual('0001', Config.title_increment_value)
-        self.assertEqual(f'{Config.title}0001', Config.fulltitle)
+        self.assertEqual(f'{Config.title}0001', Config.full_title)
         self.assertTrue(Config.datesub)
         self.assertTrue(Config.no_update)
         self.assertFalse(Config.update)

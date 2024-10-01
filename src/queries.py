@@ -93,7 +93,7 @@ def calculate_title_suffix() -> None:
                 max_suffix_len = max(max_suffix_len, len(suffix_val))
                 max_suffix_val = max(max_suffix_val, int(suffix_val))
     Config.title_increment_value = f'{max_suffix_val + 1:0{max_suffix_len:d}d}'
-    trace(f'Suffix calculated: \'{Config.title_increment_value}\'. Full title: \'{Config.fulltitle}\'')
+    trace(f'Suffix calculated: \'{Config.title_increment_value}\'. Full title: \'{Config.full_title}\'')
 
 
 def fetch_maxids(dts: Iterable[str]) -> dict[str, str]:

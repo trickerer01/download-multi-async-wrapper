@@ -20,7 +20,7 @@ buffered_strings: list[str] = list()
 
 
 def open_logfile() -> None:
-    title_part = f'{Config.fulltitle}_' if Config.title else ''
+    title_part = f'{Config.full_title}_' if Config.title else ''
     log_basename = f'log_{title_part}{datetime_str_nfull()}.log' if not Config.debug else 'log.log'
     logfile.reset(open(f'{Config.dest_logs_base}{log_basename}', 'at', encoding=UTF8, errors='replace', buffering=1))
     if buffered_strings:

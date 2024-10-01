@@ -41,7 +41,7 @@ BOOL_STRS: dict[str, bool] = ({y: v for y, v in zip(
 
 
 def unused_argument(arg: Any) -> None:
-    bool(arg)
+    _ = arg
 
 
 def assert_notnull(obj: Any) -> Any:
@@ -196,39 +196,39 @@ class BaseConfig(object):
     def __init__(self, *, test=False, console_log=False) -> None:
         # arguments
         # cmd
-        self.debug = False
-        self.no_download = False
-        self.no_update = False
-        self.install = False
+        self.debug: bool = False
+        self.no_download: bool = False
+        self.no_update: bool = False
+        self.install: bool = False
         self.ignored_args: list[IgnoredArg] = list()
         self.override_ids: list[CatDwnIds] = list()
         self.downloaders: list[str] = list()
         self.categories: list[str] = list()
-        self.script_path = ''
+        self.script_path: str = ''
         # script
-        self.dest_base = BaseConfig.DEFAULT_PATH
-        self.dest_run_base = BaseConfig.DEFAULT_PATH
-        self.dest_logs_base = BaseConfig.DEFAULT_PATH
-        self.dest_bak_base = BaseConfig.DEFAULT_PATH
-        self.title = ''
-        self.title_increment = 0
-        self.title_increment_value = ''
-        self.python = ''
-        self.datesub = True
-        self.update = False
+        self.dest_base: str = BaseConfig.DEFAULT_PATH
+        self.dest_run_base: str = BaseConfig.DEFAULT_PATH
+        self.dest_logs_base: str = BaseConfig.DEFAULT_PATH
+        self.dest_bak_base: str = BaseConfig.DEFAULT_PATH
+        self.title: str = ''
+        self.title_increment: int = 0
+        self.python: str = ''
+        self.datesub: bool = True
+        self.update: bool = False
         self.update_offsets: dict[str, int] = dict()
         # calculated
-        self.max_cmd_len = MAX_CMD_LEN[OS_WINDOWS] // 2  # MAX_CMD_LEN.get(running_system())
+        self.title_increment_value: str = ''
+        self.max_cmd_len: int = MAX_CMD_LEN[OS_WINDOWS] // 2  # MAX_CMD_LEN.get(running_system())
         self.disabled_downloaders: dict[str, set[str]] = dict()
         # internal
-        self.test = test
-        self.console_log = not (test and not console_log)
+        self.test: bool = test
+        self.console_log: bool = not (test and not console_log)
 
     def _reset(self) -> None:
         self.__init__(test=self.test, console_log=self.console_log)
 
     @property
-    def fulltitle(self) -> str:
+    def full_title(self) -> str:
         return f'{self.title}{self.title_increment_value}'
 
     def __str__(self) -> str:
@@ -242,7 +242,7 @@ class BaseConfig(object):
     __repr__ = __str__
 
 
-Config = BaseConfig()
+Config: BaseConfig = BaseConfig()
 
 HELP_DEBUG = 'Run in debug mode (for development)'
 HELP_DOWNLOADERS = f'Enabled downloaders. Default is all: \'{",".join(DOWNLOADERS)}\''
@@ -342,7 +342,7 @@ for _ in DT.__constraints__:
     assert hasattr(_, '__len__') and callable(getattr(_, '__len__')), f'DT class \'{_.__name__}\' doesn\'t have len() method!'
 
 
-class DownloadCollection(Dict[str, dict[str, Optional[DT]]]):
+class DownloadCollection(Dict[str, Dict[str, Optional[DT]]]):
     """
     DownloadCollection is a dict which stores data of type **DT** per download module per download category
     """
@@ -353,10 +353,10 @@ class DownloadCollection(Dict[str, dict[str, Optional[DT]]]):
         self[cat] = {dt: self._make_init_value(init_type, *args, **kwargs) for dt in DOWNLOADERS}
 
     def cur(self) -> dict[str, DT | None]:
-        return list(self.values())[-1]
+        return next(reversed(self.values()))
 
     def cur_key(self) -> str:
-        return list(self.keys())[-1]
+        return next(reversed(self.keys()))
 
     @staticmethod
     def _make_init_value(init_type: Type[DT], *args, **kwargs) -> DT:
