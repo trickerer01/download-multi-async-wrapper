@@ -8,7 +8,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 
 from __future__ import annotations
 from asyncio import AbstractEventLoop, Future, SubprocessProtocol, new_event_loop, sleep, as_completed
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable
 from math import log10, ceil
 from os import path, environ
 
@@ -33,7 +33,7 @@ queries_all: DownloadCollection[list[str]] = DownloadCollection()
 dtqn_fmt = Wrapper('02d')
 
 
-def sum_lists(lists: Iterable[Iterable]) -> list:
+def sum_lists(lists: Iterable[Iterable[str]]) -> list[str]:
     total = list()
     [total.extend(li) for li in lists]
     return total
@@ -73,10 +73,10 @@ def split_into_args(query: str) -> list[str]:
     return result
 
 
-async def run_cmd(query: str, dt: str, qn: int, qt: str, qtn: int) -> None:
+async def run_cmd(query: str, dt: str, qn: int, qm: int, qt: str, qtn: int, qtm: int) -> None:
     exec_time = datetime_str_nfull()
     suffix = f'{Config.full_title}_' if Config.title else ''
-    begin_msg = f'\n[{Config.full_title}] Executing \'{qt}\' {dt} query {qtn:d} ({dt} query {qn:d}):\n{query}'
+    begin_msg = f'\n[{Config.full_title}] Executing \'{qt}\' {dt} query {qtn:d} / {qtm:d} ({dt} query {qn:d} / {qm:d}):\n{query}'
     log_file_name = f'{Config.dest_logs_base}log_{suffix}{dt}{qn:{dtqn_fmt()}}_{qt.strip()}{qtn:{dtqn_fmt()}}_{exec_time}.log'
     with open(log_file_name, 'wt+', encoding=UTF8, errors='replace', buffering=1) as log_file:
         trace(begin_msg)
@@ -102,7 +102,7 @@ async def run_cmd(query: str, dt: str, qn: int, qt: str, qtn: int) -> None:
         trace(f'\n{log_file.read()}')
 
 
-async def run_dt_cmds(dt: str, qts: Sequence[str], queries: Sequence[str]) -> None:
+async def run_dt_cmds(dt: str, qts: list[str], queries: list[str]) -> None:
     if not queries:
         return
 
@@ -117,6 +117,8 @@ async def run_dt_cmds(dt: str, qts: Sequence[str], queries: Sequence[str]) -> No
 
     qt_skips = set()
     qns: dict[str, int] = {qt: 0 for qt in qts}
+    qms: dict[str, int] = {}
+    [qms.update({_: len(list(filter(None, [qt_ for qt_ in qts if qt_ == _])))}) for _ in qts if _ not in qms]
     for qi, qt in enumerate(qts):
         qns[qt] += 1
         if Config.test:
@@ -127,7 +129,7 @@ async def run_dt_cmds(dt: str, qts: Sequence[str], queries: Sequence[str]) -> No
                 await sleep(1.0)
                 trace(f'{dt.upper()} category \'{qt}\' was disabled! Skipped!\n')
             continue
-        await run_cmd(queries[qi], dt, qi + 1, qt, qns[qt])
+        await run_cmd(queries[qi], dt, qi + 1, len(qts), qt, qns[qt], qms[qt])
     trace(f'{dt.upper()} COMPLETED ({dt_qt_num - len(qt_skips):d} / {dt_qt_num:d} categories processed)\n')
 
 
@@ -138,7 +140,7 @@ async def run_all_cmds() -> None:
     for cv in as_completed(map(
         run_dt_cmds,
         [dt for dt in DOWNLOADERS],
-        [sum_lists([cat] * len(queries_all[cat][dt]) for cat in queries_all) for dt in DOWNLOADERS],
+        [sum_lists([str(cat)] * len(queries_all[cat][dt]) for cat in queries_all) for dt in DOWNLOADERS],
         [sum_lists(queries_all[cat][dt] for cat in queries_all) for dt in DOWNLOADERS]
     )):
         await cv
