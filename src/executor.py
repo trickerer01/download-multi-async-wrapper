@@ -116,7 +116,7 @@ async def run_dt_cmds(dt: str, qts: list[str], queries: list[str]) -> None:
     dt_qt_num = len(list(filter(None, [not not queries_all[dcat][dt] for dcat in queries_all])))
 
     qt_skips = set()
-    qns: dict[str, int] = {qt: 0 for qt in qts}
+    qns: dict[str, int] = {_: 0 for _ in qts}
     qms: dict[str, int] = {}
     [qms.update({_: len(list(filter(None, [qt_ for qt_ in qts if qt_ == _])))}) for _ in qts if _ not in qms]
     for qi, qt in enumerate(qts):

@@ -40,15 +40,6 @@ BOOL_STRS: dict[str, bool] = ({y: v for y, v in zip(
 )})
 
 
-def unused_argument(arg: Any) -> None:
-    _ = arg
-
-
-def assert_notnull(obj: Any) -> Any:
-    assert obj is not None
-    return obj
-
-
 class IntSequence:
     def __init__(self, ints: Iterable[int], line_num: int) -> None:
         self.ints = list(ints or [])
@@ -249,7 +240,7 @@ HELP_DOWNLOADERS = f'Enabled downloaders. Default is all: \'{",".join(DOWNLOADER
 HELP_CATEGORIES = 'Enabled categories. Default is all'
 HELP_NO_DOWNLOAD = 'Boolean flag to skip actual download (do not launch downloaders)'
 HELP_NO_UPDATE = 'Boolean flag to skip script ids update regardless of script update flag being set or not'
-HELP_INSTALL = 'Force install dependencies from enabled downloaders to selected Python\'s environment'
+HELP_INSTALL = 'Force install dependencies from enabled downloaders to selected Python environment'
 HELP_SCRIPT_PATH = 'Full path to the script (queries) file'
 HELP_IGNORE_ARGUMENT = (
     'Script one-line cmd argument to ignore, format: \'<NAME>,<COUNT>\''
@@ -369,6 +360,15 @@ class DownloadCollection(Dict[str, Dict[str, Optional[DT]]]):
         return '\n'.join(self._sub_to_str(cat) for cat in self)
 
     __repr__ = __str__
+
+
+def unused_argument(arg: Any) -> None:
+    _ = arg
+
+
+def assert_notnull(obj: WT) -> WT:
+    assert obj is not None
+    return obj
 
 
 class Wrapper(Generic[WT]):

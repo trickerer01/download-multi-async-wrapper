@@ -527,8 +527,8 @@ def update_next_ids() -> None:
                     trace(f'Applying {dt.upper()} update offset {uoffset:d}: {maxids[dt] - uoffset:d} -> {maxids[dt]:d}')
                 else:
                     trace(f'Warning: {dt.upper()} autoupdate offset ({uoffset:d}) was provided but its max id is not being updated')
+            cat: str
             for cat in sequences_ids:
-                i: int
                 dtseq: tuple[str, IntSequence | None]
                 for i, dtseq in enumerate(sequences_ids[cat].items()):
                     dt, seq = dtseq

@@ -13,7 +13,7 @@ from subprocess import check_output
 
 from defs import (
     DownloadCollection, IntPair, Config, IntSequence, DOWNLOADERS, RANGE_TEMPLATE_IDS, RANGE_TEMPLATE_PAGES, RANGE_TEMPLATE_PAGE_IDS,
-    RUXX_DOWNLOADERS, APP_NAMES, unused_argument, PATH_APPEND_DOWNLOAD_IDS, PATH_APPEND_DOWNLOAD_PAGES
+    RUXX_DOWNLOADERS, APP_NAMES, unused_argument, PATH_APPEND_DOWNLOAD_IDS, PATH_APPEND_DOWNLOAD_PAGES,
 )
 from logger import trace
 from strings import NEWLINE, path_args
@@ -40,7 +40,7 @@ def validate_runners(
         raise IOError
     if Config.test is True:
         return
-    checked_reqs: set[str] = set()
+    checked_reqs = set[str]()
     if Config.install:
         for dtr, rpath in sequences_paths_reqs.items():
             if not rpath or dtr not in Config.downloaders:

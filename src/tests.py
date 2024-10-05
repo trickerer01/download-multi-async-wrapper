@@ -20,7 +20,7 @@ from main import main_sync
 # noinspection PyProtectedMember
 from queries import (
     read_queries_file, prepare_queries, sequences_ids, sequences_pages, sequences_paths, sequences_common, sequences_tags,
-    sequences_subfolders
+    sequences_subfolders,
 )
 from strings import date_str_md
 
