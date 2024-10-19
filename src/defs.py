@@ -146,6 +146,36 @@ class CatDwnIds:
     __repr__ = __str__
 
 
+class ExtraArgs:
+    def __init__(self, cat_dwn_args_fmt: str) -> None:
+        try:
+            cat, dt, args = tuple(cat_dwn_args_fmt.split(',', 2))
+            arglist = args.split(' ')
+            assert cat and dt and arglist
+            self._name = f'{cat}:{dt}'
+            self._arglist = arglist
+            self.used = False
+        except Exception:
+            raise ValueError(f'Invalid extra arg(s) format: \'{cat_dwn_args_fmt}\'')
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def args(self) -> list[str]:
+        return self._arglist.copy()
+
+    @property
+    def len(self) -> int:
+        return len(self._arglist)
+
+    def __str__(self) -> str:
+        return f'\'{self._name}\': \'{" ".join(self._arglist)}\' ({self.len:d})'
+
+    __repr__ = __str__
+
+
 DOWNLOADER_NM = 'nm'
 DOWNLOADER_RV = 'rv'
 DOWNLOADER_RC = 'rc'
@@ -193,6 +223,7 @@ class BaseConfig(object):
         self.install: bool = False
         self.ignored_args: list[IgnoredArg] = list()
         self.override_ids: list[CatDwnIds] = list()
+        self.extra_args: list[ExtraArgs] = list()
         self.downloaders: list[str] = list()
         self.categories: list[str] = list()
         self.script_path: str = ''
@@ -240,7 +271,7 @@ HELP_DOWNLOADERS = f'Enabled downloaders. Default is all: \'{",".join(DOWNLOADER
 HELP_CATEGORIES = 'Enabled categories. Default is all'
 HELP_NO_DOWNLOAD = 'Boolean flag to skip actual download (do not launch downloaders)'
 HELP_NO_UPDATE = 'Boolean flag to skip script ids update regardless of script update flag being set or not'
-HELP_INSTALL = 'Force install dependencies from enabled downloaders to selected Python environment'
+HELP_INSTALL = 'Force install dependencies from enabled downloaders to a Python environment set within the script'
 HELP_SCRIPT_PATH = 'Full path to the script (queries) file'
 HELP_IGNORE_ARGUMENT = (
     'Script one-line cmd argument to ignore, format: \'<NAME>,<COUNT>\''
@@ -250,6 +281,12 @@ HELP_IGNORE_ARGUMENT = (
 HELP_IDLIST = (
     'Override id range script parameter for a given \'catergory:downloader\' combination.'
     ' Example: \'vid,rx,50000 51000\' forces RX downloader to use 50000-51000 as ids range when processing \'vid\' category.'
+    ' Can be used multiple times'
+)
+HELP_APPEND = (
+    'Append extra argument(s) to a given \'catergory:downloader\' combination cmdline.'
+    ' Can be used to override existing identical downloader arguments:'
+    ' \'--dest "./" --dest "../"\' will result in the latter value being used once parsed by the downloader.'
     ' Can be used multiple times'
 )
 

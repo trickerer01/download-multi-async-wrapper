@@ -371,6 +371,13 @@ def prepare_queries() -> None:
                 elif re_sub_end.fullmatch(line):
                     sequences_tags.cur()[cur_dl()].append(cur_tags_list.copy())
                 elif re_downloader_finalize.fullmatch(line):
+                    cdt = cur_dl()
+                    cat = cur_category()
+                    for extra_args in Config.extra_args:
+                        if extra_args.name == f'{cat}:{cdt}':
+                            args_temp = ' '.join(extra_args.args)
+                            trace(f'Using \'{cat}:{cdt}\' extra args: {str(extra_args.args)} -> {args_temp}')
+                            sequences_common.cur()[cur_dl()].extend(extra_args.args)
                     cur_tags_list.clear()
                     cur_dwn = ''
                 else:
