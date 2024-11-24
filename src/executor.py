@@ -102,16 +102,16 @@ async def run_cmd(query: str, dt: str, qn: int, qm: int, qt: str, qtn: int, qtm:
         trace(f'\n{log_file.read()}')
 
 
-async def run_dt_cmds(dt: str, qts: list[str], queries: list[str]) -> None:
+async def run_dt_cmds(dt: str, qts: list[str], queries: list[str]) -> str | None:
     if not queries:
-        return
+        return None
 
     assert len(qts) == len(queries)
 
     if dt not in Config.downloaders:
         await sleep(1.0)  # delay this message so it isn't printed somewhere inbetween initial cmds
         trace(f'\n{dt.upper()} SKIPPED\n')
-        return
+        return None
 
     dt_qt_num = len(list(filter(None, [not not queries_all[dcat][dt] for dcat in queries_all])))
 
@@ -131,19 +131,32 @@ async def run_dt_cmds(dt: str, qts: list[str], queries: list[str]) -> None:
             continue
         await run_cmd(queries[qi], dt, qi + 1, len(qts), qt, qns[qt], qms[qt])
     trace(f'{dt.upper()} COMPLETED ({dt_qt_num - len(qt_skips):d} / {dt_qt_num:d} categories processed)\n')
+    return dt
 
 
 async def run_all_cmds() -> None:
     if Config.no_download is True:
         trace('\n\nALL DOWNLOADERS SKIPPED DUE TO no_download FLAG!\n')
         return
+    enabled_dts = list(dt for dt in DOWNLOADERS if any(not not queries_all[cat][dt] for cat in queries_all) and dt in Config.downloaders)
+    finished_dts = list[str]()
+    trace(f'\nRunning {len(enabled_dts)} downloader(s): {", ".join(dt.upper() for dt in enabled_dts)}')
+    trace('Working...')
+    cv: Future[str | None]
     for cv in as_completed(map(
         run_dt_cmds,
         [dt for dt in DOWNLOADERS],
         [sum_lists([str(cat)] * len(queries_all[cat][dt]) for cat in queries_all) for dt in DOWNLOADERS],
         [sum_lists(queries_all[cat][dt] for cat in queries_all) for dt in DOWNLOADERS]
     )):
-        await cv
+        finished_dt = await cv
+        if finished_dt is None:
+            continue
+        finished_dts.append(finished_dt)
+        trace(f'{len(finished_dts)} / {len(enabled_dts)} DOWNLOADERS COMPLETED: {", ".join(dt.upper() for dt in finished_dts)}')
+        if remaining_dts := list(dt for dt in enabled_dts if dt not in finished_dts):
+            trace(f'WAITING FOR {len(remaining_dts)} MORE: {", ".join(dt.upper() for dt in remaining_dts)}')
+
     trace('ALL DOWNLOADERS FINISHED WORK\n')
 
 
