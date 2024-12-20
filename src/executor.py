@@ -46,12 +46,12 @@ def register_queries(queries: DownloadCollection[list[str]]) -> None:
 
 
 def split_into_args(query: str) -> list[str]:
-    r"""'a "b c" d "e" f g "{\\"h\\":\\"j\\",\\"k\\":\\"l\\"}"' -> ['a', 'b c', 'd', 'e', 'f', 'g', '{"h":"j","k":"l"}]"""
+    r"""'a "b c" d "e" f g "{\\"h\\":\\"j\\",\\"k\\":\\"l\\"}"' -> ['a', 'b c', 'd', 'e', 'f', 'g', '{"h":"j","k":"l"}']"""
     def append_result(res_str: str) -> None:
         res_str = unquote(res_str.replace('\\"', '\u2033')).replace('\u2033', '"')
         result.append(res_str)
 
-    result = []
+    result = list()
     idx1 = idx2 = idxdq = 0
     while idx2 < len(query):
         idx2 += 1
