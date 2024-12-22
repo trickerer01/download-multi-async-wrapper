@@ -14,7 +14,7 @@ from os import path, environ
 
 from defs import DownloadCollection, Wrapper, Config, UTF8, DOWNLOADERS, RUN_FILE_DOWNLOADERS
 from logger import trace, log_to
-from strings import datetime_str_nfull, unquote
+from strings import datetime_str_nfull, normalize_path, unquote
 
 __all__ = ('queries_all', 'register_queries', 'execute')
 
@@ -88,7 +88,7 @@ async def run_cmd(query: str, dt: str, qn: int, qm: int, qt: str, qtn: int, qtm:
         if dt in RUN_FILE_DOWNLOADERS and len(query) > Config.max_cmd_len:
             run_file_name = f'{Config.dest_run_base}run_{suffix}{dt}{qn:{dtqn_fmt()}}_{qt.strip()}{qtn:{dtqn_fmt()}}_{exec_time}.conf'
             trace(f'Cmdline is too long ({len(query):d}/{Config.max_cmd_len:d})! Converting to run file: {run_file_name}')
-            run_file_abspath = path.abspath(run_file_name)
+            run_file_abspath = normalize_path(path.abspath(run_file_name), False)
             cmd_args_new = cmd_args[2:]
             cmd_args[2:] = ['file', '-path', run_file_abspath]
             with open(run_file_abspath, 'wt', encoding=UTF8, buffering=1) as run_file:
