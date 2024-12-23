@@ -131,7 +131,7 @@ def fetch_maxids(dts: Iterable[str]) -> dict[str, str]:
                     # Race condition may prevent thread from joining: https://bugs.python.org/issue45274
                     if sys.version_info < (3, 11):
                         for threadx in [thread, *grab_threads]:
-                            if threadx._tstate_lock.locked(): threadx._tstate_lock.release()  # noqa
+                            if threadx._tstate_lock and threadx._tstate_lock.locked(): threadx._tstate_lock.release()  # noqa
                             threadx._stop()  # noqa
         res_errors = list()
         for dt in results:
