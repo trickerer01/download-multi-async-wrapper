@@ -103,11 +103,21 @@ b
 # send
 # end
 
-# rz
+# rp
+# 7 9
+# downloader:D:/ruxx/
+# common:-dmode 0
+# common:-module rp
+# sub:g
+g
+# send
+# end
+
+# xb
 # 5 6
 # downloader:D:/ruxx/
 # common:-dmode 1
-# common:-module rz
+# common:-module xb
 # sub:z
 z
 # send
@@ -117,16 +127,6 @@ z
 -z
 x
 (y~w)
-# send
-# end
-
-# rp
-# 7 9
-# downloader:D:/ruxx/
-# common:-dmode 0
-# common:-module rp
-# sub:g
-g
 # send
 # end
 
