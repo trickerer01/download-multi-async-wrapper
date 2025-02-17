@@ -109,6 +109,8 @@ def fetch_maxids(dts: Iterable[str]) -> dict[str, str]:
         def get_max_id(dtype: str) -> None:
             update_file_path = sequences_paths_update[dtype]
             module_arguments: list[str] = ['-module', dtype] if dtype in RUXX_DOWNLOADERS else list()
+            if dtype in COLOR_LOG_DOWNLOADERS:
+                module_arguments.append('--disable-log-colors')
             if dtype in proxies_update and proxies_update[dtype]:
                 module_arguments += [proxies_update[dtype].first, proxies_update[dtype].second]
             arguments = [Config.python, update_file_path, '-get_maxid', '-timeout', '30'] + module_arguments
