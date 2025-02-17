@@ -130,6 +130,16 @@ x
 # send
 # end
 
+# bb
+# 5 6
+# downloader:D:/ruxx/
+# common:-dmode 1
+# common:-module bb
+# sub:z
+z
+# send
+# end
+
 
 ### (VIDEOS ) ###
 # nm
