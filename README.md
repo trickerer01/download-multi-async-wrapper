@@ -8,6 +8,7 @@ Dependencies:
   - https://github.com/trickerer01/RV
   - https://github.com/trickerer01/NM
   - https://github.com/trickerer01/RC
+  - https://github.com/trickerer01/RG
   - Notes:
     - only downloaders listed within the script need to be cloned
 - Libraries:

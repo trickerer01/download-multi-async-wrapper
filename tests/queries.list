@@ -7,6 +7,7 @@
 ### DATESUB:YES
 ### UPDATE:YES
 ### UPDATE_OFFSETS:{"NM":-100,"rc":-100,"RV":-800,"RS":-300}
+### NOPROXY_FETCHES:["rg","nm"]
 ### PYTHON:python3
 ### (VIDEOS) ###
 # NM
@@ -165,6 +166,17 @@ ggg
 # p50
 # -2000
 # downloader:D:/RC/
+# common:-dmode touch
+# common:--dump-tags
+# sub:a
+aaa
+# send
+# end
+
+# rg
+# p50
+# -2000
+# downloader:D:/RG/
 # common:-dmode touch
 # common:--dump-tags
 # sub:a

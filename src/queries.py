@@ -37,6 +37,7 @@ re_dest_log = re_compile(r'^### LOGPATH:.+?$')
 re_datesub = re_compile(r'^### DATESUB:.+?$')
 re_update = re_compile(r'^### UPDATE:.+?$')
 re_update_offsets = re_compile(r'^### UPDATE_OFFSETS:.+?$')
+re_noproxy_fetches = re_compile(r'^### NOPROXY_FETCHES:.+?$')
 re_category = re_compile(r'^### \(([A-zÀ-ʯА-я\d_+\-! ]+)\) ###$')
 re_comment = re_compile(r'^##[^#].*?$')
 re_python_exec = re_compile(r'^### PYTHON:.+?$')
@@ -111,7 +112,7 @@ def fetch_maxids(dts: Iterable[str]) -> dict[str, str]:
             module_arguments: list[str] = ['-module', dtype] if dtype in RUXX_DOWNLOADERS else list()
             if dtype in COLOR_LOG_DOWNLOADERS:
                 module_arguments.append('--disable-log-colors')
-            if dtype in proxies_update and proxies_update[dtype]:
+            if dtype in proxies_update and proxies_update[dtype] and dtype not in Config.noproxy_fetches:
                 module_arguments += [proxies_update[dtype].first, proxies_update[dtype].second]
             arguments = [Config.python, update_file_path, '-get_maxid', '-timeout', '30'] + module_arguments
             try:
@@ -265,6 +266,18 @@ def prepare_queries() -> None:
                             invalid_dts.append(pdt)
                             trace(f'Error: invalid {pdt} offset int value: \'{Config.update_offsets[pdt]}\'')
                     assert not invalid_dts, f'Invalid update offsets value: {offsets_str}'
+                    continue
+                if re_noproxy_fetches.fullmatch(line):
+                    modules_str = line[line.find(':') + 1:]
+                    trace(f'Parsed noproxy fetches value: \'{modules_str}\'')
+                    assert Config.noproxy_fetches == set(), f'Noproxy fetches re-declaration! Was \'{str(Config.noproxy_fetches)}\''
+                    Config.noproxy_fetches = set(loads(modules_str.lower()))
+                    invalid_dts = list()
+                    for npdt in Config.noproxy_fetches:
+                        if npdt not in DOWNLOADERS:
+                            invalid_dts.append(npdt)
+                            trace(f'Error: inavlid downloader type: \'{npdt}\'')
+                    assert not invalid_dts, f'Invalid update offsets value: {modules_str}'
                     continue
                 ensure_logfile_wrapper()
                 cat_match = re_category.fullmatch(line)

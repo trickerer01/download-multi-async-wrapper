@@ -10,8 +10,8 @@ from unittest import TestCase
 
 from cmdargs import parse_arglist
 from defs import (
-    Config, DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RC, DOWNLOADER_RN, DOWNLOADER_RX, DOWNLOADER_RS, DOWNLOADER_RP, DOWNLOADER_EN,
-    DOWNLOADER_XB, DOWNLOADER_BB,
+    Config, DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RC, DOWNLOADER_RG, DOWNLOADER_RN, DOWNLOADER_RX, DOWNLOADER_RS, DOWNLOADER_RP,
+    DOWNLOADER_EN, DOWNLOADER_XB, DOWNLOADER_BB,
 )
 # noinspection PyProtectedMember
 from executor import queries_all, split_into_args
@@ -62,7 +62,7 @@ class ArgParseTests(TestCase):
         set_up_test()
         parse_arglist(args_argparse_str1.split())
         self.assertEqual(
-            'debug: False, downloaders: [\'nm\', \'rv\', \'rc\', \'rn\', \'rx\', \'rs\', \'rp\', \'en\', \'xb\', \'bb\'], '
+            'debug: False, downloaders: [\'nm\', \'rv\', \'rc\', \'rg\', \'rn\', \'rx\', \'rs\', \'rp\', \'en\', \'xb\', \'bb\'], '
             'script: ../tests/queries.list, dest: ./, run: ./, logs: ./, bak: ./, update: False, '
             'no_download: False, no_update: False, ignored_args: [], id_overrides: [], max_cmd_len: 16000',
             str(Config)
@@ -96,6 +96,7 @@ class QueriesFormTests(TestCase):
         self.assertTrue(Config.no_update)
         self.assertFalse(Config.update)
         self.assertEqual(Config.update_offsets, dict(nm=-100, rc=-100, rv=-800, rs=-300))
+        self.assertEqual(Config.noproxy_fetches, {'rg', 'nm'})
         self.assertEqual('../tests/', Config.dest_base)
         self.assertEqual('../bak/', Config.dest_bak_base)
         self.assertEqual('../run/', Config.dest_run_base)
@@ -104,6 +105,7 @@ class QueriesFormTests(TestCase):
         self.assertEqual(1, len(queries_all[cat_vid][DOWNLOADER_NM]))
         self.assertEqual(3, len(queries_all[cat_vid][DOWNLOADER_RV]))
         self.assertEqual(0, len(queries_all[cat_vid][DOWNLOADER_RC]))
+        self.assertEqual(0, len(queries_all[cat_vid][DOWNLOADER_RG]))
         self.assertEqual(0, len(queries_all[cat_vid][DOWNLOADER_RN]))
         self.assertEqual(0, len(queries_all[cat_vid][DOWNLOADER_RX]))
         self.assertEqual(0, len(queries_all[cat_vid][DOWNLOADER_RS]))
@@ -114,6 +116,7 @@ class QueriesFormTests(TestCase):
         self.assertEqual(0, len(queries_all[cat_img][DOWNLOADER_NM]))
         self.assertEqual(0, len(queries_all[cat_img][DOWNLOADER_RV]))
         self.assertEqual(0, len(queries_all[cat_img][DOWNLOADER_RC]))
+        self.assertEqual(0, len(queries_all[cat_img][DOWNLOADER_RG]))
         self.assertEqual(0, len(queries_all[cat_img][DOWNLOADER_RN]))
         self.assertEqual(2, len(queries_all[cat_img][DOWNLOADER_RX]))
         self.assertEqual(0, len(queries_all[cat_img][DOWNLOADER_RS]))
@@ -124,6 +127,7 @@ class QueriesFormTests(TestCase):
         self.assertEqual(1, len(queries_all[cat_vid_][DOWNLOADER_NM]))
         self.assertEqual(0, len(queries_all[cat_vid_][DOWNLOADER_RV]))
         self.assertEqual(1, len(queries_all[cat_vid_][DOWNLOADER_RC]))
+        self.assertEqual(1, len(queries_all[cat_vid_][DOWNLOADER_RG]))
         self.assertEqual(0, len(queries_all[cat_vid_][DOWNLOADER_RN]))
         self.assertEqual(0, len(queries_all[cat_vid_][DOWNLOADER_RX]))
         self.assertEqual(0, len(queries_all[cat_vid_][DOWNLOADER_RS]))
