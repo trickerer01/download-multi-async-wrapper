@@ -15,7 +15,6 @@ from re import compile as re_compile
 from subprocess import CalledProcessError, check_output
 from threading import Thread, Lock as ThreadLock
 
-from cmdargs import valid_dir_path, positive_int
 from defs import (
     DownloadCollection, Wrapper, IntSequence, Config, StrPair, UTF8, DOWNLOADERS, MIN_IDS_SEQ_LENGTH, PATH_APPEND_DOWNLOAD_IDS,
     PATH_APPEND_DOWNLOAD_PAGES, PATH_APPEND_UPDATE, PATH_APPEND_REQUIREMENTS, RUXX_DOWNLOADERS, PAGE_DOWNLOADERS, PROXY_ARG,
@@ -25,6 +24,7 @@ from executor import register_queries
 from logger import trace, ensure_logfile
 from sequences import validate_sequences, form_queries, report_queries, validate_runners, report_unoptimized
 from strings import SLASH, NEWLINE, datetime_str_nfull, all_tags_negative, all_tags_positive, normalize_path
+from validators import valid_dir_path, positive_int
 
 __all__ = ('read_queries_file', 'prepare_queries', 'update_next_ids', 'at_startup')
 
