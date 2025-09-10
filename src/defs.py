@@ -404,7 +404,7 @@ class DownloadCollection(Dict[str, Dict[str, Optional[DT]]]):
         return next(reversed(self.keys()))
 
     @staticmethod
-    def _make_init_value(init_type: Type[DT], *args, **kwargs) -> DT:
+    def _make_init_value(init_type: Type[DT], *args, **kwargs) -> DT | None:
         return init_type(*args, **kwargs) if init_type else None
 
     def _sub_to_str(self, cat: str) -> str:
