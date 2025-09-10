@@ -13,7 +13,7 @@ from defs import (
     Config, IgnoredArg, CatDwnIds, ExtraArgs, DOWNLOADERS, ACTION_STORE_TRUE, ACTION_APPEND, HELP_DEBUG, HELP_DOWNLOADERS, HELP_CATEGORIES,
     HELP_SCRIPT_PATH, HELP_NO_DOWNLOAD, HELP_NO_UPDATE, HELP_INSTALL, HELP_IGNORE_ARGUMENT, HELP_IDLIST, HELP_APPEND,
 )
-from validators import valid_file_path, valid_downloaders_list, valid_categories_list
+from validators import valid_categories_list, valid_downloaders_list, valid_file_path
 
 
 def parse_arglist(args: Sequence[str]) -> None:
