@@ -33,7 +33,7 @@ def validate_runners(
         out_py_str = out_py.decode().strip()
         match_py_ver = re_py_ver.fullmatch(out_py_str)
         assert match_py_ver
-        assert (int(match_py_ver.group(1)), int(match_py_ver.group(2))) >= (3, 7), 'Minimum python version required is 3.7!'
+        assert (int(match_py_ver.group(1)), int(match_py_ver.group(2))) >= (3, 9), 'Minimum python version required is 3.9!'
         trace(f'Found python {".".join(match_py_ver.groups())}')
     except Exception:
         trace('Error: invalid python executable!')
@@ -105,7 +105,6 @@ def validate_sequences(
     sequences_subfolders: DownloadCollection[Sequence[str]]
 ) -> None:
     unused_argument(sequences_pages)
-    unused_argument(sequences_subfolders)
     if not Config.python:
         trace('Error: python executable was not declared!')
         raise IOError
@@ -136,7 +135,7 @@ def validate_sequences(
                 trace(f'Error: sequence list existance for {cat}:{dt} tags/ids mismatch!')
                 raise IOError
         for cat in sequences_tags:
-            len1, len2 = len(sequences_tags[cat][dt]), len(sequences_tags[cat][dt])
+            len1, len2 = len(sequences_tags[cat][dt]), len(sequences_subfolders[cat][dt])
             if len1 != len2:
                 trace(f'Error: sequence list for {cat} tags/subs mismatch for {dt}: {len1:d} vs {len2:d}!')
                 raise IOError
