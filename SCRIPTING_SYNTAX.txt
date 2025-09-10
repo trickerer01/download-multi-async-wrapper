@@ -1,39 +1,39 @@
 ## author: trickerer01           <-- COMMENTS
 ## THIS FILE IS FOR SYNTAX REFERENCE ONLY
 
-### TITLE:script_1               <-- SCRIPT TITLE (USED IN LOG AND RUN FILE NAMES AS A SUFFIX, 1-20 SYMBOLS) <OPTIONAL>
-### TITLEINCREMENT:5             <-- SCRIPT RUN NUMBER AUTOMATIC INCREMENT SUFFIX LENGTH, 1-9, HERE IT'S 00001, 00002, ETC. <OPTIONAL>
-### DESTPATH:D:/download/        <-- DOWNLOAD DESTINATION BASE FOLDER, DEFAULT: './' <OPTIONAL>
+### TITLE:script_1               <-- <OPTIONAL> SCRIPT TITLE (USED IN LOG AND RUN FILE NAMES AS A SUFFIX, 1-20 SYMBOLS)
+### TITLEINCREMENT:5             <-- <OPTIONAL> SCRIPT RUN NUMBER AUTOMATIC INCREMENT SUFFIX LENGTH, 1-9, HERE IT'S 00001, 00002, ETC.
+### DESTPATH:D:/download/        <-- <OPTIONAL> DOWNLOAD DESTINATION BASE FOLDER, DEFAULT: './'
                                      CAN BE USED INSTEAD OF '-path' CMD ARGUMENT (BUT NOT BOTH)
-### BAKPATH:D:/bak/              <-- SCRIPT BACKUP FOLDER, SAVED BEFORE UPDATE (SEE BELOW), DEFAULT: './' <OPTIONAL>
-### RUNPATH:D:/run/              <-- RUN FILES DESTINATION FOLDER, USED WHEN DOWNLOADER CMDLINE IS TOO LONG, DEFAULT: './'  <OPTIONAL>
-### LOGPATH:D:/logs/             <-- LOG FILES DESTINATION FOLDER, LOGS WILL BE SAVED TO DISK ALWAYS, DEFAULT: './'  <OPTIONAL>
-### DATESUB:NO                   <-- DATE SUBFOLDER '/mmdd/' IN BASE DEST FOLDER CREATION FLAG, DEFAULT: 'YES' <OPTIONAL>
+### BAKPATH:D:/bak/              <-- <OPTIONAL> SCRIPT BACKUP FOLDER, SAVED BEFORE UPDATE (SEE BELOW), DEFAULT: './'
+### RUNPATH:D:/run/              <-- <OPTIONAL> RUN FILES DESTINATION FOLDER, USED WHEN DOWNLOADER CMDLINE IS TOO LONG, DEFAULT: './'
+### LOGPATH:D:/logs/             <-- <OPTIONAL> LOG FILES DESTINATION FOLDER, LOGS WILL BE SAVED TO DISK ALWAYS, DEFAULT: './'
+### DATESUB:NO                   <-- <OPTIONAL> DATE SUBFOLDER '/mmdd/' IN BASE DEST FOLDER CREATION FLAG, DEFAULT: 'YES'
                                      CAN ALSO USE OTHER VALUES: 'False', 'true', 'No', 'YES', 'N', 'y', '0', '1', etc.
-### UPDATE:YES                   <-- ID RANGE (SEE BELOW) UPDATE WITH FETCHED MAX ID FLAG, DEFAULT: 'NO' <OPTIONAL>
-### UPDATE_OFFSETS:{"rc":-500}   <-- MAX ID UPDATE OFFSET PER DOWNLOADER (USUALLY NEGATIVE) <OPTIONAL>
-### NOPROXY_FETCHES:["rg","NM"]  <-- DOWNLOADERS FOR WHICH MAX ID IS ALWAYS FETCHED WITHOUT PROXY EVEN IF PROVIDED <OPTIONAL>
-### PYTHON:python3               <-- PATH TO PYTHON EXECUTABLE (NORMALLY ROOT PYTHON INSTALL IS PRESENT IN SYSTEM PATH VARIABLE) <REQUIRED>
-### (vid) ###                    <-- CATEGORY MARKER, AT LEAST 1 SYMBOL (SUBFOLDER NAME: 'vid') <REQUIRED>
-# nm                             <-- DOWNLOADER TYPE <REQUIRED>
-# 50000 51000                    <-- AT LEAST ONE OR TWO IDS FOR RANGE (SEE BELOW) <REQUIRED>
-# downloader:D:/Projects/NM      <-- PATH TO THE DOWNLOADER BASE FOLDER <REQUIRED>
-# common:-dmode touch            <-- ARGUMENTS TO ADD TO EVERY QUERY <OPTIONAL>
-# common:-log trace --dump-tags  <-- ARGUMENTS TO ADD TO EVERY QUERY <OPTIONAL>
-# sub:a                          <-- SUBFOLDER FOR QUERY (NEW QUERY MARKER) <REQUIRED>
--quality 1080p                   <-- QUERY ARGUMENT (QUALITY) <DOWNLOADER ARGUMENTS>
--a -b -c -dfff                   <-- EXCLUDED TAGS <DOWNLOADER ARGUMENTS>
-ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
+### UPDATE:YES                   <-- <OPTIONAL> ID RANGE (SEE BELOW) UPDATE WITH FETCHED MAX ID FLAG, DEFAULT: 'NO'
+### UPDATE_OFFSETS:{"rc":-500}   <-- <OPTIONAL> MAX ID UPDATE OFFSET PER DOWNLOADER (USUALLY NEGATIVE)
+### NOPROXY_FETCHES:["rg","NM"]  <-- <OPTIONAL> DOWNLOADERS FOR WHICH MAX ID IS ALWAYS FETCHED WITHOUT PROXY EVEN IF PROVIDED
+### PYTHON:python3               <-- <REQUIRED> PATH TO PYTHON EXECUTABLE (NORMALLY ROOT PYTHON INSTALL IS PRESENT IN SYSTEM PATH VARIABLE)
+### (vid) ###                    <-- <REQUIRED> CATEGORY MARKER, AT LEAST 1 SYMBOL (SUBFOLDER NAME: 'vid')
+# nm                             <-- <REQUIRED> DOWNLOADER TYPE
+# 50000 51000                    <-- <REQUIRED> AT LEAST ONE OR TWO IDS FOR RANGE (SEE BELOW)
+# downloader:D:/Projects/NM      <-- <REQUIRED> PATH TO THE DOWNLOADER BASE FOLDER
+# common:-dmode touch            <-- <OPTIONAL> ARGUMENTS TO ADD TO EVERY QUERY
+# common:-log trace --dump-tags  <-- <OPTIONAL> ARGUMENTS TO ADD TO EVERY QUERY
+# sub:a                          <-- <REQUIRED> SUBFOLDER FOR QUERY (NEW QUERY MARKER)
+-quality 1080p                   <-- <DOWNLOADER ARGUMENTS> QUERY ARGUMENT (QUALITY)
+-a -b -c -dfff                   <-- <DOWNLOADER ARGUMENTS> EXCLUDED TAGS
+ggg                              <-- <DOWNLOADER ARGUMENTS> REQUIRED TAG
                                      AT LEAST ONE 'TAGS' ARGUMENT IS REQUIRED FOR QUERY TO BE VALID
                                      MIXING OF REQUIRED / EXCLUDED TAGS IN A ROW IS NOT RECOMMENDED: '-a -b -c -dfff ggg'
-# send                           <-- QUERY END MARKER <REQUIRED>
+# send                           <-- <REQUIRED> QUERY END MARKER
                                      '<cmdline base...> -quality 1080p -a -b -c -dfff ggg'
                                      DOWNLOADER ARGUMENTS STILL ACCUMULATE AFTER THIS, SEE BELOW
 # sub:b
 -+ggg                            <-- REMOVE PREVIOUSLY REQUIRED SINGLE TAG (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
--ggg                             <-- EXCLUDE PREVIOUSLY REQUIRED TAG <DOWNLOADER ARGUMENTS>
--(x,z)                           <-- EXCLUDED TAGS COMBINATION <DOWNLOADER ARGUMENTS>
-(h~i~j~k)                        <-- REQUIRED 'ANY OF' TAGS GROUP <DOWNLOADER ARGUMENTS>
+-ggg                             <-- <DOWNLOADER ARGUMENTS> EXCLUDE PREVIOUSLY REQUIRED TAG
+-(x,z)                           <-- <DOWNLOADER ARGUMENTS> EXCLUDED TAGS COMBINATION
+(h~i~j~k)                        <-- <DOWNLOADER ARGUMENTS> REQUIRED 'ANY OF' TAGS GROUP
 # send                           <-- '<cmdline base...> -quality 1080p -a -b -c -dfff -ggg -(x,z) (h~i~j~k)'
 
 # sub:c
@@ -41,17 +41,17 @@ ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
                                      MUST MATCH THIS WAY EXACTLY OTHERWISE YOU GET SOMETHING LIKE '(h~i~j~k~l) -h -i -j -k'
                                      LOGS WILL MENTION MULTIPLE EXCLUSIONS LIKE THIS WHERE MATCHING 'OR' GROUP WASN'T FOUND
 --(x,z)                          <-- REMOVE PREVIOUSLY EXCLUDED TAGS COMBINATION (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
-(l~m~n)                          <-- REQUIRED 'ANY OF' TAGS GROUP <DOWNLOADER ARGUMENTS>
+(l~m~n)                          <-- <DOWNLOADER ARGUMENTS> REQUIRED 'ANY OF' TAGS GROUP
 # send                           <-- '<cmdline base...> -quality 1080p -a -b -c -dfff -ggg -h -i -j -k (l~m~n)'
 
 # sub:d
 --quality -+1080p                <-- REMOVE PREVIOUS PARAM (QUALITY) QUERY ARGUMENT (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
 -l -m -n                         <-- REMOVE PREVIOUS TAGS GROUP AND EXCLUDE THEM (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
 --dfff                           <-- REMOVE PREVIOUS EXCLUDED SINGLE TAG (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
--quality 360p                    <-- QUERY ARGUMENT (QUALITY) <DOWNLOADER ARGUMENTS>
--utp always                      <-- QUERY ARGUMENT (UNLISTED VIDEOS DOWNLOAD POLICY) <DOWNLOADER ARGUMENTS>
+-quality 360p                    <-- <DOWNLOADER ARGUMENTS> QUERY ARGUMENT (QUALITY)
+-utp always                      <-- <DOWNLOADER ARGUMENTS> QUERY ARGUMENT (UNLISTED VIDEOS DOWNLOAD POLICY)
 # send                           <-- '<cmdline base...> -a -b -c -ggg -h -i -j -k -l -m -n -quality 360p -utp always'
-# end                            <-- DOWNLOADER QUERIES FINISH MARKER <REQUIRED>
+# end                            <-- <REQUIRED> DOWNLOADER QUERIES FINISH MARKER
 
                                  <-- AT THIS POINT 4 NM QUERIES WERE CREATED WHICH WILL BE THEN COMBINED INTO A SINGLE DOWNLOAD SCRIPT
                                  <-- 'python "D:/Projects/NM/src/ids.py" -path "<PATH>" -start 50000 -end 50999
@@ -63,21 +63,21 @@ ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
                                  <-- WHICH DOWNLOADS MATCHING VIDEOS TO 4 DIFFERENT FOLDERS IN A SINGLE PASS
 
 # RV                             <-- DOWNLOADER TYPE CAN BE UPPERCASE TOO
-# p10 s1                         <-- SWITCH TO PAGES SCAN INSTEAD OF IDS (PAGES COUNT, STARTING PAGE) <OPTIONAL>
+# p10 s1                         <-- <OPTIONAL> SWITCH TO PAGES SCAN INSTEAD OF IDS (PAGES COUNT, STARTING PAGE)
 # 3050000                        <-- A SIGNLE ID MEANS FROM THIS AND UP (TILL CURRENT MAX ID)
 # downloader:D:/Projects/RV
 # common:-log info -timeout 30 -retries 100 -throttle 100 --dump-descriptions --dump-tags
 # sub:a
 -quality 1080p
--search aaa                      <-- USE SEARCH STRING (RV) <DOWNLOADER ARGUMENTS>
+-search aaa                      <-- <DOWNLOADER ARGUMENTS> USE SEARCH STRING (RV)
 # send                           <-- '<cmdline base...> -quality 1080p -search aaa'
 
 # sub:b
 ##--search -+aaa                 <-- ONE WAY TO REMOVE PREVIOUS SEARCH STRING (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
 -aaa                             <-- QUICKER WAY TO REMOVE PREVIOUS SEARCH STRING (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
                                      DOES NOT APPEND '-aaa' TO ARGUMENTS LIST
--search_tag tag1,tag2,tag3       <-- SEARCH FOR 3 DIFFERENT TAGS <DOWNLOADER ARGUMENTS>
--search_rule_tag any             <-- MATCHING ANY OF THEM <DOWNLOADER ARGUMENTS>
+-search_tag tag1,tag2,tag3       <-- <DOWNLOADER ARGUMENTS> SEARCH FOR 3 DIFFERENT TAGS
+-search_rule_tag any             <-- <DOWNLOADER ARGUMENTS> MATCHING ANY OF THEM
 # send                           <-- '<cmdline base...> -quality 1080p -search_tag tag1,tag2,tag3 -search_rule_tag any'
 
 # sub:c
@@ -85,8 +85,8 @@ ggg                              <-- REQUIRED TAG <DOWNLOADER ARGUMENTS>
                                      DOES NOT APPEND '-any' TO ARGUMENTS LIST
 -tag1 -tag2 -tag3                <-- QUICKLY REMOVE PREVIOUS SEARCH TAGS (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
                                      AND EXCLUDE THEM (ADDS TO DOWNLOADER ARGUMENTS LIST)
--search_tag tag4,tag5            <-- SEARCH FOR 2 DIFFERENT TAGS <DOWNLOADER ARGUMENTS>
--search_rule_tag all             <-- MATCHING BOTH OF THEM <DOWNLOADER ARGUMENTS>
+-search_tag tag4,tag5            <-- <DOWNLOADER ARGUMENTS> SEARCH FOR 2 DIFFERENT TAGS
+-search_rule_tag all             <-- <DOWNLOADER ARGUMENTS> MATCHING BOTH OF THEM
 # send                           <-- '<cmdline base...> -quality 1080p -tag1 -tag2 -tag3 -search_tag tag4,tag5 -search_rule_tag all'
 # end
                                  <-- AT THIS POINT 3 RV QUERIES WERE CREATED WHICH WILL NOT BE OPTIMIZED BECAUSE OF SEARCH BEING USED
