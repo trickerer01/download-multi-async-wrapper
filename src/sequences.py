@@ -13,7 +13,8 @@ from subprocess import check_output
 
 from defs import (
     DownloadCollection, IntPair, Config, IntSequence, DOWNLOADERS, RANGE_TEMPLATE_IDS, RANGE_TEMPLATE_PAGES, RANGE_TEMPLATE_PAGE_IDS,
-    RUXX_DOWNLOADERS, APP_NAMES, unused_argument, PATH_APPEND_DOWNLOAD_IDS, PATH_APPEND_DOWNLOAD_PAGES,
+    RUXX_DOWNLOADERS, APP_NAMES, PATH_APPEND_DOWNLOAD_IDS, PATH_APPEND_DOWNLOAD_PAGES, MIN_PYTHON_VERSION, MIN_PYTHON_VERSION_STR,
+    unused_argument,
 )
 from logger import trace
 from strings import NEWLINE, path_args
@@ -33,7 +34,8 @@ def validate_runners(
         out_py_str = out_py.decode().strip()
         match_py_ver = re_py_ver.fullmatch(out_py_str)
         assert match_py_ver
-        assert (int(match_py_ver.group(1)), int(match_py_ver.group(2))) >= (3, 9), 'Minimum python version required is 3.9!'
+        fetched_py_ver = (int(match_py_ver.group(1)), int(match_py_ver.group(2)))
+        assert fetched_py_ver >= MIN_PYTHON_VERSION, f'Minimum python version required is {MIN_PYTHON_VERSION_STR}!'
         trace(f'Found python {".".join(match_py_ver.groups())}')
     except Exception:
         trace('Error: invalid python executable!')

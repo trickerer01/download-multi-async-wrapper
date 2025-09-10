@@ -11,7 +11,7 @@ from collections.abc import Sequence
 from platform import system as running_system
 
 from cmdargs import parse_arglist
-from defs import SUPPORTED_SYSTEMS
+from defs import SUPPORTED_SYSTEMS, MIN_PYTHON_VERSION, MIN_PYTHON_VERSION_STR
 from executor import execute
 from logger import close_logfile, trace
 from queries import read_queries_file, prepare_queries, update_next_ids, at_startup
@@ -46,7 +46,7 @@ def run_main(args: Sequence[str]) -> int:
 
 
 def main_sync(args: Sequence[str]) -> int:
-    assert sys.version_info >= (3, 9), 'Minimum python version required is 3.9!'
+    assert sys.version_info >= MIN_PYTHON_VERSION, f'Minimum python version required is {MIN_PYTHON_VERSION_STR}!'
     assert running_system() in SUPPORTED_SYSTEMS, f'Unsupported system \'{running_system()}\''
     return run_main(args)
 
