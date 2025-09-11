@@ -18,7 +18,7 @@ PROXY_ARG = '-proxy'
 MIN_IDS_SEQ_LENGTH = 2
 MAX_CATEGORY_NAME_LENGTH = 10
 
-MIN_PYTHON_VERSION = (3, 9)
+MIN_PYTHON_VERSION = (3, 10)
 MIN_PYTHON_VERSION_STR = f'{MIN_PYTHON_VERSION[0]}.{MIN_PYTHON_VERSION[1]}'
 
 OS_WINDOWS = 'Windows'
@@ -39,7 +39,8 @@ MAX_CMD_LEN = {
 
 BOOL_STRS: dict[str, bool] = ({y: v for y, v in zip(
     ('YES', 'Yes', 'yes', 'TRUE', 'True', 'true', '1', 'Y', 'y', 'NO', 'No', 'no', 'FALSE', 'False', 'false', '0', 'N', 'n'),
-    (True,) * 9 + (False,) * 9
+    (True,) * 9 + (False,) * 9,
+    strict=True
 )})
 
 
