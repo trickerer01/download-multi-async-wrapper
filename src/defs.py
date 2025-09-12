@@ -9,7 +9,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Iterable, Type, TypeVar, Dict, Optional, Any, Generic
+from typing import Iterable, Type, TypeVar, Dict, Any, Generic
 
 UTF8 = 'utf-8'
 ACTION_STORE_TRUE = 'store_true'
@@ -391,7 +391,7 @@ for _ in DT.__constraints__:
     assert hasattr(_, '__len__') and callable(getattr(_, '__len__')), f'DT class \'{_.__name__}\' doesn\'t have len() method!'
 
 
-class DownloadCollection(Dict[str, Dict[str, Optional[DT]]]):
+class DownloadCollection(Dict[str, Dict[str, DT | None]]):
     """
     DownloadCollection is a dict which stores data of type **DT** per download module per download category
     """
@@ -433,7 +433,7 @@ class Wrapper(Generic[WT]):
     def __init__(self, value: WT = None) -> None:
         self._value = value
 
-    def get(self) -> Optional[WT]:
+    def get(self) -> WT:
         return assert_notnull(self._value)
 
     def reset(self, value: WT = None) -> None:
