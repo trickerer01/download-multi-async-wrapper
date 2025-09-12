@@ -17,8 +17,8 @@
 # common:--dump-tags
 # common:-cookies "{\"User-Agent\":\"NM 1.8\", \"shm_user\":\"su\", \"shm_session\":\"su_session_hash\"}"
 ## <generic comment>
-# sub:a
--quality 1080p
+# sub:a ## trailing comment
+-quality 1080p      ## this is a valid comment as well
 -a -b -c -dfff
 ggg
 # send

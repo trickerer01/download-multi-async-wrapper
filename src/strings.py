@@ -18,6 +18,37 @@ def unquote(tag: str) -> str:
     return tag.strip('"\'')
 
 
+def first_not_of(string: str, char: str, start_idx: int | None = None, *, reverse=False) -> int:
+    assert start_idx is None or (0 <= start_idx < len(string))
+
+    if reverse:
+        idx = start_idx or len(string)
+        while idx >= 0:
+            if string[idx] != char:
+                return idx
+            idx -= 1
+    else:
+        idx = start_idx or -1
+        while 0 <= idx <= len(string) - 1:
+            if string[idx] != char:
+                return idx
+            idx += 1
+    return -1
+
+
+def remove_trailing_comments(line: str) -> str:
+    linecopy = line
+    idx = linecopy.find(' ##')
+    result: str
+    if idx == 0:
+        result = ''
+    elif idx > 0:
+        result = linecopy[:first_not_of(linecopy, ' ', idx, reverse=True) + 1]
+    else:
+        result = linecopy
+    return result
+
+
 def normalize_path(basepath: str, append_slash=True) -> str:
     normalized_path = basepath.replace('\\', SLASH)
     need_slash = append_slash is True and len(normalized_path) != 0 and normalized_path[-1] != SLASH

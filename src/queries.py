@@ -299,6 +299,7 @@ def prepare_queries() -> None:
             if line[0] not in '(-*#' and not line[0].isalnum():
                 trace(f'Error: corrupted line beginning found at line {i + 1:d}!')
                 raise IOError
+            line = remove_trailing_comments(line)
             if line.startswith('#'):
                 if re_comment.fullmatch(line):
                     # trace(f'Ignoring commented out line {i + 1:d}: \'{line}\'')

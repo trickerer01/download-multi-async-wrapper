@@ -29,14 +29,14 @@ ggg                              <-- <DOWNLOADER ARGUMENTS> REQUIRED TAG
 # send                           <-- <REQUIRED> QUERY END MARKER
                                      '<cmdline base...> -quality 1080p -a -b -c -dfff ggg'
                                      DOWNLOADER ARGUMENTS STILL ACCUMULATE AFTER THIS, SEE BELOW
-# sub:b
+# sub:b ## Real name: "asd"      <-- TRAILING COMMENTS CAN BE USED TOO, LOOKS FOR ' ##' DELIMITER
 -+ggg                            <-- REMOVE PREVIOUSLY REQUIRED SINGLE TAG (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
 -ggg                             <-- <DOWNLOADER ARGUMENTS> EXCLUDE PREVIOUSLY REQUIRED TAG
 -(x,z)                           <-- <DOWNLOADER ARGUMENTS> EXCLUDED TAGS COMBINATION
 (h~i~j~k)                        <-- <DOWNLOADER ARGUMENTS> REQUIRED 'ANY OF' TAGS GROUP
 # send                           <-- '<cmdline base...> -quality 1080p -a -b -c -dfff -ggg -(x,z) (h~i~j~k)'
 
-# sub:c
+# sub:c      ## kinda bad name   <-- THIS IS A VALID TRAILING COMMENT TOO
 -h -i -j -k                      <-- REMOVE PREVIOUS TAGS GROUP AND EXCLUDE THEM (REMOVES FROM DOWNLOADER ARGUMENTS LIST)
                                      MUST MATCH THIS WAY EXACTLY OTHERWISE YOU GET SOMETHING LIKE '(h~i~j~k~l) -h -i -j -k'
                                      LOGS WILL MENTION MULTIPLE EXCLUSIONS LIKE THIS WHERE MATCHING 'OR' GROUP WASN'T FOUND
