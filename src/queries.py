@@ -10,7 +10,7 @@ from __future__ import annotations
 import sys
 from collections.abc import Iterable
 from json import loads
-from os import chmod, path, stat, listdir
+from os import chmod, path, stat, scandir
 from re import compile as re_compile
 from subprocess import CalledProcessError, check_output
 from threading import Thread, Lock as ThreadLock
@@ -23,7 +23,7 @@ from defs import (
 from executor import register_queries
 from logger import trace, ensure_logfile
 from sequences import validate_sequences, form_queries, report_queries, validate_runners, report_unoptimized
-from strings import SLASH, NEWLINE, datetime_str_nfull, all_tags_negative, all_tags_positive, normalize_path
+from strings import SLASH, NEWLINE, datetime_str_nfull, all_tags_negative, all_tags_positive, normalize_path, remove_trailing_comments
 from validators import valid_dir_path, positive_int
 
 __all__ = ('read_queries_file', 'prepare_queries', 'update_next_ids', 'at_startup')
@@ -79,10 +79,8 @@ def ensure_logfile_wrapper() -> None:
 def calculate_title_suffix() -> None:
     trace('Calculating title suffix...')
     lbdir = Config.dest_logs_base
-    logsdir_all: list[str] = listdir(lbdir) if path.isdir(lbdir) else []
-    logsdir_files = list(filter(
-        lambda x: x.startswith((f'log_{Config.title}', f'run_{Config.title}')) and path.isfile(f'{lbdir}{x}'), logsdir_all
-    ))
+    logsdir_all: list[str] = [f.name for f in scandir(lbdir) if f.is_file()] if path.isdir(lbdir) else []
+    logsdir_files = list(filter(lambda x: x.startswith((f'log_{Config.title}', f'run_{Config.title}')), logsdir_all))
     max_suffix_len = Config.title_increment
     max_suffix_val = 0
     base_idx = len(f'log_{Config.title}')
