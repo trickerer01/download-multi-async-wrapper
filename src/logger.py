@@ -6,7 +6,6 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
-from __future__ import annotations
 from locale import getpreferredencoding
 from typing import TextIO
 
@@ -15,8 +14,11 @@ from strings import NEWLINE, datetime_str_nfull, timestamped_string
 
 __all__ = ('ensure_logfile', 'close_logfile', 'log_to', 'trace')
 
-logfile: Wrapper[TextIO | None] = Wrapper()
+logfile: Wrapper[TextIO] = Wrapper()
 buffered_strings: list[str] = list()
+
+PREF_ENCODING = getpreferredencoding()
+IO_ERR_POLICY = 'backslashreplace'
 
 
 def open_logfile() -> None:
@@ -58,7 +60,7 @@ def trace(msg: str, add_timestamp=True) -> None:
             print(t_msg, end='')
     except UnicodeError:
         try:
-            print(t_msg.encode(UTF8, errors='backslashreplace').decode(getpreferredencoding(), errors='backslashreplace'), end='')
+            print(t_msg.encode(UTF8, errors=IO_ERR_POLICY).decode(PREF_ENCODING, errors=IO_ERR_POLICY), end='')
         except Exception:
             print('<Message was not logged due to UnicodeError>')
     if logfile:

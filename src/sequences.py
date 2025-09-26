@@ -6,7 +6,6 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
-from __future__ import annotations
 from collections.abc import Sequence
 from re import compile as re_compile
 from subprocess import check_output
@@ -134,7 +133,7 @@ def validate_sequences(
                         Config.disabled_downloaders[cat].add(dt)
         for cat in sequences_paths:
             if (not not sequences_paths[cat][dt]) != (not not (sequences_ids[cat][dt] or sequences_tags[cat][dt])):
-                trace(f'Error: sequence list existance for {cat}:{dt} tags/ids mismatch!')
+                trace(f'Error: sequence list existance for {cat}:{dt} paths/ids mismatch!')
                 raise IOError
         for cat in sequences_tags:
             len1, len2 = len(sequences_tags[cat][dt]), len(sequences_subfolders[cat][dt])
@@ -144,7 +143,8 @@ def validate_sequences(
 
 
 def _get_base_qs(
-    sequences_ids: DownloadCollection[IntSequence], sequences_pages: DownloadCollection[IntSequence],
+    sequences_ids: DownloadCollection[IntSequence],
+    sequences_pages: DownloadCollection[IntSequence],
     sequences_paths: DownloadCollection[str]
 ) -> DownloadCollection[str]:
     def has_ids(cat: str, cdt: str) -> bool:

@@ -6,7 +6,6 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
-from __future__ import annotations
 import sys
 from collections.abc import Iterable
 from json import loads
@@ -107,14 +106,14 @@ def fetch_maxids(dts: Iterable[str]) -> dict[str, str]:
 
         def get_max_id(dtype: str) -> None:
             update_file_path = sequences_paths_update[dtype]
-            module_arguments: list[str] = ['-module', dtype] if dtype in RUXX_DOWNLOADERS else list()
+            module_arguments: list[str] = ['-module', dtype] if dtype in RUXX_DOWNLOADERS else []
             if dtype in COLOR_LOG_DOWNLOADERS:
                 module_arguments.append('--disable-log-colors')
             if dtype in proxies_update and proxies_update[dtype] and dtype not in Config.noproxy_fetches:
                 module_arguments += [proxies_update[dtype].first, proxies_update[dtype].second]
             arguments = [Config.python, update_file_path, '-get_maxid', '-timeout', '30'] + module_arguments
             try:
-                res = check_output(arguments.copy()).decode(errors='replace').strip()
+                res = check_output(arguments).decode(errors='replace').strip()
             except (KeyboardInterrupt, CalledProcessError):
                 res = 'ERROR'
             with rlock:
@@ -125,15 +124,8 @@ def fetch_maxids(dts: Iterable[str]) -> dict[str, str]:
             grab_threads[-1].start()
         while grab_threads:
             thread = grab_threads.pop(-1)
-            while thread.is_alive():
-                try:
-                    thread.join()
-                except KeyboardInterrupt:
-                    # Race condition may prevent thread from joining: https://bugs.python.org/issue45274
-                    if sys.version_info < (3, 11):
-                        for threadx in [thread, *grab_threads]:
-                            if threadx._tstate_lock and threadx._tstate_lock.locked(): threadx._tstate_lock.release()  # noqa
-                            threadx._stop()  # noqa
+            if thread.is_alive():
+                thread.join()
         res_errors = list()
         for dt in results:
             try:
@@ -230,12 +222,12 @@ def prepare_queries() -> None:
                     continue
                 if re_datesub.fullmatch(line):
                     datesub_str = line[line.find(':') + 1:]
-                    trace(f'Parsed date subfolder flag value: \'{datesub_str}\' ({str(BOOL_STRS.get(datesub_str))})')
+                    trace(f'Parsed date subfolder flag value: \'{datesub_str}\' ({str(BOOL_STRS[datesub_str])})')
                     Config.datesub = BOOL_STRS[datesub_str]
                     continue
                 if re_update.fullmatch(line):
                     update_str = line[line.find(':') + 1:]
-                    trace(f'Parsed update flag value: \'{update_str}\' ({str(BOOL_STRS.get(update_str))})')
+                    trace(f'Parsed update flag value: \'{update_str}\' ({str(BOOL_STRS[update_str])})')
                     if Config.no_update:
                         trace('UPDATE FLAG IS IGNORED DUE TO no_update FLAG')
                         assert Config.update is False

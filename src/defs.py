@@ -7,7 +7,6 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 # PROJECT-LEVEL IMPORTS ARE RESTRICTED
 #
 
-from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Iterable, Type, TypeVar, Dict, Any, Generic
 

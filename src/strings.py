@@ -87,7 +87,7 @@ def time_now_fmt(fmt: str) -> str:
 
 def datetime_str_full() -> str:
     """
-    date in format dd MMM yyyy hh:mm:ss\n\n
+    date in format dd MMM yyyy hh:mm:ss
     usable only for timestamp within log files
     """
     return time_now_fmt('%d %b %Y %H:%M:%S')
@@ -95,7 +95,7 @@ def datetime_str_full() -> str:
 
 def datetime_str_nfull() -> str:
     """
-    date in format yyyy-mm-dd_hh_mm_ss\n\n
+    date in format yyyy-mm-dd_hh_mm_ss
     usable in file names
     """
     return time_now_fmt('%Y-%m-%d_%H_%M_%S')
@@ -103,7 +103,7 @@ def datetime_str_nfull() -> str:
 
 def date_str_md(cat: str) -> str:
     """
-    date in '{cat}_mmdd' format\n\n
+    date in '{cat}_mmdd' format
     usable in folder names
     """
     return f'{f"{cat}_" if cat else ""}{time_now_fmt("%m%d")}'
