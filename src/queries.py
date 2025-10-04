@@ -125,7 +125,10 @@ def fetch_maxids(dts: Iterable[str]) -> dict[str, str]:
         while grab_threads:
             thread = grab_threads.pop(-1)
             if thread.is_alive():
-                thread.join()
+                try:
+                    thread.join()
+                except KeyboardInterrupt:
+                    pass
         res_errors = list()
         for dt in results:
             try:
