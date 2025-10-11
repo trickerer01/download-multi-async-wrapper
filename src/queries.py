@@ -110,8 +110,8 @@ def fetch_maxids(dts: Iterable[str]) -> dict[str, str]:
             if dtype in COLOR_LOG_DOWNLOADERS:
                 module_arguments.append('--disable-log-colors')
             if dtype in proxies_update and proxies_update[dtype] and dtype not in Config.noproxy_fetches:
-                module_arguments += [proxies_update[dtype].first, proxies_update[dtype].second]
-            arguments = [Config.python, update_file_path, '-get_maxid', '-timeout', '30'] + module_arguments
+                module_arguments.extend((proxies_update[dtype].first, proxies_update[dtype].second))
+            arguments = [Config.python, update_file_path, '-get_maxid', '-timeout', '30', *module_arguments]
             try:
                 res = check_output(arguments).decode(errors='replace').strip()
             except (KeyboardInterrupt, CalledProcessError):
@@ -371,7 +371,7 @@ def prepare_queries() -> None:
                     proxy_idx = common_args.index(PROXY_ARG) if PROXY_ARG in common_args else -1
                     if proxy_idx >= 0:
                         assert len(common_args) > proxy_idx + 1
-                        proxies_update[cur_dl()] = StrPair((common_args[proxy_idx], common_args[proxy_idx + 1]))
+                        proxies_update[cur_dl()] = StrPair(common_args[proxy_idx], common_args[proxy_idx + 1])
                     sequences_common.cur()[cur_dl()].extend(common_args)
                 elif re_sub_begin.fullmatch(line):
                     cdt = cur_dl()
@@ -552,7 +552,7 @@ def update_next_ids() -> None:
                     trace(f'{"W" if line_n else "Not w"}riting \'{cat}:{dt}\' ids at idx {i:d}, line {line_n + 1 if line_n else -1:d}...')
                     if line_n:
                         ids_at_line = queries_file_lines()[line_n].strip().split(' ')
-                        queries_file_lines()[line_n] = ' '.join([ids_at_line[0]] + ids_at_line[2:] + [f'{maxids[dt]:d}\n'])
+                        queries_file_lines()[line_n] = ' '.join((ids_at_line[0], *ids_at_line[2:], f'{maxids[dt]:d}\n'))
                 trace(f'Writing \'{cat}\' ids done')
             with open(Config.script_path, 'wt', encoding=UTF8, buffering=1) as outfile:
                 outfile.writelines(queries_file_lines())

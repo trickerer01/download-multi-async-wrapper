@@ -164,7 +164,7 @@ def _get_base_qs(
     irngs: dict[str, dict[str, IntPair]]
     prngs: dict[str, dict[str, IntPair]]
     irngs, prngs = ({
-        k: {dt: IntPair(ipseqs[k][dt][:2]) for dt in DOWNLOADERS if ipseqs[k][dt]} for k in ipseqs
+        k: {dt: IntPair(*ipseqs[k][dt][:2]) for dt in DOWNLOADERS if ipseqs[k][dt]} for k in ipseqs
     } for ipseqs in (sequences_ids, sequences_pages))
     [base_qs.update({
         k: {

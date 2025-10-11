@@ -7,8 +7,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 # PROJECT-LEVEL IMPORTS ARE RESTRICTED
 #
 
-from abc import ABC, abstractmethod
-from typing import Iterable, Type, TypeVar, Dict, Any, Generic
+from typing import Iterable, Type, TypeVar, Dict, NamedTuple, Any, Generic
 
 UTF8 = 'utf-8'
 ACTION_STORE_TRUE = 'store_true'
@@ -63,36 +62,14 @@ class IntSequence:
     __repr__ = __str__
 
 
-class Pair(ABC):
-    PT = TypeVar('PT')
-
-    @abstractmethod
-    def __init__(self, vals: tuple[PT, PT]) -> None:
-        self._first, self._second = vals
-        self._fmt = {int: 'd', bool: 'd', float: '.2f'}.get(type(self._first), '')
-
-    @property
-    def first(self) -> PT:
-        return self._first
-
-    @property
-    def second(self) -> PT:
-        return self._second
-
-    def __str__(self) -> str:
-        return f'first: {self._first:{self._fmt}}, second: {self._second:{self._fmt}}'
-
-    __repr__ = __str__
+class IntPair(NamedTuple):
+    first: int
+    second: int
 
 
-class IntPair(Pair):
-    def __init__(self, vals: tuple[int, int]) -> None:
-        super().__init__(vals)
-
-
-class StrPair(Pair):
-    def __init__(self, vals: tuple[str, str]) -> None:
-        super().__init__(vals)
+class StrPair(NamedTuple):
+    first: str
+    second: str
 
 
 class IgnoredArg:
@@ -348,12 +325,12 @@ PATH_APPEND_UPDATE = {
     DOWNLOADER_BB: PATH_APPEND_UPDATE_RUXX,
 }
 
-RANGE_ID_TEMPLATE_NRVCG = StrPair(('-start %d', ' -end %d'))
-RANGE_ID_TEMPLATE_RN_RP = StrPair(('id>=%d', ' id<=%d'))
-RANGE_ID_TEMPLATE_RX_RS_XB_BB = StrPair(('id:>=%d', ' id:<=%d'))
-RANGE_ID_TEMPLATE_EN = StrPair(('id:%d..', '%d'))
-RANGE_PAGE_TEMPLATE_NRVCG = StrPair(('-pages %d', ' -start %d'))
-RANGE_PAGE_IDS_TEMPLATE_NRVCG = StrPair(('-stop_id %d', '-begin_id %d'))
+RANGE_ID_TEMPLATE_NRVCG = StrPair('-start %d', ' -end %d')
+RANGE_ID_TEMPLATE_RN_RP = StrPair('id>=%d', ' id<=%d')
+RANGE_ID_TEMPLATE_RX_RS_XB_BB = StrPair('id:>=%d', ' id:<=%d')
+RANGE_ID_TEMPLATE_EN = StrPair('id:%d..', '%d')
+RANGE_PAGE_TEMPLATE_NRVCG = StrPair('-pages %d', ' -start %d')
+RANGE_PAGE_IDS_TEMPLATE_NRVCG = StrPair('-stop_id %d', '-begin_id %d')
 
 RANGE_TEMPLATE_IDS = {
     DOWNLOADER_NM: RANGE_ID_TEMPLATE_NRVCG,
