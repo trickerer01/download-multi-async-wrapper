@@ -9,9 +9,10 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 from argparse import ArgumentParser
 from collections.abc import Sequence
 
+from config import Config, IgnoredArg, CatDwnIds, ExtraArgs
 from defs import (
-    Config, IgnoredArg, CatDwnIds, ExtraArgs, DOWNLOADERS, ACTION_STORE_TRUE, ACTION_APPEND, HELP_DEBUG, HELP_DOWNLOADERS, HELP_CATEGORIES,
-    HELP_SCRIPT_PATH, HELP_NO_DOWNLOAD, HELP_NO_UPDATE, HELP_INSTALL, HELP_IGNORE_ARGUMENT, HELP_IDLIST, HELP_APPEND,
+    DOWNLOADERS, ACTION_STORE_TRUE, ACTION_APPEND, HELP_DEBUG, HELP_DOWNLOADERS, HELP_CATEGORIES, HELP_SCRIPT_PATH, HELP_NO_DOWNLOAD,
+    HELP_NO_UPDATE, HELP_INSTALL, HELP_IGNORE_ARGUMENT, HELP_IDLIST, HELP_APPEND,
 )
 from validators import valid_categories_list, valid_downloaders_list, valid_file_path
 
@@ -32,16 +33,7 @@ def parse_arglist(args: Sequence[str]) -> None:
     parser.add_argument('-script', metavar='PATH_TO_FILE', required=True, help=HELP_SCRIPT_PATH, type=valid_file_path)
 
     parsed = parser.parse_args(args)
-    Config.debug = parsed.debug
-    Config.no_download = parsed.no_download
-    Config.no_update = parsed.no_update
-    Config.install = parsed.install
-    Config.ignored_args = parsed.ignore
-    Config.override_ids = parsed.idlist
-    Config.extra_args = parsed.append
-    Config.downloaders = parsed.downloaders
-    Config.categories = parsed.categories
-    Config.script_path = parsed.script
+    Config.read(parsed)
 
 #
 #

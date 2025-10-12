@@ -9,7 +9,9 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 from locale import getpreferredencoding
 from typing import TextIO
 
-from defs import Wrapper, Config, UTF8
+from config import Config
+from containers import Wrapper
+from defs import UTF8
 from strings import NEWLINE, datetime_str_nfull, timestamped_string
 
 __all__ = ('ensure_logfile', 'close_logfile', 'log_to', 'trace')

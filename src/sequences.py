@@ -10,13 +10,15 @@ from collections.abc import Sequence
 from re import compile as re_compile
 from subprocess import check_output
 
+from config import Config
+from containers import DownloadCollection
 from defs import (
-    DownloadCollection, IntPair, Config, IntSequence, DOWNLOADERS, RANGE_TEMPLATE_IDS, RANGE_TEMPLATE_PAGES, RANGE_TEMPLATE_PAGE_IDS,
+    IntPair, IntSequence, DOWNLOADERS, RANGE_TEMPLATE_IDS, RANGE_TEMPLATE_PAGES, RANGE_TEMPLATE_PAGE_IDS,
     RUXX_DOWNLOADERS, APP_NAMES, PATH_APPEND_DOWNLOAD_IDS, PATH_APPEND_DOWNLOAD_PAGES, MIN_PYTHON_VERSION, MIN_PYTHON_VERSION_STR,
-    unused_argument,
 )
 from logger import trace
 from strings import NEWLINE, path_args
+from util import unused_argument
 
 __all__ = ('validate_runners', 'validate_sequences', 'form_queries', 'report_queries', 'report_unoptimized')
 

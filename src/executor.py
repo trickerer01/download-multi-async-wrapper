@@ -11,7 +11,9 @@ from collections.abc import Iterable
 from math import log10, ceil
 from os import path, environ
 
-from defs import DownloadCollection, Wrapper, Config, UTF8, DOWNLOADERS, RUN_FILE_DOWNLOADERS
+from config import Config
+from containers import DownloadCollection, Wrapper
+from defs import UTF8, DOWNLOADERS, RUN_FILE_DOWNLOADERS
 from logger import trace, log_to
 from strings import datetime_str_nfull, normalize_path, unquote
 

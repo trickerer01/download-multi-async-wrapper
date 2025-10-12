@@ -6,7 +6,6 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
-import sys
 from collections.abc import Iterable
 from json import loads
 from os import chmod, path, stat, scandir
@@ -14,10 +13,11 @@ from re import compile as re_compile
 from subprocess import CalledProcessError, check_output
 from threading import Thread, Lock as ThreadLock
 
+from config import Config
+from containers import DownloadCollection, Wrapper
 from defs import (
-    DownloadCollection, Wrapper, IntSequence, Config, StrPair, UTF8, DOWNLOADERS, MIN_IDS_SEQ_LENGTH, PATH_APPEND_DOWNLOAD_IDS,
-    PATH_APPEND_DOWNLOAD_PAGES, PATH_APPEND_UPDATE, PATH_APPEND_REQUIREMENTS, RUXX_DOWNLOADERS, PAGE_DOWNLOADERS, PROXY_ARG,
-    MAX_CATEGORY_NAME_LENGTH, BOOL_STRS, COLOR_LOG_DOWNLOADERS,
+    IntSequence, StrPair, UTF8, DOWNLOADERS, MIN_IDS_SEQ_LENGTH, PATH_APPEND_DOWNLOAD_IDS, PATH_APPEND_DOWNLOAD_PAGES, PATH_APPEND_UPDATE,
+    PATH_APPEND_REQUIREMENTS, RUXX_DOWNLOADERS, PAGE_DOWNLOADERS, PROXY_ARG, MAX_CATEGORY_NAME_LENGTH, BOOL_STRS, COLOR_LOG_DOWNLOADERS,
 )
 from executor import register_queries
 from logger import trace, ensure_logfile
@@ -25,7 +25,7 @@ from sequences import validate_sequences, form_queries, report_queries, validate
 from strings import SLASH, NEWLINE, datetime_str_nfull, all_tags_negative, all_tags_positive, normalize_path, remove_trailing_comments
 from validators import valid_dir_path, positive_int
 
-__all__ = ('read_queries_file', 'prepare_queries', 'update_next_ids', 'at_startup')
+__all__ = ('read_queries_file', 'prepare_queries', 'update_next_ids')
 
 re_title = re_compile(r'^### TITLE:[A-zÀ-ʯА-я\d_+\-!]{,20}$')
 re_title_incr = re_compile(r'^### TITLEINCREMENT:\d$')
@@ -562,16 +562,6 @@ def update_next_ids() -> None:
     except Exception:
         trace(f'\nError: failed to update next ids, you\'ll have to do it manually!! (backup has to be {filename_bak})\n')
         raise
-
-
-def at_startup() -> None:
-    trace(
-        f'Python {sys.version}\nCommand-line args: {" ".join(sys.argv)}'
-        f'\nEnabled downloaders: "{",".join(Config.downloaders) or "all"}"'
-        f'\nEnabled categories: "{",".join(Config.categories) or "all"}"'
-        f'\nIgnored arguments: {",".join(str(ign) for ign in Config.ignored_args) or "[]"}'
-        f'\nIds overrides: {",".join(str(ove) for ove in Config.override_ids) or "[]"}'
-    )
 
 #
 #

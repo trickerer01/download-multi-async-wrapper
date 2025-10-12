@@ -9,8 +9,9 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 from unittest import TestCase
 
 from cmdargs import parse_arglist
+from config import Config
 from defs import (
-    Config, DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RC, DOWNLOADER_RG, DOWNLOADER_RN, DOWNLOADER_RX, DOWNLOADER_RS, DOWNLOADER_RP,
+    DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RC, DOWNLOADER_RG, DOWNLOADER_RN, DOWNLOADER_RX, DOWNLOADER_RS, DOWNLOADER_RP,
     DOWNLOADER_EN, DOWNLOADER_XB, DOWNLOADER_BB,
 )
 # noinspection PyProtectedMember
