@@ -6,9 +6,9 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
-from typing import Dict, Type, Generic
+from typing import Dict, Generic, Type
 
-from defs import DT, AT, DOWNLOADERS
+from defs import AT, DOWNLOADERS, DT
 from util import assert_notnull
 
 
@@ -19,7 +19,7 @@ class DownloadCollection(Dict[str, Dict[str, DT | None]]):
     def __init__(self) -> None:
         super().__init__()
 
-    def add_category(self, cat: str, init_type: Type[DT] = None, *args, **kwargs) -> None:
+    def add_category(self, cat: str, init_type: Type[DT] | None = None, *args, **kwargs) -> None:
         self[cat] = {dt: self._make_init_value(init_type, *args, **kwargs) for dt in DOWNLOADERS}
 
     def cur(self) -> dict[str, DT | None]:
@@ -52,7 +52,7 @@ class Wrapper(Generic[AT]):
         self.__init__(value)
 
     def __bool__(self) -> bool:
-        return not not self._value
+        return bool(self._value)
 
     def __str__(self) -> str:
         return str(self._value)

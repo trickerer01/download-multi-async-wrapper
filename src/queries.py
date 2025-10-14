@@ -6,48 +6,62 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
+import contextlib
+import json
+import os
+import re
 from collections.abc import Iterable
-from json import loads
-from os import chmod, path, stat, scandir
-from re import compile as re_compile
 from subprocess import CalledProcessError, check_output
-from threading import Thread, Lock as ThreadLock
+from threading import Lock, Thread
 
 from config import Config
 from containers import DownloadCollection, Wrapper
 from defs import (
-    IntSequence, StrPair, UTF8, DOWNLOADERS, MIN_IDS_SEQ_LENGTH, PATH_APPEND_DOWNLOAD_IDS, PATH_APPEND_DOWNLOAD_PAGES, PATH_APPEND_UPDATE,
-    PATH_APPEND_REQUIREMENTS, RUXX_DOWNLOADERS, PAGE_DOWNLOADERS, PROXY_ARG, MAX_CATEGORY_NAME_LENGTH, BOOL_STRS, COLOR_LOG_DOWNLOADERS,
+    BOOL_STRS,
+    COLOR_LOG_DOWNLOADERS,
+    DOWNLOADERS,
+    MAX_CATEGORY_NAME_LENGTH,
+    MIN_IDS_SEQ_LENGTH,
+    PAGE_DOWNLOADERS,
+    PATH_APPEND_DOWNLOAD_IDS,
+    PATH_APPEND_DOWNLOAD_PAGES,
+    PATH_APPEND_REQUIREMENTS,
+    PATH_APPEND_UPDATE,
+    PROXY_ARG,
+    RUXX_DOWNLOADERS,
+    UTF8,
+    IntSequence,
+    StrPair,
 )
 from executor import register_queries
-from logger import trace, ensure_logfile
-from sequences import validate_sequences, form_queries, report_queries, validate_runners, report_unoptimized
-from strings import SLASH, NEWLINE, datetime_str_nfull, all_tags_negative, all_tags_positive, normalize_path, remove_trailing_comments
-from validators import valid_dir_path, positive_int
+from logger import ensure_logfile, trace
+from sequences import form_queries, report_queries, report_unoptimized, validate_runners, validate_sequences
+from strings import NEWLINE, SLASH, all_tags_negative, all_tags_positive, datetime_str_nfull, normalize_path, remove_trailing_comments
+from validators import positive_int, valid_dir_path
 
-__all__ = ('read_queries_file', 'prepare_queries', 'update_next_ids')
+__all__ = ('prepare_queries', 'read_queries_file', 'update_next_ids')
 
-re_title = re_compile(r'^### TITLE:[A-zÀ-ʯА-я\d_+\-!]{,20}$')
-re_title_incr = re_compile(r'^### TITLEINCREMENT:\d$')
-re_dest_base = re_compile(r'^### DESTPATH:.+?$')
-re_dest_bak = re_compile(r'^### BAKPATH:.+?$')
-re_dest_run = re_compile(r'^### RUNPATH:.+?$')
-re_dest_log = re_compile(r'^### LOGPATH:.+?$')
-re_datesub = re_compile(r'^### DATESUB:.+?$')
-re_update = re_compile(r'^### UPDATE:.+?$')
-re_update_offsets = re_compile(r'^### UPDATE_OFFSETS:.+?$')
-re_noproxy_fetches = re_compile(r'^### NOPROXY_FETCHES:.+?$')
-re_category = re_compile(r'^### \(([A-zÀ-ʯА-я\d_+\-! ]+)\) ###$')
-re_comment = re_compile(r'^##[^#].*?$')
-re_python_exec = re_compile(r'^### PYTHON:.+?$')
-re_downloader_type = re_compile(fr'^# (?:{"|".join(DOWNLOADERS)}|{"|".join(DOWNLOADERS).upper()})(?: .*?)?$')
-re_ids_list = re_compile(r'^#(?:(?: \d+)+| -\d+)$')
-re_pages_list = re_compile(r'^# p\d+(?: s\d+)?$')
-re_downloader_basepath = re_compile(r'^# downloader:[A-Z/~].+?$')
-re_common_arg = re_compile(r'^# common:-.+?$')
-re_sub_begin = re_compile(r'^# sub:[^ ].*?$')
-re_sub_end = re_compile(r'^# send$')
-re_downloader_finalize = re_compile(r'^# end$')
+re_title = re.compile(r'^### TITLE:[A-zÀ-ʯА-я\d_+\-!]{,20}$')
+re_title_incr = re.compile(r'^### TITLEINCREMENT:\d$')
+re_dest_base = re.compile(r'^### DESTPATH:.+?$')
+re_dest_bak = re.compile(r'^### BAKPATH:.+?$')
+re_dest_run = re.compile(r'^### RUNPATH:.+?$')
+re_dest_log = re.compile(r'^### LOGPATH:.+?$')
+re_datesub = re.compile(r'^### DATESUB:.+?$')
+re_update = re.compile(r'^### UPDATE:.+?$')
+re_update_offsets = re.compile(r'^### UPDATE_OFFSETS:.+?$')
+re_noproxy_fetches = re.compile(r'^### NOPROXY_FETCHES:.+?$')
+re_category = re.compile(r'^### \(([A-zÀ-ʯА-я\d_+\-! ]+)\) ###$')
+re_comment = re.compile(r'^##[^#].*?$')
+re_python_exec = re.compile(r'^### PYTHON:.+?$')
+re_downloader_type = re.compile(fr'^# (?:{"|".join(DOWNLOADERS)}|{"|".join(DOWNLOADERS).upper()})(?: .*?)?$')
+re_ids_list = re.compile(r'^#(?:(?: \d+)+| -\d+)$')
+re_pages_list = re.compile(r'^# p\d+(?: s\d+)?$')
+re_downloader_basepath = re.compile(r'^# downloader:[A-Z/~].+?$')
+re_common_arg = re.compile(r'^# common:-.+?$')
+re_sub_begin = re.compile(r'^# sub:[^ ].*?$')
+re_sub_end = re.compile(r'^# send$')
+re_downloader_finalize = re.compile(r'^# end$')
 
 queries_file_lines: Wrapper[list[str]] = Wrapper()
 
@@ -58,10 +72,10 @@ sequences_common: DownloadCollection[list[str]] = DownloadCollection()
 sequences_tags: DownloadCollection[list[list[str]]] = DownloadCollection()
 sequences_subfolders: DownloadCollection[list[str]] = DownloadCollection()
 
-sequences_paths_reqs: dict[str, str | None] = {dt: None for dt in DOWNLOADERS}
-sequences_paths_update: dict[str, str | None] = {dt: None for dt in DOWNLOADERS}
-proxies_update: dict[str, StrPair | None] = {dt: None for dt in DOWNLOADERS}
-maxid_fetched: dict[str, int] = dict()
+sequences_paths_reqs: dict[str, str | None] = dict.fromkeys(DOWNLOADERS)
+sequences_paths_update: dict[str, str | None] = dict.fromkeys(DOWNLOADERS)
+proxies_update: dict[str, StrPair | None] = dict.fromkeys(DOWNLOADERS)
+maxid_fetched: dict[str, int] = {}
 
 
 def ensure_logfile_wrapper() -> None:
@@ -78,7 +92,7 @@ def ensure_logfile_wrapper() -> None:
 def calculate_title_suffix() -> None:
     trace('Calculating title suffix...')
     lbdir = Config.dest_logs_base
-    logsdir_all: list[str] = [f.name for f in scandir(lbdir) if f.is_file()] if path.isdir(lbdir) else []
+    logsdir_all: list[str] = [f.name for f in os.scandir(lbdir) if f.is_file()] if os.path.isdir(lbdir) else []
     logsdir_files = list(filter(lambda x: x.startswith((f'log_{Config.title}', f'run_{Config.title}')), logsdir_all))
     max_suffix_len = Config.title_increment
     max_suffix_val = 0
@@ -99,10 +113,10 @@ def fetch_maxids(dts: Iterable[str]) -> dict[str, str]:
         if not dts:
             return {}
         trace('Fetching max ids...')
-        re_maxid_fetch_result = re_compile(r'^[A-Z]{2}: \d+$')
-        grab_threads = list()
+        re_maxid_fetch_result = re.compile(r'^[A-Z]{2}: \d+$')
+        grab_threads = []
         results: dict[str, str] = {dt: '' for dt in dts if sequences_paths_update[dt] is not None}
-        rlock = ThreadLock()
+        rlock = Lock()
 
         def get_max_id(dtype: str) -> None:
             update_file_path = sequences_paths_update[dtype]
@@ -125,14 +139,12 @@ def fetch_maxids(dts: Iterable[str]) -> dict[str, str]:
         while grab_threads:
             thread = grab_threads.pop(-1)
             if thread.is_alive():
-                try:
+                with contextlib.suppress(KeyboardInterrupt):
                     thread.join()
-                except KeyboardInterrupt:
-                    pass
-        res_errors = list()
-        for dt in results:
+        res_errors = []
+        for dt, result in results.items():
             try:
-                assert re_maxid_fetch_result.fullmatch(results[dt])
+                assert re_maxid_fetch_result.fullmatch(result)
             except AssertionError:
                 res_errors.append(f'Error in fetch \'{dt}\' max id result!')
                 continue
@@ -174,7 +186,7 @@ def prepare_queries() -> None:
             raise
 
     cur_dwn = ''
-    cur_tags_list = list()
+    cur_tags_list = []
     autoupdate_seqs: DownloadCollection[IntSequence] = DownloadCollection()
 
     trace('Analyzing queries file strings...')
@@ -225,12 +237,12 @@ def prepare_queries() -> None:
                     continue
                 if re_datesub.fullmatch(line):
                     datesub_str = line[line.find(':') + 1:]
-                    trace(f'Parsed date subfolder flag value: \'{datesub_str}\' ({str(BOOL_STRS[datesub_str])})')
+                    trace(f'Parsed date subfolder flag value: \'{datesub_str}\' ({BOOL_STRS[datesub_str]!s})')
                     Config.datesub = BOOL_STRS[datesub_str]
                     continue
                 if re_update.fullmatch(line):
                     update_str = line[line.find(':') + 1:]
-                    trace(f'Parsed update flag value: \'{update_str}\' ({str(BOOL_STRS[update_str])})')
+                    trace(f'Parsed update flag value: \'{update_str}\' ({BOOL_STRS[update_str]!s})')
                     if Config.no_update:
                         trace('UPDATE FLAG IS IGNORED DUE TO no_update FLAG')
                         assert Config.update is False
@@ -246,9 +258,9 @@ def prepare_queries() -> None:
                 if re_update_offsets.fullmatch(line):
                     offsets_str = line[line.find(':') + 1:]
                     trace(f'Parsed update offsets value: \'{offsets_str}\'')
-                    assert Config.update_offsets == {}, f'Update offsets re-declaration! Was \'{str(Config.update_offsets)}\''
-                    Config.update_offsets = loads(offsets_str.lower())
-                    invalid_dts = list()
+                    assert Config.update_offsets == {}, f'Update offsets re-declaration! Was \'{Config.update_offsets!s}\''
+                    Config.update_offsets = json.loads(offsets_str.lower())
+                    invalid_dts = []
                     for pdt in Config.update_offsets:
                         if pdt not in DOWNLOADERS:
                             invalid_dts.append(pdt)
@@ -263,9 +275,9 @@ def prepare_queries() -> None:
                 if re_noproxy_fetches.fullmatch(line):
                     modules_str = line[line.find(':') + 1:]
                     trace(f'Parsed noproxy fetches value: \'{modules_str}\'')
-                    assert Config.noproxy_fetches == set(), f'Noproxy fetches re-declaration! Was \'{str(Config.noproxy_fetches)}\''
-                    Config.noproxy_fetches = set(loads(modules_str.lower()))
-                    invalid_dts = list()
+                    assert Config.noproxy_fetches == set(), f'Noproxy fetches re-declaration! Was \'{Config.noproxy_fetches!s}\''
+                    Config.noproxy_fetches = set(json.loads(modules_str.lower()))
+                    invalid_dts = []
                     for npdt in Config.noproxy_fetches:
                         if npdt not in DOWNLOADERS:
                             invalid_dts.append(npdt)
@@ -293,7 +305,7 @@ def prepare_queries() -> None:
                 continue
             if line[0] not in '(-*#' and not line[0].isalnum():
                 trace(f'Error: corrupted line beginning found at line {i + 1:d}!')
-                raise IOError
+                raise OSError
             line = remove_trailing_comments(line)
             if line.startswith('#'):
                 if re_comment.fullmatch(line):
@@ -308,7 +320,7 @@ def prepare_queries() -> None:
                             skipped_idx = ignored_idx
                             break
                 if skipped_idx >= 0:
-                    trace(f'Info: ignoring argument \'{str(Config.ignored_args[skipped_idx])}\' found at line {i + 1:d}. line: \'{line}\'')
+                    trace(f'Info: ignoring argument \'{Config.ignored_args[skipped_idx]!s}\' found at line {i + 1:d}. line: \'{line}\'')
                     continue
                 if re_downloader_type.fullmatch(line):
                     assert not cur_tags_list, f'at line {i + 1:d}: unclosed previous downloader section \'{cur_dwn}\'!'
@@ -324,7 +336,7 @@ def prepare_queries() -> None:
                     for ids_override in Config.override_ids:
                         if ids_override.name == f'{cat}:{cdt}':
                             idseq_temp = IntSequence(ids_override.ids, i + 1)
-                            trace(f'Using \'{cat}:{cdt}\' ids override: {str(idseq)} -> {str(idseq_temp)}')
+                            trace(f'Using \'{cat}:{cdt}\' ids override: {idseq!s} -> {idseq_temp!s}')
                             idseq = idseq_temp
                     if sequences_pages.cur()[cdt]:
                         assert len(idseq) <= 2, f'{cdt} has pages but defines ids range of {len(idseq)} > 2!\n\tat line {i + 1}: {line}'
@@ -357,15 +369,15 @@ def prepare_queries() -> None:
                     path_requirements = f'{basepath_n}{PATH_APPEND_REQUIREMENTS}'
                     path_updater = f'{basepath_n}{PATH_APPEND_UPDATE[cdt]}'
                     if Config.test is False:
-                        assert path.isdir(basepath)
-                        assert path.isfile(path_downloader)
+                        assert os.path.isdir(basepath)
+                        assert os.path.isfile(path_downloader)
                         if Config.install:
-                            assert path.isfile(path_requirements)
+                            assert os.path.isfile(path_requirements)
                         if Config.update:
-                            assert path.isfile(path_updater)
+                            assert os.path.isfile(path_updater)
                     sequences_paths.cur()[cur_dl()] = path_downloader
                     sequences_paths_reqs[cur_dl()] = path_requirements
-                    sequences_paths_update[cur_dl()] = normalize_path(path.abspath(path_updater), False)
+                    sequences_paths_update[cur_dl()] = normalize_path(os.path.abspath(path_updater), False)
                 elif re_common_arg.fullmatch(line):
                     common_args = line[line.find(':') + 1:].split(' ')
                     proxy_idx = common_args.index(PROXY_ARG) if PROXY_ARG in common_args else -1
@@ -385,21 +397,21 @@ def prepare_queries() -> None:
                     for extra_args in Config.extra_args:
                         if extra_args.name == f'{cat}:{cdt}':
                             args_temp = ' '.join(extra_args.args)
-                            trace(f'Using \'{cat}:{cdt}\' extra args: {str(extra_args.args)} -> {args_temp}')
+                            trace(f'Using \'{cat}:{cdt}\' extra args: {extra_args.args!s} -> {args_temp}')
                             sequences_common.cur()[cur_dl()].extend(extra_args.args)
                     cur_tags_list.clear()
                     cur_dwn = ''
                 else:
                     trace(f'Error: unknown param at line {i + 1:d}!')
-                    raise IOError
+                    raise OSError
             else:  # elif line[0] in '(-*' or line[0].isalpha():
                 assert sequences_ids.cur()[cur_dl()] or sequences_pages.cur()[cur_dl()]
                 if '  ' in line:
                     trace(f'Error: double space found in tags at line {i + 1:d}!')
-                    raise IOError
+                    raise OSError
                 if line[0] != '(' and not line.startswith('-+(') and '~' in line:
                     trace(f'Error: unsupported ungrouped OR symbol at line {i + 1:d}!')
-                    raise IOError
+                    raise OSError
                 need_append = True
                 if all_tags_negative(line.split(' ')):  # line[0] === '-'
                     if line[1] in '-+':
@@ -443,13 +455,13 @@ def prepare_queries() -> None:
                             trace(f'Info: exclusion(s) at {i + 1:d}, no previous matching tag or \'or\' group found. Line: \'{line}\'')
                 elif not all_tags_positive(line.split(' ')):
                     param_like = line[0] == '-' and len(line.split(' ')) == 2
-                    if not (param_like and (line.startswith('-search') or line.startswith('-quality'))):
+                    if not (param_like and (line.startswith(('-search', '-quality')))):
                         trace(f'Warning (W2): mixed positive / negative tags at line {i + 1:d}, '
                               f'{"param" if param_like else "error"}? Line: \'{line}\'')
                 if need_append:
                     cur_tags_list.extend(line.split(' '))
         except Exception as e:
-            trace(f'Error: issue encountered while parsing queries file at line {i + 1:d}!\n - {str(e)}')
+            trace(f'Error: issue encountered while parsing queries file at line {i + 1:d}!\n - {e!s}')
             raise
 
     trace('Sequences parsed successfully\n')
@@ -457,7 +469,7 @@ def prepare_queries() -> None:
         trace('[Autoupdate] validating runners...\n')
         validate_runners(sequences_paths, sequences_paths_reqs, sequences_paths_update)
         trace('Running max ID autoupdates...\n')
-        unsolved_idseqs = list()
+        unsolved_idseqs = []
         needed_updates = [dt for dt in DOWNLOADERS if any(dt in autoupdate_seqs[c] for c in autoupdate_seqs if autoupdate_seqs[c][dt])]
         maxids = fetch_maxids(needed_updates)
         for dt in needed_updates:
@@ -465,20 +477,20 @@ def prepare_queries() -> None:
             for cat in autoupdate_seqs:
                 uidseq: IntSequence | None = autoupdate_seqs[cat][dt]
                 if uidseq:
-                    update_str_base = f'{cat}:{dt} id sequence extended from {str(uidseq.ints)} to '
+                    update_str_base = f'{cat}:{dt} id sequence extended from {uidseq.ints!s} to '
                     if len(uidseq) == 1 and uidseq[0] < 0:
                         delta = uidseq.ints[0]
                         uidseq.ints.clear()
                         uidseq.ints.extend((maxid + delta, maxid))
                     else:
                         uidseq.ints.append(maxid)
-                    trace(f'{update_str_base}{str(uidseq.ints)}')
+                    trace(f'{update_str_base}{uidseq.ints!s}')
                     maxid_fetched[dt] = maxid
         for cat in sequences_ids:
             for dt in sequences_ids[cat]:
                 if sequences_ids[cat][dt] is not None and len(sequences_ids[cat][dt]) < MIN_IDS_SEQ_LENGTH:
                     unsolved_idseqs.append(f'{cat}:{dt}')
-                    trace(f'{cat}:{dt} sequence is not fixed! \'{str(sequences_ids[cat][dt])}\'')
+                    trace(f'{cat}:{dt} sequence is not fixed! \'{sequences_ids[cat][dt]!s}\'')
         assert len(unsolved_idseqs) == 0
 
     trace('Validating sequences...\n')
@@ -524,8 +536,8 @@ def update_next_ids() -> None:
             trace(f'\nSetting read-only permissions for \'{filename_bak}\'...')
             perm = 0
             try:
-                chmod(bak_fullpath, 0o100444)  # S_IFREG | S_IRUSR | S_IRGRP | S_IROTH
-                perm = stat(bak_fullpath).st_mode
+                os.chmod(bak_fullpath, 0o100444)  # S_IFREG | S_IRUSR | S_IRGRP | S_IROTH
+                perm = os.stat(bak_fullpath).st_mode
                 assert (perm & 0o777) == 0o444
                 trace('Permissions successfully updated')
             except AssertionError:

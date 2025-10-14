@@ -7,7 +7,8 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 # PROJECT-LEVEL IMPORTS ARE RESTRICTED
 #
 
-from typing import Iterable, NamedTuple, TypeVar
+from collections.abc import Iterable
+from typing import NamedTuple, TypeVar
 
 UTF8 = 'utf-8'
 ACTION_STORE_TRUE = 'store_true'
@@ -27,7 +28,7 @@ class IntSequence:
         self.line_num = line_num or -1
 
     def __str__(self) -> str:
-        return f'{str(self.ints)} (found at line {self.line_num:d})'
+        return f'{self.ints!s} (found at line {self.line_num:d})'
 
     def __len__(self) -> int:
         return len(self.ints)
@@ -52,11 +53,11 @@ class StrPair(NamedTuple):
 
 
 DT = TypeVar('DT', str, list, IntSequence)
-"""Must have __len__() defined"""
+'''Must have __len__() defined'''
 AT = TypeVar('AT')
-"""Any type"""
+'''Any type'''
 for _ in DT.__constraints__:
-    assert hasattr(_, '__len__') and callable(getattr(_, '__len__')), f'DT class \'{_.__name__}\' doesn\'t have len() method!'
+    assert hasattr(_, '__len__') and callable(_.__len__), f'DT class \'{_.__name__}\' doesn\'t have len() method!'
 # ^ Types ^
 
 OS_WINDOWS = 'Windows'
@@ -75,11 +76,11 @@ MAX_CMD_LEN: dict[str, int] = {
     OS_MACOS: 65000,
 }
 
-BOOL_STRS: dict[str, bool] = ({y: v for y, v in zip(
+BOOL_STRS: dict[str, bool] = (dict(zip(
     ('YES', 'Yes', 'yes', 'TRUE', 'True', 'true', '1', 'Y', 'y', 'NO', 'No', 'no', 'FALSE', 'False', 'false', '0', 'N', 'n'),
     (True,) * 9 + (False,) * 9,
-    strict=True
-)})
+    strict=True,
+)))
 
 DOWNLOADER_NM = 'nm'
 DOWNLOADER_RV = 'rv'
@@ -95,7 +96,7 @@ DOWNLOADER_BB = 'bb'
 
 DOWNLOADERS = [
     DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RC, DOWNLOADER_RG, DOWNLOADER_RN,
-    DOWNLOADER_RX, DOWNLOADER_RS, DOWNLOADER_RP, DOWNLOADER_EN, DOWNLOADER_XB, DOWNLOADER_BB
+    DOWNLOADER_RX, DOWNLOADER_RS, DOWNLOADER_RP, DOWNLOADER_EN, DOWNLOADER_XB, DOWNLOADER_BB,
 ]
 RUXX_DOWNLOADERS = (DOWNLOADER_RN, DOWNLOADER_RX, DOWNLOADER_RS, DOWNLOADER_RP, DOWNLOADER_EN, DOWNLOADER_XB, DOWNLOADER_BB)
 RUN_FILE_DOWNLOADERS = (DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RC, DOWNLOADER_RG)

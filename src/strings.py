@@ -6,8 +6,8 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
+import datetime
 from collections.abc import Iterable
-from datetime import datetime
 
 SLASH = '/'
 NEWLINE = '\n'
@@ -81,7 +81,7 @@ def path_args(dest_base: str, cat: str, sub: str, datepath: bool) -> str:
 
 def time_now_fmt(fmt: str) -> str:
     """datetime.now().strftime() wrapper"""
-    return datetime.now().strftime(fmt)
+    return datetime.datetime.now().strftime(fmt)
 
 
 def datetime_str_full() -> str:

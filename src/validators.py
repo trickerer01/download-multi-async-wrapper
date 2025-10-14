@@ -6,8 +6,8 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
+import os
 from argparse import ArgumentError
-from os import path
 
 from defs import DOWNLOADERS
 from logger import trace
@@ -16,8 +16,8 @@ from strings import normalize_path, unquote
 
 def valid_dir_path(pathstr: str) -> str:
     try:
-        newpath = normalize_path(path.expanduser(unquote(pathstr)))
-        assert path.isdir(newpath)
+        newpath = normalize_path(os.path.expanduser(unquote(pathstr)))
+        assert os.path.isdir(newpath)
         return newpath
     except Exception:
         raise ArgumentError
@@ -25,14 +25,14 @@ def valid_dir_path(pathstr: str) -> str:
 
 def valid_file_path(pathstr: str) -> str:
     try:
-        newpath = normalize_path(path.expanduser(unquote(pathstr)), False)
-        assert path.isfile(newpath)
+        newpath = normalize_path(os.path.expanduser(unquote(pathstr)), False)
+        assert os.path.isfile(newpath)
         return newpath
     except Exception:
         raise ArgumentError
 
 
-def valid_int(val: str, *, lb: int = None, ub: int = None) -> int:
+def valid_int(val: str, *, lb: int | None = None, ub: int | None = None) -> int:
     try:
         val = int(val)
         assert lb is None or val >= lb
@@ -51,7 +51,7 @@ def valid_downloaders_list(downloaders_str: str) -> list[str]:
         if len(downloaders_str) == 0:
             trace('Downloaders list can\'t be empty, use --no-download instead!')
             raise ValueError
-        listed_downloaders = list()
+        listed_downloaders = []
         ldll = [d.lower() for d in downloaders_str.split(',')]
         for d in ldll:
             assert d in DOWNLOADERS
@@ -68,7 +68,7 @@ def valid_downloaders_list(downloaders_str: str) -> list[str]:
 
 def valid_categories_list(categories_str: str) -> list[str]:
     try:
-        listed_categories = list()
+        listed_categories = []
         if len(categories_str) == 0:
             return listed_categories
         lctl = categories_str.split(',')

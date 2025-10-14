@@ -12,10 +12,10 @@ from platform import system as running_system
 
 from cmdargs import parse_arglist
 from config import Config
-from defs import SUPPORTED_SYSTEMS, MIN_PYTHON_VERSION, MIN_PYTHON_VERSION_STR
+from defs import MIN_PYTHON_VERSION, MIN_PYTHON_VERSION_STR, SUPPORTED_SYSTEMS
 from executor import execute
 from logger import close_logfile, trace
-from queries import read_queries_file, prepare_queries, update_next_ids
+from queries import prepare_queries, read_queries_file, update_next_ids
 from strings import datetime_str_full
 
 __all__ = ('main_sync',)
@@ -28,7 +28,7 @@ def at_startup() -> None:
             f'\nEnabled downloaders: "{",".join(Config.downloaders) or "all"}"'
             f'\nEnabled categories: "{",".join(Config.categories) or "all"}"'
             f'\nIgnored arguments: {",".join(str(ign) for ign in Config.ignored_args) or "[]"}'
-            f'\nIds overrides: {",".join(str(ove) for ove in Config.override_ids) or "[]"}'
+            f'\nIds overrides: {",".join(str(ove) for ove in Config.override_ids) or "[]"}',
         )
 
 
@@ -53,7 +53,7 @@ def run_main(args: Sequence[str]) -> int:
         result = -3
     finally:
         close_logfile()
-        return result
+    return result
 
 
 def main_sync(args: Sequence[str]) -> int:

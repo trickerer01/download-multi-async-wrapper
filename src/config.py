@@ -10,7 +10,7 @@ from argparse import Namespace
 
 from defs import MAX_CMD_LEN, OS_WINDOWS
 
-__all__ = ('Config', 'IgnoredArg', 'CatDwnIds', 'ExtraArgs')
+__all__ = ('CatDwnIds', 'Config', 'ExtraArgs', 'IgnoredArg')
 
 
 class IgnoredArg:
@@ -97,7 +97,7 @@ class ExtraArgs:
     __repr__ = __str__
 
 
-class BaseConfig(object):
+class BaseConfig:
     DEFAULT_PATH = './'
 
     def __init__(self, *, test=False, console_log=False) -> None:
@@ -107,11 +107,11 @@ class BaseConfig(object):
         self.no_download: bool = False
         self.no_update: bool = False
         self.install: bool = False
-        self.ignored_args: list[IgnoredArg] = list()
-        self.override_ids: list[CatDwnIds] = list()
-        self.extra_args: list[ExtraArgs] = list()
-        self.downloaders: list[str] = list()
-        self.categories: list[str] = list()
+        self.ignored_args: list[IgnoredArg] = []
+        self.override_ids: list[CatDwnIds] = []
+        self.extra_args: list[ExtraArgs] = []
+        self.downloaders: list[str] = []
+        self.categories: list[str] = []
         self.script_path: str = ''
         # script
         self.dest_base: str = BaseConfig.DEFAULT_PATH
@@ -123,12 +123,12 @@ class BaseConfig(object):
         self.python: str = ''
         self.datesub: bool = True
         self.update: bool = False
-        self.update_offsets: dict[str, int] = dict()
+        self.update_offsets: dict[str, int] = {}
         self.noproxy_fetches: set[str] = set()
         # calculated
         self.title_increment_value: str = ''
         self.max_cmd_len: int = MAX_CMD_LEN[OS_WINDOWS] // 2  # MAX_CMD_LEN.get(running_system())
-        self.disabled_downloaders: dict[str, set[str]] = dict()
+        self.disabled_downloaders: dict[str, set[str]] = {}
         # internal
         self.test: bool = test
         self.console_log: bool = not (test and not console_log)
@@ -154,10 +154,10 @@ class BaseConfig(object):
 
     def __str__(self) -> str:
         return (
-            f'debug: {self.debug}, downloaders: {str(self.downloaders)}, script: {self.script_path}, dest: {self.dest_base}, '
+            f'debug: {self.debug}, downloaders: {self.downloaders!s}, script: {self.script_path}, dest: {self.dest_base}, '
             f'run: {self.dest_run_base}, logs: {self.dest_logs_base}, bak: {self.dest_bak_base}, update: {self.update}, '
-            f'no_download: {self.no_download}, no_update: {self.no_update}, ignored_args: {str(self.ignored_args)}, '
-            f'id_overrides: {str(self.override_ids)}, max_cmd_len: {self.max_cmd_len}'
+            f'no_download: {self.no_download}, no_update: {self.no_update}, ignored_args: {self.ignored_args!s}, '
+            f'id_overrides: {self.override_ids!s}, max_cmd_len: {self.max_cmd_len}'
         )
 
     __repr__ = __str__

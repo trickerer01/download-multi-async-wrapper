@@ -14,10 +14,10 @@ from containers import Wrapper
 from defs import UTF8
 from strings import NEWLINE, datetime_str_nfull, timestamped_string
 
-__all__ = ('ensure_logfile', 'close_logfile', 'log_to', 'trace')
+__all__ = ('close_logfile', 'ensure_logfile', 'log_to', 'trace')
 
 logfile: Wrapper[TextIO] = Wrapper()
-buffered_strings: list[str] = list()
+buffered_strings: list[str] = []
 
 PREF_ENCODING = getpreferredencoding()
 IO_ERR_POLICY = 'backslashreplace'
@@ -41,8 +41,8 @@ def close_logfile() -> None:
         trace('\nClosing logfile...\n\n', False)
         logfile().close()
         if Config.test:
-            from os import remove
-            remove(logfile().name)
+            import os
+            os.remove(logfile().name)
         logfile.reset()
     elif buffered_strings:
         trace(f'\nWarning: buffered log messages were never dumped! Contents:\n{NEWLINE.join(buffered_strings)}')

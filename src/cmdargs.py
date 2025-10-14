@@ -9,10 +9,21 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 from argparse import ArgumentParser
 from collections.abc import Sequence
 
-from config import Config, IgnoredArg, CatDwnIds, ExtraArgs
+from config import CatDwnIds, Config, ExtraArgs, IgnoredArg
 from defs import (
-    DOWNLOADERS, ACTION_STORE_TRUE, ACTION_APPEND, HELP_DEBUG, HELP_DOWNLOADERS, HELP_CATEGORIES, HELP_SCRIPT_PATH, HELP_NO_DOWNLOAD,
-    HELP_NO_UPDATE, HELP_INSTALL, HELP_IGNORE_ARGUMENT, HELP_IDLIST, HELP_APPEND,
+    ACTION_APPEND,
+    ACTION_STORE_TRUE,
+    DOWNLOADERS,
+    HELP_APPEND,
+    HELP_CATEGORIES,
+    HELP_DEBUG,
+    HELP_DOWNLOADERS,
+    HELP_IDLIST,
+    HELP_IGNORE_ARGUMENT,
+    HELP_INSTALL,
+    HELP_NO_DOWNLOAD,
+    HELP_NO_UPDATE,
+    HELP_SCRIPT_PATH,
 )
 from validators import valid_categories_list, valid_downloaders_list, valid_file_path
 
