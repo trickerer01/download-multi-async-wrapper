@@ -6,7 +6,6 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
-import contextlib
 import json
 import os
 import re
@@ -139,8 +138,10 @@ def fetch_maxids(dts: Iterable[str]) -> dict[str, str]:
         while grab_threads:
             thread = grab_threads.pop(-1)
             if thread.is_alive():
-                with contextlib.suppress(KeyboardInterrupt):
+                try:
                     thread.join()
+                except KeyboardInterrupt:
+                    pass
         res_errors = []
         for dt, result in results.items():
             try:

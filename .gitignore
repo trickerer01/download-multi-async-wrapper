@@ -1,6 +1,6 @@
 # Dev
 *venv/
-.ruff_cache/
+/.ruff_cache/
 src/__pycache__/
 logs/*
 run/*
