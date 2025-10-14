@@ -236,10 +236,10 @@ class QueriesFormTests(TestCase):
         read_queries_file()
         prepare_queries()
         self.assertEqual('script_2', Config.title)
-        self.assertEqual('P:/', Config.dest_base)
-        self.assertEqual('P:/', Config.dest_bak_base)
-        self.assertEqual('P:/', Config.dest_run_base)
-        self.assertEqual('P:/', Config.dest_logs_base)
+        self.assertEqual('C:/', Config.dest_base)
+        self.assertEqual('C:/', Config.dest_bak_base)
+        self.assertEqual('C:/', Config.dest_run_base)
+        self.assertEqual('C:/', Config.dest_logs_base)
         print(f'{self._testMethodName} passed')
 
 
