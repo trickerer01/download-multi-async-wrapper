@@ -1,14 +1,17 @@
-
 # Dev
-1venv/
+*venv/
+.ruff_cache/
 src/__pycache__/
 logs/*
 run/*
 tests/*
 *.pyc
 *.bak
+*.cfg
+*.lnk
+*.exe
 src/curr.py
-setup.cfg
+!setup.cfg
 
 # IDE
 /.idea/*
