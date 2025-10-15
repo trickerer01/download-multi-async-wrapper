@@ -186,6 +186,7 @@ def prepare_queries() -> None:
             trace(f'\nat line {i + 1:d}: current download category isn\'t selected!')
             raise
 
+    args_to_ignore = Config.ignored_args.copy()
     cur_dwn = ''
     cur_tags_list = []
     autoupdate_seqs: DownloadCollection[IntSequence] = DownloadCollection()
@@ -310,18 +311,31 @@ def prepare_queries() -> None:
             line = remove_trailing_comments(line)
             if line.startswith('#'):
                 if re_comment.fullmatch(line):
-                    # trace(f'Ignoring commented out line {i + 1:d}: \'{line}\'')
                     continue
-                skipped_idx = -1
-                for ignored_idx, ignored in enumerate(Config.ignored_args):
-                    start_idx = line.find(': ') + 2 if ': ' in line else 0
-                    start_idx = line.find(ignored.name, start_idx)
+                for ignored_idx in reversed(range(len(args_to_ignore))):
+                    ignored_arg = args_to_ignore[ignored_idx]
+                    start_idx = line.find(ignored_arg.name, line.find(':') + 1)
                     if start_idx > 0 and line[start_idx - 1] == '-':
-                        if ignored.len < 2 or line.find(' ', start_idx + len(ignored.name)) > start_idx:
-                            skipped_idx = ignored_idx
-                            break
-                if skipped_idx >= 0:
-                    trace(f'Info: ignoring argument \'{Config.ignored_args[skipped_idx]!s}\' found at line {i + 1:d}. line: \'{line}\'')
+                        start_idx -= 1
+                        while start_idx and line[start_idx - 1] == '-':
+                            start_idx -= 1
+                        end_idx = start_idx + len(ignored_arg.name)
+                        for num_to_skip in reversed(range(ignored_arg.len)):
+                            end_idx = line.find(' ', end_idx) + 1
+                            if end_idx == 0:
+                                if num_to_skip == 0:
+                                    end_idx = len(line)
+                                else:
+                                    break
+                            if num_to_skip == 0:
+                                # remove ignored arg(s) and consume ignored arg from config
+                                new_line = f'{line[:start_idx]}{line[min(end_idx, len(line)):]}'
+                                trace(f'Info: ignoring argument \'{ignored_arg!s}\' found at line {i + 1:d}:\n  \'{line}\' -->'
+                                      f'\n  {" " * start_idx}^{" " * (end_idx - start_idx)}^\n  {new_line}')
+                                line = new_line
+                                del args_to_ignore[ignored_idx]
+                if not line or line.endswith(':'):
+                    trace(f'Ignoring remnants of now consumed line {i + 1:d}: \'{line}\'')
                     continue
                 if re_downloader_type.fullmatch(line):
                     assert not cur_tags_list, f'at line {i + 1:d}: unclosed previous downloader section \'{cur_dwn}\'!'

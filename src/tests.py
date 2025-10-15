@@ -51,7 +51,7 @@ args_argparse_str1 = (
 args_argparse_str2 = (
     '--debug '
     '--no-update '
-    '-ignore dmode,2 '
+    '-ignore dmode,2 -ignore dmode,2 '
     '-downloaders rv,rx,rn,rs '
     '-script "../tests/queries.list"'
 )
@@ -93,7 +93,7 @@ class ArgParseTests(TestCase):
         self.assertEqual(
             'debug: True, downloaders: [\'rv\', \'rn\', \'rx\', \'rs\'], '
             'script: ../tests/queries.list, dest: ./, run: ./, logs: ./, bak: ./, update: False, '
-            'no_download: False, no_update: True, ignored_args: [dmode(2)], id_overrides: [], max_cmd_len: 16000',
+            'no_download: False, no_update: True, ignored_args: [dmode(2), dmode(2)], id_overrides: [], max_cmd_len: 16000',
             str(Config),
         )
         print(f'{self._testMethodName} passed')
@@ -206,24 +206,24 @@ class QueriesFormTests(TestCase):
             queries_all[cat_img][DOWNLOADER_RX][1],
         )
         self.assertEqual(
-            f'python3 "D:/ruxx/src/ruxx_cmd.py" id>=7 id<=8 -path "../tests/{date_str_md(cat_img)}/g/" -module rp g',
+            f'python3 "D:/ruxx/src/ruxx_cmd.py" id>=7 id<=8 -path "../tests/{date_str_md(cat_img)}/g/" -dmode 0 -module rp g',
             queries_all[cat_img][DOWNLOADER_RP][0],
         )
         self.assertEqual(
-            f'python3 "D:/ruxx/src/ruxx_cmd.py" id:>=5 id:<=5 -path "../tests/{date_str_md(cat_img)}/z/" -module xb z',
+            f'python3 "D:/ruxx/src/ruxx_cmd.py" id:>=5 id:<=5 -path "../tests/{date_str_md(cat_img)}/z/" -dmode 1 -module xb z',
             queries_all[cat_img][DOWNLOADER_XB][0],
         )
         self.assertEqual(
-            f'python3 "D:/ruxx/src/ruxx_cmd.py" id:>=5 id:<=5 -path "../tests/{date_str_md(cat_img)}/x/" -module xb -z x (y~w)',
+            f'python3 "D:/ruxx/src/ruxx_cmd.py" id:>=5 id:<=5 -path "../tests/{date_str_md(cat_img)}/x/" -dmode 1 -module xb -z x (y~w)',
             queries_all[cat_img][DOWNLOADER_XB][1],
         )
         self.assertEqual(
-            f'python3 "D:/ruxx/src/ruxx_cmd.py" id:>=5 id:<=5 -path "../tests/{date_str_md(cat_img)}/z/" -module bb z',
+            f'python3 "D:/ruxx/src/ruxx_cmd.py" id:>=5 id:<=5 -path "../tests/{date_str_md(cat_img)}/z/" -dmode 1 -module bb z',
             queries_all[cat_img][DOWNLOADER_BB][0],
         )
         self.assertEqual(  # same dest for 'vid' and 'vid_' categories
-            f'python3 "D:/NM/src/ids.py" -start 1 -end 1 -path "../tests/{date_str_md(cat_vid)}/" --disable-log-colors --dump-tags '
-            '-script "'
+            f'python3 "D:/NM/src/ids.py" -start 1 -end 1 -path "../tests/{date_str_md(cat_vid)}/" --disable-log-colors -dmode touch '
+            '--dump-tags -script "'
             'a: -quality 1080p -a -b -c -dfff ggg; '
             'b: -quality 1080p -a -b -c -dfff -ggg -(x,z) (h~i~j~k)"',
             queries_all[cat_vid_][DOWNLOADER_NM][0],

@@ -13,12 +13,12 @@ Dependencies:
   - Notes:
     - only downloaders listed within the script need to be cloned
 - Libraries:
-  - wrapper itself has no additional module dependencies
+  - wrapper itself has no additional package dependencies
   - downloaders have their respective dependencies which have to be installed to the environment linked to Python executable path set within the script in order to enable wrapper to launch said downloaders. Check respective downloaders ReadMe's and `requirements.txt`. Use `--install` cmd argument to install enabled downloaders' dependencies to selected Python environment automatically. Notes:
-    - RV, NM and RC dependencies are always the same
+    - RV, NM, RC and RG dependencies are always the same
     - Ruxx dependencies are Python version dependent
 
 See [SCRIPTING_SYNTAX.txt](https://github.com/trickerer01/download-multi-async-wrapper/blob/master/SCRIPTING_SYNTAX.txt) for script composition guidelines and tips  
-Invoke `python main.py --help` to list all cmdline arguments
+Invoke `python src/main.py --help` to list all cmdline arguments
 
 Once you are done with initial script setup you only need to invoke a single cmd command to download the next batch without any need to even update next max id manually, ever (ideally)

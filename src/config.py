@@ -17,7 +17,7 @@ class IgnoredArg:
     def __init__(self, ignored_fmt: str) -> None:
         try:
             ignored_name, ignored_num = tuple(ignored_fmt.split(',', 1))
-            assert ignored_name and ' ' not in ignored_name and int(ignored_num) in (1, 2)
+            assert ignored_name and ' ' not in ignored_name and ignored_num in ('1', '2')
             self._name = ignored_name
             self._len = int(ignored_num)
         except Exception:

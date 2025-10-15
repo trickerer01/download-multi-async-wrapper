@@ -212,19 +212,20 @@ HELP_NO_UPDATE = 'Boolean flag to skip script ids update regardless of script up
 HELP_INSTALL = 'Force install dependencies from enabled downloaders to a Python environment set within the script'
 HELP_SCRIPT_PATH = 'Full path to the script (queries) file'
 HELP_IGNORE_ARGUMENT = (
-    'Script one-line cmd argument to ignore, format: \'<NAME>,<COUNT>\''
-    ' where <NAME> is argument name (dash prefix must be omitted) and <COUNT> is a number of arguments to skip (1 or 2).'
-    ' Skips the entire line! Can be used multiple times'
+    'Script cmd argument to ignore, format: \'<NAME>,<COUNT>\' where <NAME> is argument name (without any dash prefix)'
+    ' and <COUNT> is a number of arguments to skip: 1 or 2 (argument+value).'
+    ' Example: \'-ignore proxy,2\' will ignore first encountered argument \'-proxy <anything>\'.'
+    ' Can be used multiple times (each entry consumes a single argument[+value])'
 )
 HELP_IDLIST = (
     'Override id range script parameter for a given \'catergory:downloader\' combination.'
-    ' Example: \'vid,rx,50000 51000\' forces RX downloader to use 50000-51000 as ids range when processing \'vid\' category.'
+    ' Example: \'vid,rx,50000 51000\' forces RX downloader to use 50000-51000 as ids range when processing \'vid\' category.'
     ' Can be used multiple times'
 )
 HELP_APPEND = (
     'Append extra argument(s) to a given \'catergory:downloader\' combination cmdline.'
-    ' Can be used to override existing identical downloader arguments:'
-    ' \'--dest "./" --dest "../"\' will result in the latter value being used once parsed by the downloader.'
+    ' Can be used to override existing identical downloader arguments.'
+    ' Example: \'--dest "./" --dest "./sub1/"\' will result in the latter value being used once parsed by the downloader.'
     ' Can be used multiple times'
 )
 
