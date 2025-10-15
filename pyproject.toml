@@ -115,6 +115,7 @@ ignore = [
     'PLW1510', # subprocess-run-without-check
     'PLW1641', # eq-without-hash
     'PLW2901', # redefined-loop-name
+    'RET504',  # unnecessary-assign
     'RUF001',  # ambiguous-unicode-character-string
     'RUF012',  # mutable-class-default
     'RUF100',  # unused-noqa (flake8 has slightly different behavior)
