@@ -270,7 +270,7 @@ def prepare_queries() -> None:
                             int(Config.update_offsets[pdt])
                         except ValueError:
                             invalid_dts.append(pdt)
-                            trace(f'Error: invalid {pdt} offset int value: \'{Config.update_offsets[pdt]}\'')
+                            trace(f'Error: invalid {pdt} offset int value: \'{Config.update_offsets[pdt]!s}\'')
                     assert not invalid_dts, f'Invalid update offsets value: {offsets_str}'
                     continue
                 if re_noproxy_fetches.fullmatch(line):
