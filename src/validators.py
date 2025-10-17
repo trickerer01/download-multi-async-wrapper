@@ -46,7 +46,7 @@ def positive_int(val: str) -> int:
     return valid_int(val, lb=0)
 
 
-def valid_downloaders_list(downloaders_str: str) -> list[str]:
+def valid_downloaders_list(downloaders_str: str) -> tuple[str, ...]:
     try:
         if len(downloaders_str) == 0:
             trace('Downloaders list can\'t be empty, use --no-download instead!')
@@ -61,7 +61,7 @@ def valid_downloaders_list(downloaders_str: str) -> list[str]:
         for d in DOWNLOADERS:
             if d in ldll:
                 listed_downloaders.append(d)
-        return listed_downloaders
+        return tuple(listed_downloaders)
     except Exception:
         raise ArgumentError
 

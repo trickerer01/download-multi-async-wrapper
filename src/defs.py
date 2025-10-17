@@ -94,14 +94,46 @@ DOWNLOADER_EN = 'en'
 DOWNLOADER_XB = 'xb'
 DOWNLOADER_BB = 'bb'
 
-DOWNLOADERS = [
-    DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RC, DOWNLOADER_RG, DOWNLOADER_RN,
-    DOWNLOADER_RX, DOWNLOADER_RS, DOWNLOADER_RP, DOWNLOADER_EN, DOWNLOADER_XB, DOWNLOADER_BB,
-]
-RUXX_DOWNLOADERS = (DOWNLOADER_RN, DOWNLOADER_RX, DOWNLOADER_RS, DOWNLOADER_RP, DOWNLOADER_EN, DOWNLOADER_XB, DOWNLOADER_BB)
-RUN_FILE_DOWNLOADERS = (DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RC, DOWNLOADER_RG)
-PAGE_DOWNLOADERS = (DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RC, DOWNLOADER_RG)
-COLOR_LOG_DOWNLOADERS = (DOWNLOADER_NM, DOWNLOADER_RV, DOWNLOADER_RC, DOWNLOADER_RG)
+DOWNLOADERS = (
+    DOWNLOADER_NM,
+    DOWNLOADER_RV,
+    DOWNLOADER_RC,
+    DOWNLOADER_RG,
+    DOWNLOADER_RN,
+    DOWNLOADER_RX,
+    DOWNLOADER_RS,
+    DOWNLOADER_RP,
+    DOWNLOADER_EN,
+    DOWNLOADER_XB,
+    DOWNLOADER_BB,
+)
+RUXX_DOWNLOADERS = (
+    DOWNLOADER_RN,
+    DOWNLOADER_RX,
+    DOWNLOADER_RS,
+    DOWNLOADER_RP,
+    DOWNLOADER_EN,
+    DOWNLOADER_XB,
+    DOWNLOADER_BB,
+)
+RUN_FILE_DOWNLOADERS = (
+    DOWNLOADER_NM,
+    DOWNLOADER_RV,
+    DOWNLOADER_RC,
+    DOWNLOADER_RG,
+)
+PAGE_DOWNLOADERS = (
+    DOWNLOADER_NM,
+    DOWNLOADER_RV,
+    DOWNLOADER_RC,
+    DOWNLOADER_RG,
+)
+COLOR_LOG_DOWNLOADERS = (
+    DOWNLOADER_NM,
+    DOWNLOADER_RV,
+    DOWNLOADER_RC,
+    DOWNLOADER_RG,
+)
 
 APP_NAME_NM = DOWNLOADER_NM.upper()
 APP_NAME_RV = DOWNLOADER_RV.upper()
@@ -224,8 +256,9 @@ HELP_IDLIST = (
 )
 HELP_APPEND = (
     'Append extra argument(s) to a given \'catergory:downloader\' combination cmdline.'
-    ' Can be used to override existing identical downloader arguments.'
-    ' Example: \'--dest "./" --dest "./sub1/"\' will result in the latter value being used once parsed by the downloader.'
+    ' Syntax: \'--append <category>:<downloader>:<arg1>:<param1>[:<arg2>:<param2>...]\''
+    ' Can be used to override existing identical downloader arguments. Replace all spaces with colons'
+    ' Example: \'--append vid:rx:--dest:./sub1/\' will make rx downloader download to folder \'sub1\' when processing category \'vid\'.'
     ' Can be used multiple times'
 )
 

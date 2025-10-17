@@ -22,10 +22,12 @@ class DownloadCollection(Dict[str, Dict[str, DT | None]]):
     def add_category(self, cat: str, init_type: Type[DT] | None = None, *args, **kwargs) -> None:
         self[cat] = {dt: self._make_init_value(init_type, *args, **kwargs) for dt in DOWNLOADERS}
 
-    def cur(self) -> dict[str, DT | None]:
+    @property
+    def at_cur_cat(self) -> dict[str, DT | None]:
         return next(reversed(self.values()))
 
-    def cur_key(self) -> str:
+    @property
+    def cur_cat(self) -> str:
         return next(reversed(self.keys()))
 
     @staticmethod
@@ -42,14 +44,17 @@ class DownloadCollection(Dict[str, Dict[str, DT | None]]):
 
 
 class Wrapper(Generic[AT]):
-    def __init__(self, value: AT = None) -> None:
-        self._value = value
+    _value: AT | None
 
-    def get(self) -> AT:
+    def __init__(self, value: AT | None = None) -> None:
+        self.reset(value)
+
+    @property
+    def val(self) -> AT:
         return assert_notnull(self._value)
 
-    def reset(self, value: AT = None) -> None:
-        self.__init__(value)
+    def reset(self, value: AT | None = None) -> None:
+        self._value = value
 
     def __bool__(self) -> bool:
         return bool(self._value)
@@ -58,7 +63,6 @@ class Wrapper(Generic[AT]):
         return str(self._value)
 
     __repr__ = __str__
-    __call__ = get
 
 #
 #

@@ -70,8 +70,8 @@ class CatDwnIds:
 class ExtraArgs:
     def __init__(self, cat_dwn_args_fmt: str) -> None:
         try:
-            cat, dt, args = tuple(cat_dwn_args_fmt.split(',', 2))
-            arglist = args.split(' ')
+            cat, dt, args = tuple(cat_dwn_args_fmt.split(':', 2))
+            arglist = args.split(':')
             assert cat and dt and arglist
             self._name = f'{cat}:{dt}'
             self._arglist = arglist
@@ -110,7 +110,7 @@ class BaseConfig:
         self.ignored_args: list[IgnoredArg] = []
         self.override_ids: list[CatDwnIds] = []
         self.extra_args: list[ExtraArgs] = []
-        self.downloaders: list[str] = []
+        self.downloaders: tuple[str, ...] = ()
         self.categories: list[str] = []
         self.script_path: str = ''
         # script

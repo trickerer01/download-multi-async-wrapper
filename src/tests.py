@@ -23,13 +23,9 @@ from defs import (
     DOWNLOADER_RX,
     DOWNLOADER_XB,
 )
-
-# noinspection PyProtectedMember
 from executor import queries_all, split_into_args
 from logger import close_logfile
 from main import main_sync
-
-# noinspection PyProtectedMember
 from queries import (
     prepare_queries,
     read_queries_file,
@@ -57,13 +53,13 @@ args_argparse_str2 = (
 )
 
 args_argparse_str3 = (
-    '-script ../tests/queries2.list'
+    '-script ../tests/queries2.list '
+    '-append VIDEOS:nm:-continue'
 )
 
 
 def set_up_test(log=False) -> None:
     close_logfile()
-    # noinspection PyProtectedMember
     Config._reset()
     Config.test = True
     Config.console_log = log
@@ -80,7 +76,7 @@ class ArgParseTests(TestCase):
         set_up_test()
         parse_arglist(args_argparse_str1.split())
         self.assertEqual(
-            'debug: False, downloaders: [\'nm\', \'rv\', \'rc\', \'rg\', \'rn\', \'rx\', \'rs\', \'rp\', \'en\', \'xb\', \'bb\'], '
+            'debug: False, downloaders: (\'nm\', \'rv\', \'rc\', \'rg\', \'rn\', \'rx\', \'rs\', \'rp\', \'en\', \'xb\', \'bb\'), '
             'script: ../tests/queries.list, dest: ./, run: ./, logs: ./, bak: ./, update: False, '
             'no_download: False, no_update: False, ignored_args: [], id_overrides: [], max_cmd_len: 16000',
             str(Config),
@@ -91,7 +87,7 @@ class ArgParseTests(TestCase):
         set_up_test(True)
         parse_arglist(args_argparse_str2.split())
         self.assertEqual(
-            'debug: True, downloaders: [\'rv\', \'rn\', \'rx\', \'rs\'], '
+            'debug: True, downloaders: (\'rv\', \'rn\', \'rx\', \'rs\'), '
             'script: ../tests/queries.list, dest: ./, run: ./, logs: ./, bak: ./, update: False, '
             'no_download: False, no_update: True, ignored_args: [dmode(2), dmode(2)], id_overrides: [], max_cmd_len: 16000',
             str(Config),
@@ -231,6 +227,7 @@ class QueriesFormTests(TestCase):
         print(f'{self._testMethodName} passed')
 
     def test_queries2(self) -> None:
+        cat_vid = 'VIDEOS'
         set_up_test()
         parse_arglist(args_argparse_str3.split())
         read_queries_file()
@@ -240,6 +237,7 @@ class QueriesFormTests(TestCase):
         self.assertEqual('C:/', Config.dest_bak_base)
         self.assertEqual('C:/', Config.dest_run_base)
         self.assertEqual('C:/', Config.dest_logs_base)
+        self.assertIn('-continue', queries_all[cat_vid][DOWNLOADER_NM][0])
         print(f'{self._testMethodName} passed')
 
 

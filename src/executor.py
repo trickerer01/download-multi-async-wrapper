@@ -77,7 +77,7 @@ def split_into_args(query: str) -> list[str]:
 async def run_cmd(query: str, dt: str, qn: int, qm: int, qt: str, qtn: int, qtm: int) -> None:
     suffix = f'{Config.full_title}_' if Config.title else ''
     begin_msg = f'\n[{Config.full_title}] Executing \'{qt}\' {dt} query {qtn:d} / {qtm:d} ({dt} query {qn:d} / {qm:d}):\n{query}'
-    proc_file_name_body = f'{suffix}{dt}{qn:{dtqn_fmt()}}_{qt.strip()}{qtn:{dtqn_fmt()}}_{datetime_str_nfull()}'
+    proc_file_name_body = f'{suffix}{dt}{qn:{dtqn_fmt.val}}_{qt.strip()}{qtn:{dtqn_fmt.val}}_{datetime_str_nfull()}'
     log_file_name = f'{Config.dest_logs_base}log_{proc_file_name_body}.log'
     with open(log_file_name, 'wt+', encoding=UTF8, errors='replace', buffering=1) as log_file:
         trace(begin_msg)
@@ -94,9 +94,9 @@ async def run_cmd(query: str, dt: str, qn: int, qm: int, qt: str, qtn: int, qtm:
             cmd_args[2:] = ['file', '-path', run_file_abspath]
             with open(run_file_abspath, 'wt', encoding=UTF8, buffering=1) as run_file:
                 run_file.write('\n'.join(cmd_args_new))
-        ef = Future(loop=executor_event_loop())
-        tr, _ = await executor_event_loop().subprocess_exec(lambda: DummyResultProtocol(ef), *cmd_args, stderr=log_file, stdout=log_file,
-                                                            env={**os.environ, 'PYTHONIOENCODING': UTF8, 'PYTHONUNBUFFERED': '1'})
+        ef = Future(loop=executor_event_loop.val)
+        tr, _ = await executor_event_loop.val.subprocess_exec(lambda: DummyResultProtocol(ef), *cmd_args, stderr=log_file, stdout=log_file,
+                                                              env={**os.environ, 'PYTHONIOENCODING': UTF8, 'PYTHONUNBUFFERED': '1'})
         await ef
         tr.close()
         log_file.seek(0)
@@ -163,8 +163,8 @@ async def run_all_cmds() -> None:
 
 def execute() -> None:
     executor_event_loop.reset(new_event_loop())
-    executor_event_loop().run_until_complete(run_all_cmds())
-    executor_event_loop().close()
+    executor_event_loop.val.run_until_complete(run_all_cmds())
+    executor_event_loop.val.close()
     executor_event_loop.reset()
 
 #
