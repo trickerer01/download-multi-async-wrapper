@@ -54,7 +54,7 @@ args_argparse_str2 = (
 
 args_argparse_str3 = (
     '-script ../tests/queries2.list '
-    '-append VIDEOS:nm:-continue'
+    '-append VIDEOS,nm,-continue'
 )
 
 

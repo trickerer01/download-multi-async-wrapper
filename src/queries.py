@@ -407,7 +407,7 @@ def prepare_queries() -> None:
                     for extra_args in Config.extra_args:
                         if extra_args.name == f'{cat}:{cdt}':
                             trace(f'Using \'{cat}:{cdt}\' extra args: {extra_args.args!s} -> {" ".join(extra_args.args)}')
-                            sequences_common.at_cur_cat[cur_dl()].extend(extra_args.args)
+                            sequences_common.at_cur_cat[cur_dl()].extend(f'"{arg}"' for arg in extra_args.args)
                     cur_tags_list.clear()
                     cur_dwn = ''
                 else:

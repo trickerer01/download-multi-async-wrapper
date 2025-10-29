@@ -13,6 +13,7 @@ from config import CatDwnIds, Config, ExtraArgs, IgnoredArg
 from defs import (
     ACTION_APPEND,
     ACTION_STORE_TRUE,
+    APPEND_SEPARATOR,
     DOWNLOADERS,
     HELP_APPEND,
     HELP_CATEGORIES,
@@ -24,6 +25,7 @@ from defs import (
     HELP_NO_DOWNLOAD,
     HELP_NO_UPDATE,
     HELP_SCRIPT_PATH,
+    IDLIST_SEPARATOR,
 )
 from validators import valid_categories_list, valid_downloaders_list, valid_file_path
 
@@ -37,8 +39,10 @@ def parse_arglist(args: Sequence[str]) -> None:
     parser.add_argument('--no-update', action=ACTION_STORE_TRUE, help=HELP_NO_UPDATE)
     parser.add_argument('--install', action=ACTION_STORE_TRUE, help=HELP_INSTALL)
     parser.add_argument('-ignore', metavar='ARG,LEN', default=[], action=ACTION_APPEND, help=HELP_IGNORE_ARGUMENT, type=IgnoredArg)
-    parser.add_argument('-idlist', metavar='CAT,DWN,IDS', default=[], action=ACTION_APPEND, help=HELP_IDLIST, type=CatDwnIds)
-    parser.add_argument('-append', metavar='CAT:DWN:ARGS', default=[], action=ACTION_APPEND, help=HELP_APPEND, type=ExtraArgs)
+    parser.add_argument('-idlist', metavar=IDLIST_SEPARATOR.join(('CAT', 'DWN', 'ARGS')),
+                        default=[], action=ACTION_APPEND, help=HELP_IDLIST, type=CatDwnIds)
+    parser.add_argument('-append', metavar=APPEND_SEPARATOR.join(('CAT', 'DWN', 'ARGS')),
+                        default=[], action=ACTION_APPEND, help=HELP_APPEND, type=ExtraArgs)
     parser.add_argument('-categories', metavar='L,I,S,T', default=[], help=HELP_CATEGORIES, type=valid_categories_list)
     parser.add_argument('-downloaders', metavar='L,I,S,T', default=DOWNLOADERS, help=HELP_DOWNLOADERS, type=valid_downloaders_list)
     parser.add_argument('-script', metavar='PATH_TO_FILE', required=True, help=HELP_SCRIPT_PATH, type=valid_file_path)

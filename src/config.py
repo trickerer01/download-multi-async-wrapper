@@ -8,7 +8,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 
 from argparse import Namespace
 
-from defs import MAX_CMD_LEN, OS_WINDOWS
+from defs import APPEND_SEPARATOR, IDLIST_SEPARATOR, MAX_CMD_LEN, OS_WINDOWS
 
 __all__ = ('CatDwnIds', 'Config', 'ExtraArgs', 'IgnoredArg')
 
@@ -40,8 +40,8 @@ class IgnoredArg:
 class CatDwnIds:
     def __init__(self, cat_dwn_ids_fmt: str) -> None:
         try:
-            cat, dt, ids = tuple(cat_dwn_ids_fmt.split(',', 2))
-            idlist = ids.split(' ')
+            cat, dt, ids = tuple(cat_dwn_ids_fmt.split(IDLIST_SEPARATOR, 2))
+            idlist = ids.split(IDLIST_SEPARATOR)
             assert cat and dt and idlist
             assert all(int(_) for _ in idlist)
             self._name = f'{cat}:{dt}'
@@ -70,8 +70,8 @@ class CatDwnIds:
 class ExtraArgs:
     def __init__(self, cat_dwn_args_fmt: str) -> None:
         try:
-            cat, dt, args = tuple(cat_dwn_args_fmt.split(':', 2))
-            arglist = args.split(':')
+            cat, dt, args = tuple(cat_dwn_args_fmt.split(APPEND_SEPARATOR, 2))
+            arglist = args.split(APPEND_SEPARATOR)
             assert cat and dt and arglist
             self._name = f'{cat}:{dt}'
             self._arglist = arglist

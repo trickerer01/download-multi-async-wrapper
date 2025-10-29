@@ -16,6 +16,8 @@ ACTION_APPEND = 'append'
 PROXY_ARG = '-proxy'
 MIN_IDS_SEQ_LENGTH = 2
 MAX_CATEGORY_NAME_LENGTH = 10
+APPEND_SEPARATOR = ','
+IDLIST_SEPARATOR = ','
 
 MIN_PYTHON_VERSION = (3, 10)
 MIN_PYTHON_VERSION_STR = f'{MIN_PYTHON_VERSION[0]:d}.{MIN_PYTHON_VERSION[1]:d}'
@@ -250,16 +252,18 @@ HELP_IGNORE_ARGUMENT = (
     ' Can be used multiple times (each entry consumes a single argument[+value])'
 )
 HELP_IDLIST = (
-    'Override id range script parameter for a given \'catergory:downloader\' combination.'
-    ' Example: \'vid,rx,50000 51000\' forces RX downloader to use 50000-51000 as ids range when processing \'vid\' category.'
-    ' Can be used multiple times'
+    f'Override id range script parameter for a given \'catergory:downloader\' combination.'
+    f' Example: \'{IDLIST_SEPARATOR.join(("vid", "rx", "50000", "51000"))}\''
+    f' forces RX downloader to use 50000-51000 as ids range when processing \'vid\' category.'
+    f' Can be used multiple times'
 )
 HELP_APPEND = (
-    'Append extra argument(s) to a given \'catergory:downloader\' combination cmdline.'
-    ' Syntax: \'--append <category>:<downloader>:<arg1>:<param1>[:<arg2>:<param2>...]\''
-    ' Can be used to override existing identical downloader arguments. Replace all spaces with colons'
-    ' Example: \'--append vid:rx:--dest:./sub1/\' will make rx downloader download to folder \'sub1\' when processing category \'vid\'.'
-    ' Can be used multiple times'
+    f'Append extra argument(s) to a given \'catergory:downloader\' combination cmdline.'
+    f' Syntax: \'--append {APPEND_SEPARATOR.join(("<category>", "<downloader>", "<arg1>[<param1>[", "<arg2>", "<param2>...]]"))}\''
+    f' Can be used to override existing identical downloader arguments. Replace all spaces with colons'
+    f' Example: \'--append {APPEND_SEPARATOR.join(("vid", "rx", "--dest", "./sub1/"))}\''
+    f' will make rx downloader download to folder \'sub1\' when processing category \'vid\'.'
+    f' Can be used multiple times'
 )
 
 #
