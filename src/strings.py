@@ -17,7 +17,7 @@ def unquote(tag: str) -> str:
     return tag.strip('"\'')
 
 
-def first_not_of(string: str, char: str, start_idx: int | None = None, *, reverse=False) -> int:
+def first_not_of(string: str, char: str, *, start_idx=0, reverse=False) -> int:
     assert start_idx is None or (0 <= start_idx < len(string))
 
     if reverse:
@@ -27,7 +27,7 @@ def first_not_of(string: str, char: str, start_idx: int | None = None, *, revers
                 return idx
             idx -= 1
     else:
-        idx = start_idx or -1
+        idx = start_idx or 0
         while 0 <= idx <= len(string) - 1:
             if string[idx] != char:
                 return idx
@@ -42,7 +42,7 @@ def remove_trailing_comments(line: str) -> str:
     if idx == 0:
         result = ''
     elif idx > 0:
-        result = linecopy[:first_not_of(linecopy, ' ', idx, reverse=True) + 1]
+        result = linecopy[:first_not_of(linecopy, ' ', start_idx=idx, reverse=True) + 1]
     else:
         result = linecopy
     return result
