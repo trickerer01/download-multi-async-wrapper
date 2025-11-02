@@ -115,15 +115,15 @@ def fetch_maxids(dts: Iterable[str]) -> dict[str, str]:
             return {}
         trace('Fetching max ids...')
         re_maxid_fetch_result = re.compile(r'^[A-Z]{2}: \d+$')
-        grab_threads = []
+        grab_threads: list[Thread] = []
         results: dict[str, str] = {dt: '' for dt in dts if sequences_paths_update[dt] is not None}
         rlock = Lock()
 
         if Config.test:
-            return {dt: f'{10**18:d}' for dt in results}
+            return dict.fromkeys(results, f'{10 ** 18:d}')
 
         def get_max_id(dtype: str) -> None:
-            update_file_path = sequences_paths_update[dtype]
+            update_file_path: str = sequences_paths_update[dtype]
             module_arguments: list[str] = ['-module', dtype] if dtype in RUXX_DOWNLOADERS else []
             if dtype in COLOR_LOG_DOWNLOADERS:
                 module_arguments.append('--disable-log-colors')
@@ -148,7 +148,7 @@ def fetch_maxids(dts: Iterable[str]) -> dict[str, str]:
                     thread.join()
                 except KeyboardInterrupt:
                     pass
-        res_errors = []
+        res_errors: list[str] = []
         for dt, result in results.items():
             try:
                 assert re_maxid_fetch_result.fullmatch(result)
@@ -266,7 +266,7 @@ def prepare_queries() -> None:
                     trace(f'Parsed update offsets value: \'{offsets_str}\'')
                     assert Config.update_offsets == {}, f'Update offsets re-declaration! Was \'{Config.update_offsets!s}\''
                     Config.update_offsets = json.loads(offsets_str.lower())
-                    invalid_dts = []
+                    invalid_dts: list[str] = []
                     for pdt in Config.update_offsets:
                         if pdt not in DOWNLOADERS:
                             invalid_dts.append(pdt)
@@ -283,7 +283,7 @@ def prepare_queries() -> None:
                     trace(f'Parsed noproxy fetches value: \'{modules_str}\'')
                     assert Config.noproxy_fetches == set(), f'Noproxy fetches re-declaration! Was \'{Config.noproxy_fetches!s}\''
                     Config.noproxy_fetches = set(json.loads(modules_str.lower()))
-                    invalid_dts = []
+                    invalid_dts: list[str] = []
                     for npdt in Config.noproxy_fetches:
                         if npdt not in DOWNLOADERS:
                             invalid_dts.append(npdt)
@@ -360,7 +360,7 @@ def prepare_queries() -> None:
                             trace(f'Using \'{cat}:{cdt}\' ids override: {idseq!s} -> {idseq_temp!s}')
                             idseq = idseq_temp
                     if sequences_pages.at_cur_cat[cdt]:
-                        assert len(idseq) <= 2, f'{cdt} has pages but defines ids range of {len(idseq)} > 2!\n\tat line {i + 1}: {line}'
+                        assert len(idseq) <= 2, f'{cdt} has pages but defines ids range of {len(idseq):d} > 2!\n\tat line {i + 1}: {line}'
                     sequences_ids.at_cur_cat[cdt] = idseq
                     if len(idseq) < MIN_IDS_SEQ_LENGTH:
                         if cdt in Config.downloaders:
@@ -376,7 +376,7 @@ def prepare_queries() -> None:
                     assert cdt in PAGE_DOWNLOADERS, f'{cdt} doesn\'t support pages search!\n\tat line {i + 1}: {line}'
                     idseq = sequences_ids.at_cur_cat[cdt]
                     if idseq:
-                        assert len(idseq) <= 2, f'{cdt} defines pages but has ids range of {len(idseq)} > 2!\n\tat line {i + 1}: {line}'
+                        assert len(idseq) <= 2, f'{cdt} defines pages but has ids range of {len(idseq):d} > 2!\n\tat line {i + 1}: {line}'
                     pageseq = IntSequence([int(num[1:]) for num in line.split(' ')[1:]], i + 1)
                     sequences_pages.at_cur_cat[cdt] = pageseq
                     if len(pageseq) < MIN_IDS_SEQ_LENGTH:
@@ -441,7 +441,7 @@ def prepare_queries() -> None:
                                     del cur_tags_list[j]
                                     del tags_to_remove[k]
                                     break
-                        assert len(tags_to_remove) == 0
+                        assert len(tags_to_remove) == 0, f'Tags weren\'t consumed: "{" ".join(tags_to_remove)}" at line {i + 1}: {line}'
                         continue
                     else:
                         tags_split = [tag[1:] for tag in line.split(' ')]
@@ -487,7 +487,7 @@ def prepare_queries() -> None:
         trace('[Autoupdate] validating runners...\n')
         validate_runners(sequences_paths, sequences_paths_reqs, sequences_paths_update)
         trace('Running max ID autoupdates...\n')
-        unsolved_idseqs = []
+        unsolved_idseqs: list[str] = []
         needed_updates = [dt for dt in DOWNLOADERS if any(dt in autoupdate_seqs[c] for c in autoupdate_seqs if autoupdate_seqs[c][dt])]
         maxids = fetch_maxids(needed_updates)
         for dt in needed_updates:
@@ -544,8 +544,7 @@ def update_next_ids() -> None:
     filename_bak = f'{queries_file_name}_bak_{datetime_str_nfull()}.list'
     trace(f'File: \'{queries_file_name}\', backup file: \'{filename_bak}\'')
     try:
-        ids_downloaders = [dt for dt in Config.downloaders if any(sequences_ids[cat][dt] for cat in sequences_ids)]
-        if ids_downloaders:
+        if ids_downloaders := [dt for dt in Config.downloaders if any(sequences_ids[cat][dt] for cat in sequences_ids)]:
             [ids_downloaders.remove(dt) for dt in maxid_fetched if dt in ids_downloaders]
             results = fetch_maxids(ids_downloaders)
             trace(f'\nSaving backup to \'{filename_bak}\'...')

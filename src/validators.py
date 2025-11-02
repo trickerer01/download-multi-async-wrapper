@@ -51,7 +51,7 @@ def valid_downloaders_list(downloaders_str: str) -> tuple[str, ...]:
         if len(downloaders_str) == 0:
             trace('Downloaders list can\'t be empty, use --no-download instead!')
             raise ValueError
-        listed_downloaders = []
+        listed_downloaders: list[str] = []
         ldll = [d.lower() for d in downloaders_str.split(',')]
         for d in ldll:
             assert d in DOWNLOADERS
@@ -68,7 +68,7 @@ def valid_downloaders_list(downloaders_str: str) -> tuple[str, ...]:
 
 def valid_categories_list(categories_str: str) -> list[str]:
     try:
-        listed_categories = []
+        listed_categories: list[str] = []
         if len(categories_str) == 0:
             return listed_categories
         lctl = categories_str.split(',')

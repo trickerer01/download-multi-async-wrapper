@@ -45,7 +45,7 @@ def validate_runners(
         out_py_str = out_py.decode().strip()
         match_py_ver = re_py_ver.fullmatch(out_py_str)
         assert match_py_ver
-        fetched_py_ver = (int(match_py_ver.group(1)), int(match_py_ver.group(2)))
+        fetched_py_ver = int(match_py_ver.group(1)), int(match_py_ver.group(2))
         assert fetched_py_ver >= MIN_PYTHON_VERSION, f'Minimum python version required is {MIN_PYTHON_VERSION_STR}!'
         trace(f'Found python {".".join(match_py_ver.groups())}')
     except Exception:
@@ -69,7 +69,7 @@ def validate_runners(
             except Exception:
                 trace(f'Error: invalid {dtr} requirements path found: \'{rpath}\'!')
                 raise OSError
-    checked_paths: set[str] = set()
+    checked_paths = set[str]()
     if not Config.no_download:
         for cat in sequences_paths:
             for dtd in sequences_paths[cat]:
@@ -126,9 +126,7 @@ def validate_sequences(
         for cat in sequences_subfolders:
             if cat not in Config.categories:
                 trace(f'Warning: category \'{cat}\' is not in enabled categories list! Will be skipped!')
-                if cat not in Config.disabled_downloaders:
-                    Config.disabled_downloaders[cat] = set()
-                [Config.disabled_downloaders[cat].add(dt) for dt in DOWNLOADERS]
+                Config.disabled_downloaders[cat] = set(DOWNLOADERS)
     for dt in DOWNLOADERS:
         for cat in sequences_ids:
             intseq: IntSequence | None = sequences_ids[cat][dt]
@@ -171,13 +169,13 @@ def _get_base_qs(
     def page_ids(cat: str, cdt: str) -> bool:
         return has_ids(cat, cdt) and has_pages(cat, cdt)
 
-    base_qs: DownloadCollection[str] = DownloadCollection()
     ri, rp, rpi = RANGE_TEMPLATE_IDS, RANGE_TEMPLATE_PAGES, RANGE_TEMPLATE_PAGE_IDS
     irngs: dict[str, dict[str, IntPair]]
     prngs: dict[str, dict[str, IntPair]]
     irngs, prngs = ({
         k: {dt: IntPair(*ipseqs[k][dt][:2]) for dt in DOWNLOADERS if ipseqs[k][dt]} for k in ipseqs
     } for ipseqs in (sequences_ids, sequences_pages))
+    base_qs: DownloadCollection[str] = DownloadCollection()
     [base_qs.update({
         k: {
             dt: (f'{Config.python} "{sequences_paths[k][dt]}" '

@@ -9,13 +9,13 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 import math
 import os
 from asyncio import AbstractEventLoop, Future, SubprocessProtocol, as_completed, new_event_loop, sleep
-from collections.abc import Iterable
 
 from config import Config
 from containers import DownloadCollection, Wrapper
 from defs import DOWNLOADERS, RUN_FILE_DOWNLOADERS, UTF8
 from logger import log_to, trace
 from strings import datetime_str_nfull, normalize_path, unquote
+from util import sum_lists
 
 __all__ = ('execute', 'register_queries')
 
@@ -32,12 +32,6 @@ executor_event_loop: Wrapper[AbstractEventLoop] = Wrapper()
 
 queries_all: DownloadCollection[list[str]] = DownloadCollection()
 dtqn_fmt = Wrapper('02d')
-
-
-def sum_lists(lists: Iterable[Iterable[str]]) -> list[str]:
-    total = []
-    [total.extend(li) for li in lists]
-    return total
 
 
 def register_queries(queries: DownloadCollection[list[str]]) -> None:
@@ -116,7 +110,7 @@ async def run_dt_cmds(dt: str, qts: list[str], queries: list[str]) -> str | None
 
     dt_qt_num = len(list(filter(None, [bool(queries_all[dcat][dt]) for dcat in queries_all])))
 
-    qt_skips = set()
+    qt_skips = set[str]()
     qns: dict[str, int] = dict.fromkeys(qts, 0)
     qms: dict[str, int] = {}
     [qms.update({_: len(list(filter(None, [qt_ for qt_ in qts if qt_ == _])))}) for _ in qts if _ not in qms]
@@ -142,13 +136,13 @@ async def run_all_cmds() -> None:
     if Config.test:
         return
     enabled_dts = [dt for dt in Config.downloaders if any(bool(queries_all[cat][dt]) for cat in queries_all)]
-    finished_dts = list[str]()
+    finished_dts: list[str] = []
     trace(f'\nRunning {len(enabled_dts)} downloader(s): {", ".join(dt.upper() for dt in enabled_dts)}')
     trace('Working...')
     cv: Future[str | None]
     for cv in as_completed(map(
         run_dt_cmds,
-        list(DOWNLOADERS),
+        DOWNLOADERS,
         [sum_lists([str(cat)] * len(queries_all[cat][dt]) for cat in queries_all) for dt in DOWNLOADERS],
         [sum_lists(queries_all[cat][dt] for cat in queries_all) for dt in DOWNLOADERS],
     )):
