@@ -127,6 +127,7 @@ def fetch_maxids(dts: Iterable[str]) -> dict[str, str]:
                 module_arguments.extend((proxies_update[dtype].first, proxies_update[dtype].second))
             arguments = [Config.python, update_file_path, '-get_maxid', '-timeout', '30', *module_arguments]
             try:
+                trace(f'Executing "{" ".join(arguments)}"...')
                 res = check_output(arguments).decode(errors='replace').strip()
             except (KeyboardInterrupt, CalledProcessError):
                 res = 'ERROR'
