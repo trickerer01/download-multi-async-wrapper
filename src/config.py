@@ -131,7 +131,7 @@ class BaseConfig:
         self.disabled_downloaders: dict[str, set[str]] = {}
         # internal
         self.test: bool = test
-        self.console_log: bool = not (test and not console_log)
+        self.console_log: bool = console_log or not test
 
     def _reset(self) -> None:
         self.__init__(test=self.test, console_log=self.console_log)

@@ -139,6 +139,8 @@ async def run_all_cmds() -> None:
     if Config.no_download is True:
         trace('\n\nALL DOWNLOADERS SKIPPED DUE TO no_download FLAG!\n')
         return
+    if Config.test:
+        return
     enabled_dts = [dt for dt in Config.downloaders if any(bool(queries_all[cat][dt]) for cat in queries_all)]
     finished_dts = list[str]()
     trace(f'\nRunning {len(enabled_dts)} downloader(s): {", ".join(dt.upper() for dt in enabled_dts)}')

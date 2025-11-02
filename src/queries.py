@@ -91,19 +91,20 @@ def ensure_logfile_wrapper() -> None:
 
 def calculate_title_suffix() -> None:
     trace('Calculating title suffix...')
-    lbdir = Config.dest_logs_base
-    logsdir_all: list[str] = [f.name for f in os.scandir(lbdir) if f.is_file()] if os.path.isdir(lbdir) else []
-    logsdir_files = list(filter(lambda x: x.startswith((f'log_{Config.title}', f'run_{Config.title}')), logsdir_all))
     max_suffix_len = Config.title_increment
     max_suffix_val = 0
-    base_idx = len(f'log_{Config.title}')
-    for fname in logsdir_files:
-        sep_idx = fname.find('_', base_idx)
-        if sep_idx > base_idx:
-            suffix_val = fname[base_idx:sep_idx]
-            if suffix_val.isnumeric():
-                max_suffix_len = max(max_suffix_len, len(suffix_val))
-                max_suffix_val = max(max_suffix_val, int(suffix_val))
+    if os.path.isdir(Config.dest_logs_base):
+        log_prefixes = tuple(f'{_}_{Config.title}' for _ in ('log', 'run'))
+        base_idx = len(log_prefixes[0])
+        with os.scandir(Config.dest_logs_base) as listing:
+            logsdir_files: list[str] = [f.name for f in listing if f.is_file() and f.name.startswith(log_prefixes)]
+        for fname in logsdir_files:
+            sep_idx = fname.find('_', base_idx)
+            if sep_idx > base_idx:
+                suffix_val = fname[base_idx:sep_idx]
+                if suffix_val.isnumeric():
+                    max_suffix_len = max(max_suffix_len, len(suffix_val))
+                    max_suffix_val = max(max_suffix_val, int(suffix_val))
     Config.title_increment_value = f'{max_suffix_val + 1:0{max_suffix_len:d}d}'
     trace(f'Suffix calculated: \'{Config.title_increment_value}\'. Full title: \'{Config.full_title}\'')
 
@@ -117,6 +118,9 @@ def fetch_maxids(dts: Iterable[str]) -> dict[str, str]:
         grab_threads = []
         results: dict[str, str] = {dt: '' for dt in dts if sequences_paths_update[dt] is not None}
         rlock = Lock()
+
+        if Config.test:
+            return {dt: f'{10**18:d}' for dt in results}
 
         def get_max_id(dtype: str) -> None:
             update_file_path = sequences_paths_update[dtype]
@@ -527,6 +531,9 @@ def prepare_queries() -> None:
 def update_next_ids() -> None:
     if Config.update is False:
         trace('\nNext ids update SKIPPED due to no --update flag!')
+        return
+
+    if Config.test:
         return
 
     # save backup and write a new one

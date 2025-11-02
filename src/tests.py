@@ -5,7 +5,10 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #########################################
 #
 #
-
+import functools
+import os
+from collections.abc import Callable
+from contextlib import ExitStack
 from unittest import TestCase
 
 from cmdargs import parse_arglist
@@ -58,22 +61,34 @@ args_argparse_str3 = (
 )
 
 
-def set_up_test(log=False) -> None:
-    close_logfile()
-    Config._reset()
-    Config.test = True
-    Config.console_log = log
-    sequences_ids.clear()
-    sequences_pages.clear()
-    sequences_paths.clear()
-    sequences_common.clear()
-    sequences_tags.clear()
-    sequences_subfolders.clear()
+def test_prepare(*, console_log=False) -> Callable[[], Callable[[], None]]:
+    def invoke1(test_func) -> Callable[[], None]:
+        @functools.wraps(test_func)
+        def invoke_test(*args, **kwargs) -> None:
+            def set_up_test() -> None:
+                Config._reset()
+                Config.test = True
+                Config.console_log = console_log
+
+            def cleanup_test() -> None:
+                sequences_ids.clear()
+                sequences_pages.clear()
+                sequences_paths.clear()
+                sequences_common.clear()
+                sequences_tags.clear()
+                sequences_subfolders.clear()
+                close_logfile()
+
+            set_up_test()
+            test_func(*args, **kwargs)
+            cleanup_test()
+        return invoke_test
+    return invoke1
 
 
 class ArgParseTests(TestCase):
+    @test_prepare()
     def test_argparse1(self) -> None:
-        set_up_test()
         parse_arglist(args_argparse_str1.split())
         self.assertEqual(
             'debug: False, downloaders: (\'nm\', \'rv\', \'rc\', \'rg\', \'rn\', \'rx\', \'rs\', \'rp\', \'en\', \'xb\', \'bb\'), '
@@ -83,8 +98,8 @@ class ArgParseTests(TestCase):
         )
         print(f'{self._testMethodName} passed')
 
+    @test_prepare()
     def test_argparse2(self) -> None:
-        set_up_test(True)
         parse_arglist(args_argparse_str2.split())
         self.assertEqual(
             'debug: True, downloaders: (\'rv\', \'rn\', \'rx\', \'rs\'), '
@@ -96,9 +111,9 @@ class ArgParseTests(TestCase):
 
 
 class QueriesFormTests(TestCase):
+    @test_prepare()
     def test_queries1(self) -> None:
         cat_vid, cat_img, cat_vid_ = 'VIDEOS', 'IMAGES', 'VIDEOS '
-        set_up_test()
         parse_arglist(args_argparse_str2.split())
         read_queries_file()
         prepare_queries()
@@ -226,9 +241,9 @@ class QueriesFormTests(TestCase):
         )
         print(f'{self._testMethodName} passed')
 
+    @test_prepare()
     def test_queries2(self) -> None:
         cat_vid = 'VIDEOS'
-        set_up_test()
         parse_arglist(args_argparse_str3.split())
         read_queries_file()
         prepare_queries()
@@ -240,22 +255,39 @@ class QueriesFormTests(TestCase):
         self.assertIn('-continue', queries_all[cat_vid][DOWNLOADER_NM][0])
         print(f'{self._testMethodName} passed')
 
+    @test_prepare(console_log=True)
+    def test_queries3(self) -> None:
+        num_dummys = 6
+        dummy_paths: list[str] = []
+        self.assertLess(num_dummys, 9)
+        parse_arglist(args_argparse_str1.split())
+        read_queries_file()
+        with ExitStack() as ctxm:
+            for log_base_name in (f'../logs/log_script_0000{n:d}_temp.conf' for n in range(1, num_dummys + 1)):
+                dummy_paths.append(log_base_name)
+                ctxm.enter_context(open(dummy_paths[-1], 'wb'))
+        prepare_queries()
+        self.assertEqual(f'{Config.title}{"0" * (Config.title_increment - 1)}{num_dummys + 1:d}', Config.full_title)
+        for dpath in dummy_paths:
+            os.remove(dpath)
+        print(f'{self._testMethodName} passed')
+
 
 class RunTests(TestCase):
+    @test_prepare()
     def test_main1(self) -> None:
-        set_up_test()
         main_sync(('-script', '"../tests/queries.list"',
                    '--debug', '--no-download', '--no-update', '-downloaders', 'rx,nm,rn,rs'))
         print(f'{self._testMethodName} passed')
 
+    @test_prepare()
     def test_main2(self) -> None:
-        set_up_test()
         main_sync(('-script', '"../tests/queries.list"',
                    '--debug', '-downloaders', 'rx,nm,rn,rs'))
         print(f'{self._testMethodName} passed')
 
+    @test_prepare()
     def test_main3(self) -> None:
-        set_up_test()
         main_sync(('-script', '"../tests/queries.list"',
                    '-downloaders', 'rx,nm,rn,rs'))
         print(f'{self._testMethodName} passed')
