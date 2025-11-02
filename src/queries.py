@@ -180,10 +180,16 @@ def prepare_queries() -> None:
             trace(f'\nat line {i + 1:d}: current downloader isn\'t selected!')
             raise
 
+    def try_parse_proxy(pargs: list[str]) -> None:
+        proxy_idx = pargs.index(PROXY_ARG) if PROXY_ARG in pargs else -1
+        if proxy_idx >= 0:
+            assert len(pargs) > proxy_idx + 1
+            proxies_update[cur_dl()] = StrPair(pargs[proxy_idx], pargs[proxy_idx + 1])
+
     args_to_ignore = Config.ignored_args.copy()
     cur_cat = ''
     cur_dwn = ''
-    cur_tags_list = []
+    cur_tags_list: list[str] = []
     autoupdate_seqs: DownloadCollection[IntSequence] = DownloadCollection()
 
     trace('Analyzing queries file strings...')
@@ -390,10 +396,7 @@ def prepare_queries() -> None:
                     sequences_paths_update[cur_dl()] = normalize_path(os.path.abspath(path_updater), False)
                 elif re_common_arg.fullmatch(line):
                     common_args = line[line.find(':') + 1:].split(' ')
-                    proxy_idx = common_args.index(PROXY_ARG) if PROXY_ARG in common_args else -1
-                    if proxy_idx >= 0:
-                        assert len(common_args) > proxy_idx + 1
-                        proxies_update[cur_dl()] = StrPair(common_args[proxy_idx], common_args[proxy_idx + 1])
+                    try_parse_proxy(common_args)
                     sequences_common.at_cur_cat[cur_dl()].extend(common_args)
                 elif re_sub_begin.fullmatch(line):
                     cdt = cur_dl()
@@ -407,6 +410,7 @@ def prepare_queries() -> None:
                     for extra_args in Config.extra_args:
                         if extra_args.name == f'{cat}:{cdt}':
                             trace(f'Using \'{cat}:{cdt}\' extra args: {extra_args.args!s} -> {" ".join(extra_args.args)}')
+                            try_parse_proxy(extra_args.args)
                             sequences_common.at_cur_cat[cur_dl()].extend(f'"{arg}"' for arg in extra_args.args)
                     cur_tags_list.clear()
                     cur_dwn = ''
