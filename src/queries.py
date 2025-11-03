@@ -120,7 +120,7 @@ def fetch_maxids(dts: Iterable[str]) -> dict[str, str]:
         rlock = Lock()
 
         if Config.test:
-            return dict.fromkeys(results, f'{10 ** 18:d}')
+            return {dt: f'{dt.upper()}: {10 ** 18:d}' for dt in results}
 
         def get_max_id(dtype: str) -> None:
             update_file_path: str = sequences_paths_update[dtype]
