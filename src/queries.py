@@ -497,6 +497,9 @@ def prepare_queries() -> None:
                 if uidseq:
                     update_str_base = f'{cat}:{dt} id sequence extended from {uidseq.ints!s} to '
                     if len(uidseq) == 1 and uidseq[0] < 0:
+                        if maxid + uidseq.ints[0] <= 0:
+                            trace(f'{cat}:{dt} id sequence extension <= 0 detected! Clamping to \'1\'!')
+                            uidseq.ints[0] = -1 * (maxid - 1)
                         delta = uidseq.ints[0]
                         uidseq.ints.clear()
                         uidseq.ints.extend((maxid + delta, maxid))
