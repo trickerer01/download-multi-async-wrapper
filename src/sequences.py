@@ -7,11 +7,10 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 
 import re
-from collections.abc import Sequence
 from subprocess import check_output
 
 from config import Config
-from containers import DownloadCollection
+from containers import DownloadCollection, Queries
 from defs import (
     APP_NAMES,
     DOWNLOADERS,
@@ -28,16 +27,11 @@ from defs import (
 )
 from logger import trace
 from strings import NEWLINE, path_args
-from util import unused_argument
 
 __all__ = ('form_queries', 'report_queries', 'report_unoptimized', 'validate_runners', 'validate_sequences')
 
 
-def validate_runners(
-    sequences_paths: DownloadCollection[str],
-    sequences_paths_reqs: dict[str, str | None],
-    sequences_paths_update: dict[str, str | None],
-) -> None:
+def validate_runners(queries: Queries) -> None:
     try:
         trace('Looking for python executable...')
         re_py_ver = re.compile(r'^[Pp]ython (\d)\.(\d{1,2})\.(\d+)$')
@@ -55,7 +49,7 @@ def validate_runners(
         return
     checked_reqs = set[str]()
     if Config.install:
-        for dtr, rpath in sequences_paths_reqs.items():
+        for dtr, rpath in queries.sequences_paths_reqs.items():
             if not rpath or dtr not in Config.downloaders:
                 continue
             if rpath in checked_reqs:
@@ -71,9 +65,9 @@ def validate_runners(
                 raise OSError
     checked_paths = set[str]()
     if not Config.no_download:
-        for cat in sequences_paths:
-            for dtd in sequences_paths[cat]:
-                dpath: str | None = sequences_paths[cat][dtd]
+        for cat in queries.sequences_paths:
+            for dtd in queries.sequences_paths[cat]:
+                dpath: str | None = queries.sequences_paths[cat][dtd]
                 if not dpath or dtd not in Config.downloaders:
                     continue
                 dtype = ('pages' if dpath.endswith(PATH_APPEND_DOWNLOAD_PAGES[dtd]) else
@@ -93,7 +87,7 @@ def validate_runners(
                     trace(f'Error: invalid {dtd} {dtype} downloader found at: \'{dpath}\' ({cat})!')
                     raise OSError
     if Config.update:
-        for dtu, upath in sequences_paths_update.items():
+        for dtu, upath in queries.sequences_paths_update.items():
             if not upath or dtu not in Config.downloaders:
                 continue
             if upath in checked_paths:
@@ -112,24 +106,19 @@ def validate_runners(
                 raise OSError
 
 
-def validate_sequences(
-    sequences_ids: DownloadCollection[IntSequence], sequences_pages: DownloadCollection[IntSequence],
-    sequences_paths: DownloadCollection[str], sequences_tags: DownloadCollection[Sequence[list[str]]],
-    sequences_subfolders: DownloadCollection[Sequence[str]],
-) -> None:
-    unused_argument(sequences_pages)
+def validate_sequences(queries: Queries) -> None:
     if not Config.python:
         trace('Error: python executable was not declared!')
         raise OSError
     cat: str
     if Config.categories:
-        for cat in sequences_subfolders:
+        for cat in queries.sequences_subfolders:
             if cat not in Config.categories:
                 trace(f'Warning: category \'{cat}\' is not in enabled categories list! Will be skipped!')
                 Config.disabled_downloaders[cat] = set(DOWNLOADERS)
     for dt in DOWNLOADERS:
-        for cat in sequences_ids:
-            intseq: IntSequence | None = sequences_ids[cat][dt]
+        for cat in queries.sequences_ids:
+            intseq: IntSequence | None = queries.sequences_ids[cat][dt]
             ivlist = list(intseq.ints if intseq else [])
             for iv in range(1, len(ivlist)):
                 if ivlist[iv - 1] >= ivlist[iv]:
@@ -141,27 +130,23 @@ def validate_sequences(
                         if cat not in Config.disabled_downloaders:
                             Config.disabled_downloaders[cat] = set()
                         Config.disabled_downloaders[cat].add(dt)
-        for cat in sequences_paths:
-            if bool(sequences_paths[cat][dt]) != (bool(sequences_ids[cat][dt] or sequences_tags[cat][dt])):
+        for cat in queries.sequences_paths:
+            if bool(queries.sequences_paths[cat][dt]) != (bool(queries.sequences_ids[cat][dt] or queries.sequences_tags[cat][dt])):
                 trace(f'Error: sequence list existance for {cat}:{dt} paths/ids mismatch!')
                 raise OSError
-        for cat in sequences_tags:
-            len1, len2 = len(sequences_tags[cat][dt]), len(sequences_subfolders[cat][dt])
+        for cat in queries.sequences_tags:
+            len1, len2 = len(queries.sequences_tags[cat][dt]), len(queries.sequences_subfolders[cat][dt])
             if len1 != len2:
                 trace(f'Error: sequence list for {cat} tags/subs mismatch for {dt}: {len1:d} vs {len2:d}!')
                 raise OSError
 
 
-def _get_base_qs(
-    sequences_ids: DownloadCollection[IntSequence],
-    sequences_pages: DownloadCollection[IntSequence],
-    sequences_paths: DownloadCollection[str],
-) -> DownloadCollection[str]:
+def _get_base_qs(queries: Queries) -> DownloadCollection[str]:
     def has_ids(cat: str, cdt: str) -> bool:
-        return bool(sequences_ids[cat] and sequences_ids[cat][cdt])
+        return bool(queries.sequences_ids[cat] and queries.sequences_ids[cat][cdt])
 
     def has_pages(cat: str, cdt: str) -> bool:
-        return bool(sequences_pages[cat] and sequences_pages[cat][cdt])
+        return bool(queries.sequences_pages[cat] and queries.sequences_pages[cat][cdt])
 
     def pure_ids(cat: str, cdt: str) -> bool:
         return has_ids(cat, cdt) and not has_pages(cat, cdt)
@@ -174,28 +159,24 @@ def _get_base_qs(
     prngs: dict[str, dict[str, IntPair]]
     irngs, prngs = ({
         k: {dt: IntPair(*ipseqs[k][dt][:2]) for dt in DOWNLOADERS if ipseqs[k][dt]} for k in ipseqs
-    } for ipseqs in (sequences_ids, sequences_pages))
+    } for ipseqs in (queries.sequences_ids, queries.sequences_pages))
     base_qs: DownloadCollection[str] = DownloadCollection()
     [base_qs.update({
         k: {
-            dt: (f'{Config.python} "{sequences_paths[k][dt]}" '
+            dt: (f'{Config.python} "{queries.sequences_paths[k][dt]}" '
                  f'{(ri[dt].first % irngs[k][dt].first) if pure_ids(k, dt) else (rp[dt].first % prngs[k][dt].first)}'
                  f'{(ri[dt].second % (irngs[k][dt].second - 1)) if pure_ids(k, dt) else (rp[dt].second % prngs[k][dt].second)}'
                  f'{f" {rpi[dt].first % irngs[k][dt].first}" if page_ids(k, dt) and irngs[k][dt].first else ""}'
                  f'{f" {rpi[dt].second % (irngs[k][dt].second - 1)}" if page_ids(k, dt) and irngs[k][dt].second else ""}')
             for dt in DOWNLOADERS if (dt in irngs[k] or dt in prngs[k])
         },
-    }) for k in sequences_paths]
+    }) for k in queries.sequences_paths]
     return base_qs
 
 
-def form_queries(
-    sequences_ids: DownloadCollection[IntSequence], sequences_pages: DownloadCollection[IntSequence],
-    sequences_paths: DownloadCollection[str], sequences_tags: DownloadCollection[Sequence[list[str]]],
-    sequences_subfolders: DownloadCollection[Sequence[str]], sequences_common: DownloadCollection[Sequence[str]],
-) -> DownloadCollection[list[str]]:
-    stags, ssubs, scomms = sequences_tags, sequences_subfolders, sequences_common
-    base_qs = _get_base_qs(sequences_ids, sequences_pages, sequences_paths)
+def form_queries(queries: Queries) -> DownloadCollection[list[str]]:
+    stags, ssubs, scomms, spaths = queries.sequences_tags, queries.sequences_subfolders, queries.sequences_common, queries.sequences_paths
+    base_qs = _get_base_qs(queries)
     queries_final: DownloadCollection[list[str]] = DownloadCollection()
     [queries_final.update({
         k: {
@@ -210,17 +191,13 @@ def form_queries(
                   f'"'] if stags[k][dt] else [])
             for dt in DOWNLOADERS
         },
-    }) for k in sequences_paths]
+    }) for k in spaths]
     return queries_final
 
 
-def report_unoptimized(
-    sequences_ids: DownloadCollection[IntSequence], sequences_pages: DownloadCollection[IntSequence],
-    sequences_paths: DownloadCollection[str], sequences_tags: DownloadCollection[Sequence[list[str]]],
-    sequences_subfolders: DownloadCollection[Sequence[str]], sequences_common: DownloadCollection[Sequence[str]],
-) -> None:
-    stags, ssubs, scomms = sequences_tags, sequences_subfolders, sequences_common
-    base_qs = _get_base_qs(sequences_ids, sequences_pages, sequences_paths)
+def report_unoptimized(queries: Queries) -> None:
+    stags, ssubs, scomms, spaths = queries.sequences_tags, queries.sequences_subfolders, queries.sequences_common, queries.sequences_paths
+    base_qs = _get_base_qs(queries)
     queries: DownloadCollection[list[str]] = DownloadCollection()
     [queries.update({
         k: {
@@ -229,7 +206,7 @@ def report_unoptimized(
                   for i, staglist in enumerate(stags[k][dt]) if staglist])
             for dt in DOWNLOADERS
         },
-    }) for k in sequences_paths]
+    }) for k in spaths]
     report_queries(queries)
 
 

@@ -31,13 +31,8 @@ from logger import close_logfile
 from main import main_sync
 from queries import (
     prepare_queries,
+    queries,
     read_queries_file,
-    sequences_common,
-    sequences_ids,
-    sequences_pages,
-    sequences_paths,
-    sequences_subfolders,
-    sequences_tags,
 )
 from strings import date_str_md
 
@@ -71,13 +66,8 @@ def test_prepare(*, console_log=False) -> Callable[[], Callable[[], None]]:
                 Config.console_log = console_log
 
             def cleanup_test() -> None:
-                sequences_ids.clear()
-                sequences_pages.clear()
-                sequences_paths.clear()
-                sequences_common.clear()
-                sequences_tags.clear()
-                sequences_subfolders.clear()
                 close_logfile()
+                queries.__init__()
 
             set_up_test()
             test_func(*args, **kwargs)

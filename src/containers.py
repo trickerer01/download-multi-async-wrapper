@@ -8,7 +8,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 
 from typing import Dict, Generic, Type
 
-from defs import AT, DOWNLOADERS, DT
+from defs import AT, DOWNLOADERS, DT, IntSequence, StrPair
 from util import assert_notnull
 
 
@@ -63,6 +63,25 @@ class Wrapper(Generic[AT]):
         return str(self._value)
 
     __repr__ = __str__
+
+
+class Queries:
+    def __init__(self) -> None:
+        self.queries_file_lines: list[str] = []
+
+        self.autoupdate_seqs: DownloadCollection[IntSequence] = DownloadCollection()
+
+        self.sequences_ids: DownloadCollection[IntSequence] = DownloadCollection()
+        self.sequences_pages: DownloadCollection[IntSequence] = DownloadCollection()
+        self.sequences_paths: DownloadCollection[str] = DownloadCollection()
+        self.sequences_common: DownloadCollection[list[str]] = DownloadCollection()
+        self.sequences_tags: DownloadCollection[list[list[str]]] = DownloadCollection()
+        self.sequences_subfolders: DownloadCollection[list[str]] = DownloadCollection()
+
+        self.sequences_paths_reqs: dict[str, str | None] = dict.fromkeys(DOWNLOADERS)
+        self.sequences_paths_update: dict[str, str | None] = dict.fromkeys(DOWNLOADERS)
+        self.proxies_update: dict[str, StrPair | None] = dict.fromkeys(DOWNLOADERS)
+        self.maxid_fetched: dict[str, int] = {}
 
 #
 #

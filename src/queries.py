@@ -14,7 +14,7 @@ from subprocess import CalledProcessError, check_output
 from threading import Lock, Thread
 
 from config import Config
-from containers import DownloadCollection, Wrapper
+from containers import Queries
 from defs import (
     BOOL_STRS,
     COLOR_LOG_DOWNLOADERS,
@@ -63,19 +63,7 @@ re_sub_begin = re.compile(r'^# sub:[^ ].*?$')
 re_sub_end = re.compile(r'^# send$')
 re_downloader_finalize = re.compile(r'^# end$')
 
-queries_file_lines: Wrapper[list[str]] = Wrapper()
-
-sequences_ids: DownloadCollection[IntSequence] = DownloadCollection()
-sequences_pages: DownloadCollection[IntSequence] = DownloadCollection()
-sequences_paths: DownloadCollection[str] = DownloadCollection()
-sequences_common: DownloadCollection[list[str]] = DownloadCollection()
-sequences_tags: DownloadCollection[list[list[str]]] = DownloadCollection()
-sequences_subfolders: DownloadCollection[list[str]] = DownloadCollection()
-
-sequences_paths_reqs: dict[str, str | None] = dict.fromkeys(DOWNLOADERS)
-sequences_paths_update: dict[str, str | None] = dict.fromkeys(DOWNLOADERS)
-proxies_update: dict[str, StrPair | None] = dict.fromkeys(DOWNLOADERS)
-maxid_fetched: dict[str, int] = {}
+queries = Queries()
 
 
 def ensure_logfile_wrapper() -> None:
@@ -116,19 +104,19 @@ def fetch_maxids(dts: Iterable[str]) -> dict[str, str]:
         trace('Fetching max ids...')
         re_maxid_fetch_result = re.compile(r'^[A-Z]{2}: \d+$')
         grab_threads: list[Thread] = []
-        results: dict[str, str] = {dt: '' for dt in dts if sequences_paths_update[dt] is not None}
+        results: dict[str, str] = {dt: '' for dt in dts if queries.sequences_paths_update[dt] is not None}
         rlock = Lock()
 
         if Config.test:
             return {dt: f'{dt.upper()}: {10 ** 18:d}' for dt in results}
 
         def get_max_id(dtype: str) -> None:
-            update_file_path: str = sequences_paths_update[dtype]
+            update_file_path: str = queries.sequences_paths_update[dtype]
             module_arguments: list[str] = ['-module', dtype] if dtype in RUXX_DOWNLOADERS else []
             if dtype in COLOR_LOG_DOWNLOADERS:
                 module_arguments.append('--disable-log-colors')
-            if dtype in proxies_update and proxies_update[dtype] and dtype not in Config.noproxy_fetches:
-                module_arguments.extend((proxies_update[dtype].first, proxies_update[dtype].second))
+            if dtype in queries.proxies_update and queries.proxies_update[dtype] and dtype not in Config.noproxy_fetches:
+                module_arguments.extend((queries.proxies_update[dtype].first, queries.proxies_update[dtype].second))
             arguments = [Config.python, update_file_path, '-get_maxid', '-timeout', '30', *module_arguments]
             try:
                 trace(f'Executing "{" ".join(arguments)}"...')
@@ -167,10 +155,17 @@ def fetch_maxids(dts: Iterable[str]) -> dict[str, str]:
 def read_queries_file() -> None:
     trace(f'\nReading queries file: \'{Config.script_path}\'')
     with open(Config.script_path, 'rt', encoding=UTF8) as qfile:
-        queries_file_lines.reset(qfile.readlines())
+        queries.queries_file_lines[:] = qfile.readlines()
 
 
-def prepare_queries() -> None:
+def try_parse_proxy(pargs: list[str], dl: str) -> None:
+    proxy_idx = pargs.index(PROXY_ARG) if PROXY_ARG in pargs else -1
+    if proxy_idx >= 0:
+        assert len(pargs) > proxy_idx + 1
+        queries.proxies_update[dl] = StrPair(pargs[proxy_idx], pargs[proxy_idx + 1])
+
+
+def parse_queries_file() -> None:
     def cur_ct() -> str:
         try:
             return assert_notnull(cur_cat)
@@ -185,21 +180,11 @@ def prepare_queries() -> None:
             trace(f'\nat line {i + 1:d}: current downloader isn\'t selected!')
             raise
 
-    def try_parse_proxy(pargs: list[str]) -> None:
-        proxy_idx = pargs.index(PROXY_ARG) if PROXY_ARG in pargs else -1
-        if proxy_idx >= 0:
-            assert len(pargs) > proxy_idx + 1
-            proxies_update[cur_dl()] = StrPair(pargs[proxy_idx], pargs[proxy_idx + 1])
-
     args_to_ignore = Config.ignored_args.copy()
-    cur_cat = ''
-    cur_dwn = ''
+    cur_cat = cur_dwn = ''
     cur_tags_list: list[str] = []
-    autoupdate_seqs: DownloadCollection[IntSequence] = DownloadCollection()
 
-    trace('Analyzing queries file strings...')
-
-    for i, line in enumerate(queries_file_lines.val):
+    for i, line in enumerate(queries.queries_file_lines):
         try:
             line = line.strip(' \n\ufeff')  # remove BOM too
             if line == '':
@@ -299,14 +284,14 @@ def prepare_queries() -> None:
                     trace(f'Category name \'{cat_match.group(1)}\' is too long ({len(cat_match.group(1))} > {len(cur_ct())})! Shrinked.')
                 if cur_ct() != cur_ct().strip():
                     trace(f'Category name \'{cur_ct()}\' will become \'{cur_ct().strip()}\' after stripping!')
-                assert cur_ct() not in sequences_paths, f'Category \'{cur_ct()}\' already exists. Aborted!'
+                assert cur_ct() not in queries.sequences_paths, f'Category \'{cur_ct()}\' already exists. Aborted!'
                 trace(f'Processing new category: \'{cur_ct()}\'...')
-                sequences_ids.add_category(cur_ct())
-                sequences_pages.add_category(cur_ct())
-                sequences_paths.add_category(cur_ct())
-                sequences_common.add_category(cur_ct(), list)
-                sequences_tags.add_category(cur_ct(), list)
-                sequences_subfolders.add_category(cur_ct(), list)
+                queries.sequences_ids.add_category(cur_ct())
+                queries.sequences_pages.add_category(cur_ct())
+                queries.sequences_paths.add_category(cur_ct())
+                queries.sequences_common.add_category(cur_ct(), list)
+                queries.sequences_tags.add_category(cur_ct(), list)
+                queries.sequences_subfolders.add_category(cur_ct(), list)
                 cur_tags_list.clear()
                 continue
             if line[0] not in '(-*#' and not line[0].isalnum():
@@ -349,7 +334,7 @@ def prepare_queries() -> None:
                     assert cur_dl() in DOWNLOADERS, f'at line {i + 1:d}: unknown downloader \'{cur_dl()}\'!'
                     trace(f'Processing \'{cur_dl().upper()}\' arguments...')
                     if cur_dl() in COLOR_LOG_DOWNLOADERS:
-                        sequences_common.at_cur_cat[cur_dl()].append('--disable-log-colors')
+                        queries.sequences_common.at_cur_cat[cur_dl()].append('--disable-log-colors')
                 elif re_ids_list.fullmatch(line):
                     cdt = cur_dl()
                     cat = cur_ct()
@@ -359,33 +344,33 @@ def prepare_queries() -> None:
                             idseq_temp = IntSequence(ids_override.ids, i + 1)
                             trace(f'Using \'{cat}:{cdt}\' ids override: {idseq!s} -> {idseq_temp!s}')
                             idseq = idseq_temp
-                    if sequences_pages.at_cur_cat[cdt]:
+                    if queries.sequences_pages.at_cur_cat[cdt]:
                         assert len(idseq) <= 2, f'{cdt} has pages but defines ids range of {len(idseq):d} > 2!\n\tat line {i + 1}: {line}'
-                    sequences_ids.at_cur_cat[cdt] = idseq
+                    queries.sequences_ids.at_cur_cat[cdt] = idseq
                     if len(idseq) < MIN_IDS_SEQ_LENGTH:
                         if cdt in Config.downloaders:
                             negative_str = ' NEGATIVE' if idseq[0] < 0 else ''
                             trace(f'{cdt} at line {i + 1:d} provides a single{negative_str} id hence requires maxid autoupdate')
-                            if cat not in autoupdate_seqs:
-                                autoupdate_seqs.add_category(cat)
-                            autoupdate_seqs[cat][cdt] = idseq
+                            if cat not in queries.autoupdate_seqs:
+                                queries.autoupdate_seqs.add_category(cat)
+                            queries.autoupdate_seqs[cat][cdt] = idseq
                         else:
                             idseq.ints.append(2**31 - 1)
                 elif re_pages_list.fullmatch(line):
                     cdt = cur_dl()
                     assert cdt in PAGE_DOWNLOADERS, f'{cdt} doesn\'t support pages search!\n\tat line {i + 1}: {line}'
-                    idseq = sequences_ids.at_cur_cat[cdt]
+                    idseq = queries.sequences_ids.at_cur_cat[cdt]
                     if idseq:
                         assert len(idseq) <= 2, f'{cdt} defines pages but has ids range of {len(idseq):d} > 2!\n\tat line {i + 1}: {line}'
                     pageseq = IntSequence([int(num[1:]) for num in line.split(' ')[1:]], i + 1)
-                    sequences_pages.at_cur_cat[cdt] = pageseq
+                    queries.sequences_pages.at_cur_cat[cdt] = pageseq
                     if len(pageseq) < MIN_IDS_SEQ_LENGTH:
                         pageseq.ints.append(1)
                 elif re_downloader_basepath.fullmatch(line):
                     cdt = cur_dl()
                     basepath = line[line.find(':') + 1:]
                     basepath_n = normalize_path(basepath)
-                    path_append = PATH_APPEND_DOWNLOAD_PAGES if sequences_pages.at_cur_cat[cdt] else PATH_APPEND_DOWNLOAD_IDS
+                    path_append = PATH_APPEND_DOWNLOAD_PAGES if queries.sequences_pages.at_cur_cat[cdt] else PATH_APPEND_DOWNLOAD_IDS
                     path_downloader = f'{basepath_n}{path_append[cdt]}'
                     path_requirements = f'{basepath_n}{PATH_APPEND_REQUIREMENTS}'
                     path_updater = f'{basepath_n}{PATH_APPEND_UPDATE[cdt]}'
@@ -396,34 +381,34 @@ def prepare_queries() -> None:
                             assert os.path.isfile(path_requirements)
                         if Config.update:
                             assert os.path.isfile(path_updater)
-                    sequences_paths.at_cur_cat[cur_dl()] = path_downloader
-                    sequences_paths_reqs[cur_dl()] = path_requirements
-                    sequences_paths_update[cur_dl()] = normalize_path(os.path.abspath(path_updater), False)
+                    queries.sequences_paths.at_cur_cat[cur_dl()] = path_downloader
+                    queries.sequences_paths_reqs[cur_dl()] = path_requirements
+                    queries.sequences_paths_update[cur_dl()] = normalize_path(os.path.abspath(path_updater), False)
                 elif re_common_arg.fullmatch(line):
                     common_args = line[line.find(':') + 1:].split(' ')
-                    try_parse_proxy(common_args)
-                    sequences_common.at_cur_cat[cur_dl()].extend(common_args)
+                    try_parse_proxy(common_args, cur_dl())
+                    queries.sequences_common.at_cur_cat[cur_dl()].extend(common_args)
                 elif re_sub_begin.fullmatch(line):
                     cdt = cur_dl()
-                    assert len(sequences_subfolders.at_cur_cat[cdt]) == len(sequences_tags.at_cur_cat[cdt]), f'Error: unclosed {cdt} sub!'
-                    sequences_subfolders.at_cur_cat[cur_dl()].append(line[line.find(':') + 1:])
+                    seq_subs, seq_tags = queries.sequences_subfolders, queries.sequences_tags
+                    assert len(seq_subs.at_cur_cat[cdt]) == len(seq_tags.at_cur_cat[cdt]), f'Error: unclosed {cdt} sub!'
+                    queries.sequences_subfolders.at_cur_cat[cur_dl()].append(line[line.find(':') + 1:])
                 elif re_sub_end.fullmatch(line):
-                    sequences_tags.at_cur_cat[cur_dl()].append(cur_tags_list.copy())
+                    queries.sequences_tags.at_cur_cat[cur_dl()].append(cur_tags_list.copy())
                 elif re_downloader_finalize.fullmatch(line):
-                    cdt = cur_dl()
-                    cat = cur_ct()
+                    cat, cdt = cur_ct(), cur_dl()
                     for extra_args in Config.extra_args:
                         if extra_args.name == f'{cat}:{cdt}':
                             trace(f'Using \'{cat}:{cdt}\' extra args: {extra_args.args!s} -> {" ".join(extra_args.args)}')
-                            try_parse_proxy(extra_args.args)
-                            sequences_common.at_cur_cat[cur_dl()].extend(f'"{arg}"' for arg in extra_args.args)
+                            try_parse_proxy(extra_args.args, cur_dl())
+                            queries.sequences_common.at_cur_cat[cur_dl()].extend(f'"{arg}"' for arg in extra_args.args)
                     cur_tags_list.clear()
                     cur_dwn = ''
                 else:
                     trace(f'Error: unknown param at line {i + 1:d}!')
                     raise OSError
             else:  # elif line[0] in '(-*' or line[0].isalpha():
-                assert sequences_ids.at_cur_cat[cur_dl()] or sequences_pages.at_cur_cat[cur_dl()]
+                assert queries.sequences_ids.at_cur_cat[cur_dl()] or queries.sequences_pages.at_cur_cat[cur_dl()]
                 if '  ' in line:
                     trace(f'Error: double space found in tags at line {i + 1:d}!')
                     raise OSError
@@ -482,53 +467,62 @@ def prepare_queries() -> None:
             trace(f'Error: issue encountered while parsing queries file at line {i + 1:d}!\n - {e!s}')
             raise
 
+
+def run_autoupdates() -> None:
+    trace('Running max ID autoupdates...\n')
+    unsolved_idseqs: list[str] = []
+    autoupdate_seqs = queries.autoupdate_seqs
+    needed_updates = [dt for dt in DOWNLOADERS if any(dt in autoupdate_seqs[c] for c in autoupdate_seqs if autoupdate_seqs[c][dt])]
+    maxids = fetch_maxids(needed_updates)
+    for dt in needed_updates:
+        maxid = int(maxids[dt][4:])
+        for cat in autoupdate_seqs:
+            uidseq: IntSequence | None = autoupdate_seqs[cat][dt]
+            if uidseq:
+                update_str_base = f'{cat}:{dt} id sequence extended from {uidseq.ints!s} to '
+                if len(uidseq) == 1 and uidseq[0] < 0:
+                    if maxid + uidseq.ints[0] <= 0:
+                        trace(f'{cat}:{dt} id sequence extension <= 0 detected! Clamping to \'1\'!')
+                        uidseq.ints[0] = -1 * (maxid - 1)
+                    delta = uidseq.ints[0]
+                    uidseq.ints.clear()
+                    uidseq.ints.extend((maxid + delta, maxid))
+                else:
+                    uidseq.ints.append(maxid)
+                trace(f'{update_str_base}{uidseq.ints!s}')
+                queries.maxid_fetched[dt] = maxid
+    for cat in queries.sequences_ids:
+        for dt in queries.sequences_ids[cat]:
+            if queries.sequences_ids[cat][dt] is not None and len(queries.sequences_ids[cat][dt]) < MIN_IDS_SEQ_LENGTH:
+                unsolved_idseqs.append(f'{cat}:{dt}')
+                trace(f'{cat}:{dt} sequence is not fixed! \'{queries.sequences_ids[cat][dt]!s}\'')
+    assert len(unsolved_idseqs) == 0
+
+
+def prepare_queries_impl() -> None:
+    trace('Analyzing queries file strings...')
+    parse_queries_file()
     trace('Sequences parsed successfully\n')
-    if autoupdate_seqs:
+    if queries.autoupdate_seqs:
         trace('[Autoupdate] validating runners...\n')
-        validate_runners(sequences_paths, sequences_paths_reqs, sequences_paths_update)
-        trace('Running max ID autoupdates...\n')
-        unsolved_idseqs: list[str] = []
-        needed_updates = [dt for dt in DOWNLOADERS if any(dt in autoupdate_seqs[c] for c in autoupdate_seqs if autoupdate_seqs[c][dt])]
-        maxids = fetch_maxids(needed_updates)
-        for dt in needed_updates:
-            maxid = int(maxids[dt][4:])
-            for cat in autoupdate_seqs:
-                uidseq: IntSequence | None = autoupdate_seqs[cat][dt]
-                if uidseq:
-                    update_str_base = f'{cat}:{dt} id sequence extended from {uidseq.ints!s} to '
-                    if len(uidseq) == 1 and uidseq[0] < 0:
-                        if maxid + uidseq.ints[0] <= 0:
-                            trace(f'{cat}:{dt} id sequence extension <= 0 detected! Clamping to \'1\'!')
-                            uidseq.ints[0] = -1 * (maxid - 1)
-                        delta = uidseq.ints[0]
-                        uidseq.ints.clear()
-                        uidseq.ints.extend((maxid + delta, maxid))
-                    else:
-                        uidseq.ints.append(maxid)
-                    trace(f'{update_str_base}{uidseq.ints!s}')
-                    maxid_fetched[dt] = maxid
-        for cat in sequences_ids:
-            for dt in sequences_ids[cat]:
-                if sequences_ids[cat][dt] is not None and len(sequences_ids[cat][dt]) < MIN_IDS_SEQ_LENGTH:
-                    unsolved_idseqs.append(f'{cat}:{dt}')
-                    trace(f'{cat}:{dt} sequence is not fixed! \'{sequences_ids[cat][dt]!s}\'')
-        assert len(unsolved_idseqs) == 0
-
+        validate_runners(queries)
+        run_autoupdates()
     trace('Validating sequences...\n')
-    validate_sequences(sequences_ids, sequences_pages, sequences_paths, sequences_tags, sequences_subfolders)
-    if not autoupdate_seqs:
-        validate_runners(sequences_paths, sequences_paths_reqs, sequences_paths_update)
-
+    validate_sequences(queries)
+    if not queries.autoupdate_seqs:
+        validate_runners(queries)
     trace('Sequences validated. Finalizing...\n')
-    queries_final = form_queries(sequences_ids, sequences_pages, sequences_paths, sequences_tags, sequences_subfolders, sequences_common)
-
     if Config.debug:
         trace('[DEBUG] Unoptimized:')
-        report_unoptimized(sequences_ids, sequences_pages, sequences_paths, sequences_tags, sequences_subfolders, sequences_common)
+        report_unoptimized(queries)
         trace('\n\nFinals:')
-
+    queries_final = form_queries(queries)
     report_queries(queries_final)
     register_queries(queries_final)
+
+
+def prepare_queries() -> None:
+    prepare_queries_impl()
 
 
 def update_next_ids() -> None:
@@ -547,13 +541,13 @@ def update_next_ids() -> None:
     filename_bak = f'{queries_file_name}_bak_{datetime_str_nfull()}.list'
     trace(f'File: \'{queries_file_name}\', backup file: \'{filename_bak}\'')
     try:
-        if ids_downloaders := [dt for dt in Config.downloaders if any(sequences_ids[cat][dt] for cat in sequences_ids)]:
-            [ids_downloaders.remove(dt) for dt in maxid_fetched if dt in ids_downloaders]
+        if ids_downloaders := [dt for dt in Config.downloaders if any(queries.sequences_ids[cat][dt] for cat in queries.sequences_ids)]:
+            [ids_downloaders.remove(dt) for dt in queries.maxid_fetched if dt in ids_downloaders]
             results = fetch_maxids(ids_downloaders)
             trace(f'\nSaving backup to \'{filename_bak}\'...')
             bak_fullpath = f'{Config.dest_bak_base}{filename_bak}'
             with open(bak_fullpath, 'wt', encoding=UTF8, buffering=1) as outfile_bak:
-                outfile_bak.writelines(queries_file_lines.val)
+                outfile_bak.writelines(queries.queries_file_lines)
                 trace('Saving done')
 
             trace(f'\nSetting read-only permissions for \'{filename_bak}\'...')
@@ -570,7 +564,7 @@ def update_next_ids() -> None:
 
             trace(f'\nWriting updated queries to \'{queries_file_name}\'...')
             maxids: dict[str, int] = {dt: int(results[dt][4:]) for dt in results}
-            maxids.update(maxid_fetched)
+            maxids.update(queries.maxid_fetched)
             for dt in Config.update_offsets:
                 uoffset = Config.update_offsets[dt]
                 if dt in maxids:
@@ -579,18 +573,18 @@ def update_next_ids() -> None:
                 else:
                     trace(f'Warning: {dt.upper()} autoupdate offset ({uoffset:d}) was provided but its max id is not being updated')
             cat: str
-            for cat in sequences_ids:
+            for cat in queries.sequences_ids:
                 dtseq: tuple[str, IntSequence | None]
-                for i, dtseq in enumerate(sequences_ids[cat].items()):
+                for i, dtseq in enumerate(queries.sequences_ids[cat].items()):
                     dt, seq = dtseq
                     line_n = (seq.line_num - 1) if seq and dt in maxids else None
                     trace(f'{"W" if line_n else "Not w"}riting \'{cat}:{dt}\' ids at idx {i:d}, line {line_n + 1 if line_n else -1:d}...')
                     if line_n:
-                        ids_at_line = queries_file_lines.val[line_n].strip().split(' ')
-                        queries_file_lines.val[line_n] = ' '.join((ids_at_line[0], *ids_at_line[2:], f'{maxids[dt]:d}\n'))
+                        ids_at_line = queries.queries_file_lines[line_n].strip().split(' ')
+                        queries.queries_file_lines[line_n] = ' '.join((ids_at_line[0], *ids_at_line[2:], f'{maxids[dt]:d}\n'))
                 trace(f'Writing \'{cat}\' ids done')
             with open(Config.script_path, 'wt', encoding=UTF8, buffering=1) as outfile:
-                outfile.writelines(queries_file_lines.val)
+                outfile.writelines(queries.queries_file_lines)
             trace('Writing done\n\nNext ids update successfully completed')
         else:
             trace('No id sequences were used, next ids update cancelled')
