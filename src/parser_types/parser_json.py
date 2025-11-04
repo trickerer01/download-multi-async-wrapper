@@ -53,9 +53,8 @@ class ParserJson:
         args_to_ignore = Config.ignored_args.copy()
         cur_tags_list: list[str] = []
 
-        json_clear = '\n'.join(filter(
-            lambda l: l and not l.startswith('#'), (remove_trailing_comments(_.strip(' \n\ufeff')) for _ in self.queries.queries_file_lines)
-        ))
+        json_clear = '\n'.join(filter(lambda l: l and not l.startswith('#'),
+                                      (remove_trailing_comments(_.strip(' \n\ufeff')) for _ in self.queries.queries_file_lines)))
         try:
             self._json.update(json.loads(json_clear))
         except Exception:
