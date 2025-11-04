@@ -78,7 +78,7 @@ class ArgParseTests(TestCase):
         parse_arglist(args_argparse_str1.split())
         self.assertEqual(
             'debug: False, '
-            'parser_type_str: list, parser_type: NoneType, '
+            'parser_type_str: auto, parser_type: NoneType, '
             'downloaders: (\'nm\', \'rv\', \'rc\', \'rg\', \'rn\', \'rx\', \'rs\', \'rp\', \'en\', \'xb\', \'bb\'), '
             'script: ../tests/queries.list, dest: ./, run: ./, logs: ./, bak: ./, update: False, '
             'no_download: False, no_update: False, ignored_args: [], id_overrides: [], max_cmd_len: 16000',
@@ -91,7 +91,7 @@ class ArgParseTests(TestCase):
         parse_arglist(args_argparse_str2.split())
         self.assertEqual(
             'debug: True, '
-            'parser_type_str: list, parser_type: NoneType, '
+            'parser_type_str: auto, parser_type: NoneType, '
             'downloaders: (\'rv\', \'rn\', \'rx\', \'rs\'), '
             'script: ../tests/queries.list, dest: ./, run: ./, logs: ./, bak: ./, update: False, '
             'no_download: False, no_update: True, ignored_args: [dmode(2), dmode(2)], id_overrides: [], max_cmd_len: 16000',
