@@ -13,11 +13,13 @@ from config import Config
 from containers import Queries
 from defs import (
     PARSER_TYPE_AUTO,
+    PARSER_TYPE_JSON,
     PARSER_TYPE_LIST,
     PARSER_TYPE_TXT,
 )
 from logger import trace
-from parser_text import ParserText
+from parser_types.parser_json import ParserJson
+from parser_types.parser_text import ParserText
 
 __all__ = ('ParserMeta', 'create_parser', 'register_parser_type')
 
@@ -32,6 +34,7 @@ class ParserMeta(Protocol):
 
 
 PARSERS: dict[str, ParserMeta] = {
+    PARSER_TYPE_JSON: ParserJson(),
     PARSER_TYPE_LIST: ParserText(),
     PARSER_TYPE_TXT: ParserText(),
 }

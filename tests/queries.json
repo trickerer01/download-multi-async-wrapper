@@ -1,0 +1,187 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$comment": "Test script ver 1.0",
+    "title": "script_0",
+    "title_increment": "4",
+    "dest_path": "../tests",
+    "bak_path": "../bak",
+    "run_path": "../run",
+    "log_path": "../logs",
+    "date_sub": "YES",
+    "update": "YES",
+    "update_offsets": {"NM":-100,"rc":-100,"RV":-800,"RS":-300},
+    "noproxy_fetches": ["rg","nm"],
+    "python": "python3",
+    "compose": {
+        "VIDEOS": {
+            "NM": {
+                "downloader": "D:/NM/",
+                "pages": null,
+                "ids": ["1", "2"],
+                "common": [
+                    "-dmode touch",
+                    "--dump-tags",
+                    "-cookies \"{\\\"User-Agent\\\":\\\"NM 1.8\\\", \\\"shm_user\\\":\\\"su\\\", \\\"shm_session\\\":\\\"su_session_hash\\\"}\""
+                ],
+                "subs": [
+                    {"a": [
+                        "-quality 1080p",
+                        "-a -b -c -dfff",
+                        "ggg"
+                    ]},
+                    {"b": [
+                        "-ggg",
+                        "-(x,z)",
+                        "(h~i~j~k)"
+                    ]},
+                    {"c": [
+                        "-h -i -j -k",
+                        "--(x,z)",
+                        "(l~m~n)"
+                    ]},
+                    {"d": [
+                        "--quality -+1080p",
+                        "-l -m -n",
+                        "--dfff",
+                        "-quality 360p",
+                        "-uvp always"
+                    ]}
+                ]
+            },
+            "rv": {
+                "pages": ["p5", "s2"],
+                "ids": ["5", "9"],
+                "downloader": "D:/old/RV",
+                "common": ["-log info -timeout 15 -retries 50 -throttle 30 --dump-descriptions --dump-tags --dump-comments"],
+                "subs": [
+                    {"a": [
+                        "-quality 1080p",
+                        "-search a"
+                    ]},
+                    {"b": [
+                        "-a",
+                        "-search_tag b,c,d",
+                        "-search_rule_tag any"
+                    ]},
+                    {"c": [
+                        "-any",
+                        "-b -c -d",
+                        "-(g,h,i)",
+                        "-search_tag e,f",
+                        "-search_rule_tag all"
+                    ]}
+                ]
+            },
+            "en": {
+                "pages": null,
+                "ids": ["2", "8"],
+                "downloader": "D:/old/ruxx",
+                "common": ["-module en"],
+                "subs": [
+                    {"k": [
+                        "k"
+                    ]},
+                    {"pb": [
+                        "-k",
+                        "p b",
+                        "(o~q)"
+                    ]}
+                ]
+            }
+        },
+        "IMAGES": {
+            "rx": {
+                "downloader": "D:/ruxx/",
+                "pages": null,
+                "ids": ["1", "2"],
+                "common": ["-dmode 2", "-module rx"],
+                "subs": [
+                    {"a": [
+                        "a"
+                    ]},
+                    {"b": [
+                        "-+a",
+                        "-a",
+                        "b",
+                        "(c~d)"
+                    ]}
+                ]
+            },
+            "rp": {
+                "downloader": "D:/ruxx/",
+                "pages": null,
+                "ids": ["7", "9"],
+                "common": ["-dmode 0", "-module rp"],
+                "subs": [
+                    {"g": ["g"]}
+                ]
+            },
+            "xb": {
+                "downloader": "D:/ruxx/",
+                "pages": null,
+                "ids": ["5", "6"],
+                "common": ["-dmode 1", "-module xb"],
+                "subs": [
+                    {"z": ["z"]},
+                    {"x": [
+                        "-+z",
+                        "-z",
+                        "x",
+                        "(y~w)"
+                    ]}
+                ]
+            },
+            "bb": {
+                "downloader": "D:/ruxx/",
+                "pages": null,
+                "ids": ["5", "6"],
+                "common": ["-dmode 1", "-module bb"],
+                "subs": [
+                    {"z": ["z"]}
+                ]
+            }
+        },
+        "VIDEOS ": {
+            "nm": {
+                "downloader": "D:/NM/",
+                "pages": null,
+                "ids": ["1", "2"],
+                "common": ["-dmode touch", "--dump-tags"],
+                "subs": [
+                    {"a": [
+                        "-quality 1080p",
+                        "-a -b -c -dfff",
+                        "ggg"
+                    ]},
+                    {"b": [
+                        "-ggg",
+                        "-(x,z)",
+                        "(h~i~j~k)"
+                    ]}
+                ]
+            },
+            "rc": {
+                "downloader": "D:/RC/",
+                "pages": ["p50"],
+                "ids": ["-2000"],
+                "common": ["-dmode touch", "--dump-tags"],
+                "subs": [
+                    {"a": [
+                        "aaa"
+                    ]}
+                ]
+            },
+            "rg": {
+                "downloader": "D:/RG/",
+                "pages": ["p50"],
+                "ids": ["-2000"],
+                "common": ["-dmode touch", "--dump-tags"],
+                "subs": [
+                    {"a": [
+                        "aaa"
+                    ]}
+                ]
+            }
+        }
+    }
+}

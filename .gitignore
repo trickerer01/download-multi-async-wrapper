@@ -21,6 +21,7 @@ src/curr.py
 !run/.dummy
 !tests/.dummy
 !tests/*.list
+!tests/*.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

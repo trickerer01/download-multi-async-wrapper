@@ -87,7 +87,7 @@ def fetch_maxids(dts: Iterable[str]) -> dict[str, str]:
 
 
 def make_parser() -> None:
-    assert Config.parser is None, 'Error: make_parser() should only be called once'
+    assert Config.test or Config.parser is None, 'Error: make_parser() should only be called once'
     Config.parser = create_parser()
 
 

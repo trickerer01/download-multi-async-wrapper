@@ -61,7 +61,7 @@ __all__ = ('ParserText',)
 
 class ParserText:
     def __init__(self) -> None:
-        self.queries = Queries()
+        self.queries: Queries = Queries()
 
     @staticmethod
     def get_type_names() -> set[str]:
@@ -268,10 +268,10 @@ class ParserText:
                                 idseq.ints.append(2**31 - 1)
                     elif re_pages_list.fullmatch(line):
                         cdt = cur_dl()
-                        assert cdt in PAGE_DOWNLOADERS, f'{cdt} doesn\'t support pages search!\n\tat line {i + 1}: {line}'
+                        assert cdt in PAGE_DOWNLOADERS, f'{cur_cat}:{cdt} doesn\'t support pages search!\n\tat line {i + 1}: {line}'
                         idseq = self.queries.sequences_ids.at_cur_cat[cdt]
                         if idseq:
-                            assert len(idseq) <= 2, (f'{cdt} defines pages but has ids range of '
+                            assert len(idseq) <= 2, (f'{cur_cat}:{cdt} defines pages but has ids range of '
                                                      f'{len(idseq):d} > 2!\n\tat line {i + 1}: {line}')
                         pageseq = IntSequence([int(num[1:]) for num in line.split(' ')[1:]], i + 1)
                         self.queries.sequences_pages.at_cur_cat[cdt] = pageseq

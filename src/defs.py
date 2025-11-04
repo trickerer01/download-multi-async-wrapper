@@ -41,6 +41,9 @@ class IntSequence:
     def __setitem__(self, key: int | slice, value: int | Iterable[int]) -> None:
         self.ints.__setitem__(key, value)
 
+    def __eq__(self, other) -> bool:
+        return isinstance(other, IntSequence) and self.ints == other.ints
+
     __repr__ = __str__
 
 
@@ -73,15 +76,17 @@ SUPPORTED_SYSTEMS = (
 )
 
 PARSER_TYPE_AUTO = 'auto'
+PARSER_TYPE_JSON = 'json'
 PARSER_TYPE_TXT = 'txt'
 PARSER_TYPE_LIST = 'list'
 
 SUPPORTED_PARSER_TYPES = (
     PARSER_TYPE_AUTO,
+    PARSER_TYPE_JSON,
     PARSER_TYPE_LIST,
     PARSER_TYPE_TXT,
 )
-'''auto, txt, list'''
+'''auto, json, txt, list'''
 PARSER_DEFAULT = PARSER_TYPE_AUTO
 '''auto'''
 

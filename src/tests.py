@@ -52,6 +52,8 @@ args_argparse_str3 = (
     '-append VIDEOS,nm,-continue'
 )
 
+args_argparse_str4 = args_argparse_str2.replace('queries.list', 'queries.json')
+
 
 def test_prepare(*, console_log=False) -> Callable[[], Callable[[], None]]:
     def invoke1(test_func) -> Callable[[], None]:
@@ -247,7 +249,7 @@ class QueriesFormTests(TestCase):
         self.assertIn('-continue', queries_all[cat_vid][DOWNLOADER_NM][0])
         print(f'{self._testMethodName} passed')
 
-    @test_prepare(console_log=True)
+    @test_prepare()
     def test_queries3(self) -> None:
         num_dummys = 6
         dummy_paths: list[str] = []
@@ -263,6 +265,21 @@ class QueriesFormTests(TestCase):
         self.assertEqual(f'{Config.title}{"0" * (Config.title_increment - 1)}{num_dummys + 1:d}', Config.full_title)
         for dpath in dummy_paths:
             os.remove(dpath)
+        print(f'{self._testMethodName} passed')
+
+    @test_prepare()
+    def test_queries4(self) -> None:
+        parse_arglist(args_argparse_str2.split())
+        make_parser()
+        read_queries_file()
+        parser1 = Config.parser
+        parser1.parse_queries_file()
+        parse_arglist(args_argparse_str4.split())
+        make_parser()
+        read_queries_file()
+        parser2 = Config.parser
+        parser2.parse_queries_file()
+        self.assertEqual(parser1.queries, parser2.queries)
         print(f'{self._testMethodName} passed')
 
 

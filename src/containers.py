@@ -68,8 +68,27 @@ class Wrapper(Generic[AT]):
 
 
 class Queries:
+    __slots__ = frozenset[str]((
+        'autoupdate_seqs',
+        'maxid_fetched',
+        'proxies_update',
+        'queries_file_lines',
+        'sequences_common',
+        'sequences_ids',
+        'sequences_pages',
+        'sequences_paths',
+        'sequences_paths_reqs',
+        'sequences_paths_update',
+        'sequences_subfolders',
+        'sequences_tags',
+    ))
+
+    compare_exclude_slots = frozenset[str]((
+        'queries_file_lines',
+    ))
+
     def __init__(self) -> None:
-        self.queries_file_lines: list[str] = []
+        self.queries_file_lines: list[str] | dict = []
 
         self.autoupdate_seqs: DownloadCollection[IntSequence] = DownloadCollection()
 
@@ -84,6 +103,11 @@ class Queries:
         self.sequences_paths_update: dict[str, str | None] = dict.fromkeys(DOWNLOADERS)
         self.proxies_update: dict[str, StrPair | None] = dict.fromkeys(DOWNLOADERS)
         self.maxid_fetched: dict[str, int] = {}
+
+    def __eq__(self, other) -> bool:
+        return isinstance(other, Queries) and all(
+            getattr(self, f) == getattr(other, f) for f in self.__slots__.difference(self.compare_exclude_slots)
+        )
 
 #
 #
