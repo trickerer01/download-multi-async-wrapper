@@ -15,7 +15,7 @@ from config import Config
 from defs import MIN_PYTHON_VERSION, MIN_PYTHON_VERSION_STR, SUPPORTED_SYSTEMS
 from executor import execute
 from logger import close_logfile, trace
-from queries import prepare_queries, read_queries_file, update_next_ids
+from queries import make_parser, prepare_queries, read_queries_file, update_next_ids
 from strings import datetime_str_full
 
 __all__ = ('main_sync',)
@@ -25,6 +25,8 @@ def at_startup() -> None:
     if __name__ == '__main__':
         trace(
             f'Python {sys.version}\nCommand-line args: {" ".join(sys.argv)}'
+            f'\nScript path: \'{Config.script_path}\''
+            f'\nSelected parser type: \'{Config.parser_type}\''
             f'\nEnabled downloaders: "{",".join(Config.downloaders) or "all"}"'
             f'\nEnabled categories: "{",".join(Config.categories) or "all"}"'
             f'\nIgnored arguments: {",".join(str(ign) for ign in Config.ignored_args) or "[]"}'
@@ -39,6 +41,7 @@ def run_main(args: Sequence[str]) -> int:
         trace('Logfile opened...', False)
         trace(f'\n# Started at {datetime_str_full()} #')
         at_startup()
+        make_parser()
         read_queries_file()
         prepare_queries()
         execute()

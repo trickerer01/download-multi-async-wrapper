@@ -72,6 +72,15 @@ SUPPORTED_SYSTEMS = (
     # OS_MACOS,
 )
 
+PARSER_TYPE_TXT = 'txt'
+PARSER_TYPE_LIST = 'list'
+
+SUPPORTED_PARSER_TYPES = (
+    PARSER_TYPE_LIST,
+    PARSER_TYPE_TXT,
+)
+PARSER_DEFAULT = PARSER_TYPE_LIST
+
 MAX_CMD_LEN: dict[str, int] = {
     OS_WINDOWS: 32000,
     OS_LINUX: 127000,
@@ -245,6 +254,7 @@ HELP_NO_DOWNLOAD = 'Boolean flag to skip actual download (do not launch download
 HELP_NO_UPDATE = 'Boolean flag to skip script ids update regardless of script update flag being set or not'
 HELP_INSTALL = 'Force install dependencies from enabled downloaders to a Python environment set within the script'
 HELP_SCRIPT_PATH = 'Full path to the script (queries) file'
+HELP_PARSER = 'Parser type override (if doesn\'t match script file extension)'
 HELP_IGNORE_ARGUMENT = (
     'Script cmd argument to ignore, format: \'<NAME>,<COUNT>\' where <NAME> is argument name (without any dash prefix)'
     ' and <COUNT> is a number of arguments to skip: 1 or 2 (argument+value).'

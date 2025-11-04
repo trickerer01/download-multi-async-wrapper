@@ -5,6 +5,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #########################################
 #
 #
+
 import functools
 import os
 from collections.abc import Callable
@@ -29,11 +30,7 @@ from defs import (
 from executor import queries_all, split_into_args
 from logger import close_logfile
 from main import main_sync
-from queries import (
-    prepare_queries,
-    queries,
-    read_queries_file,
-)
+from queries import make_parser, prepare_queries, read_queries_file
 from strings import date_str_md
 
 __all__ = ()
@@ -67,7 +64,6 @@ def test_prepare(*, console_log=False) -> Callable[[], Callable[[], None]]:
 
             def cleanup_test() -> None:
                 close_logfile()
-                queries.__init__()
 
             set_up_test()
             test_func(*args, **kwargs)
@@ -81,7 +77,9 @@ class ArgParseTests(TestCase):
     def test_argparse1(self) -> None:
         parse_arglist(args_argparse_str1.split())
         self.assertEqual(
-            'debug: False, downloaders: (\'nm\', \'rv\', \'rc\', \'rg\', \'rn\', \'rx\', \'rs\', \'rp\', \'en\', \'xb\', \'bb\'), '
+            'debug: False, '
+            'parser_type_str: list, parser_type: NoneType, '
+            'downloaders: (\'nm\', \'rv\', \'rc\', \'rg\', \'rn\', \'rx\', \'rs\', \'rp\', \'en\', \'xb\', \'bb\'), '
             'script: ../tests/queries.list, dest: ./, run: ./, logs: ./, bak: ./, update: False, '
             'no_download: False, no_update: False, ignored_args: [], id_overrides: [], max_cmd_len: 16000',
             str(Config),
@@ -92,7 +90,9 @@ class ArgParseTests(TestCase):
     def test_argparse2(self) -> None:
         parse_arglist(args_argparse_str2.split())
         self.assertEqual(
-            'debug: True, downloaders: (\'rv\', \'rn\', \'rx\', \'rs\'), '
+            'debug: True, '
+            'parser_type_str: list, parser_type: NoneType, '
+            'downloaders: (\'rv\', \'rn\', \'rx\', \'rs\'), '
             'script: ../tests/queries.list, dest: ./, run: ./, logs: ./, bak: ./, update: False, '
             'no_download: False, no_update: True, ignored_args: [dmode(2), dmode(2)], id_overrides: [], max_cmd_len: 16000',
             str(Config),
@@ -105,6 +105,7 @@ class QueriesFormTests(TestCase):
     def test_queries1(self) -> None:
         cat_vid, cat_img, cat_vid_ = 'VIDEOS', 'IMAGES', 'VIDEOS '
         parse_arglist(args_argparse_str2.split())
+        make_parser()
         read_queries_file()
         prepare_queries()
         self.assertEqual('script_0', Config.title)
@@ -235,6 +236,7 @@ class QueriesFormTests(TestCase):
     def test_queries2(self) -> None:
         cat_vid = 'VIDEOS'
         parse_arglist(args_argparse_str3.split())
+        make_parser()
         read_queries_file()
         prepare_queries()
         self.assertEqual('script_2', Config.title)
@@ -251,6 +253,7 @@ class QueriesFormTests(TestCase):
         dummy_paths: list[str] = []
         self.assertLess(num_dummys, 9)
         parse_arglist(args_argparse_str1.split())
+        make_parser()
         read_queries_file()
         with ExitStack() as ctxm:
             for log_base_name in (f'../logs/log_script_0000{n:d}_temp.conf' for n in range(1, num_dummys + 1)):

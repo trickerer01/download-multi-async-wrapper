@@ -24,10 +24,15 @@ from defs import (
     HELP_INSTALL,
     HELP_NO_DOWNLOAD,
     HELP_NO_UPDATE,
+    HELP_PARSER,
     HELP_SCRIPT_PATH,
     IDLIST_SEPARATOR,
+    PARSER_DEFAULT,
+    SUPPORTED_PARSER_TYPES,
 )
 from validators import valid_categories_list, valid_downloaders_list, valid_file_path
+
+__all__ = ('parse_arglist',)
 
 
 def parse_arglist(args: Sequence[str]) -> None:
@@ -46,6 +51,7 @@ def parse_arglist(args: Sequence[str]) -> None:
     parser.add_argument('-categories', metavar='L,I,S,T', default=[], help=HELP_CATEGORIES, type=valid_categories_list)
     parser.add_argument('-downloaders', metavar='L,I,S,T', default=DOWNLOADERS, help=HELP_DOWNLOADERS, type=valid_downloaders_list)
     parser.add_argument('-script', metavar='PATH_TO_FILE', required=True, help=HELP_SCRIPT_PATH, type=valid_file_path)
+    parser.add_argument('-parser', metavar='PARSER_TYPE', default=PARSER_DEFAULT, help=HELP_PARSER, choices=SUPPORTED_PARSER_TYPES)
 
     parsed = parser.parse_args(args)
     Config.read(parsed)

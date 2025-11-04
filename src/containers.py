@@ -11,6 +11,8 @@ from typing import Dict, Generic, Type
 from defs import AT, DOWNLOADERS, DT, IntSequence, StrPair
 from util import assert_notnull
 
+__all__ = ('DownloadCollection', 'Queries', 'Wrapper')
+
 
 class DownloadCollection(Dict[str, Dict[str, DT | None]]):
     """

@@ -10,6 +10,9 @@ from argparse import Namespace
 
 from defs import APPEND_SEPARATOR, IDLIST_SEPARATOR, MAX_CMD_LEN, OS_WINDOWS
 
+if True is False:
+    from parsers import ParserMeta
+
 __all__ = ('CatDwnIds', 'Config', 'ExtraArgs', 'IgnoredArg')
 
 
@@ -113,7 +116,9 @@ class BaseConfig:
         self.downloaders: tuple[str, ...] = ()
         self.categories: list[str] = []
         self.script_path: str = ''
+        self.parser_type: str = ''
         # script
+        self.parser: ParserMeta | None = None
         self.dest_base: str = BaseConfig.DEFAULT_PATH
         self.dest_run_base: str = BaseConfig.DEFAULT_PATH
         self.dest_logs_base: str = BaseConfig.DEFAULT_PATH
@@ -147,6 +152,7 @@ class BaseConfig:
         self.downloaders = params.downloaders or self.downloaders
         self.categories = params.categories or self.categories
         self.script_path = params.script or self.script_path
+        self.parser_type = params.parser or self.parser_type
 
     @property
     def full_title(self) -> str:
@@ -154,7 +160,9 @@ class BaseConfig:
 
     def __str__(self) -> str:
         return (
-            f'debug: {self.debug}, downloaders: {self.downloaders!s}, script: {self.script_path}, dest: {self.dest_base}, '
+            f'debug: {self.debug}, '
+            f'parser_type_str: {self.parser_type}, parser_type: {self.parser.__class__.__name__!s}, '
+            f'downloaders: {self.downloaders!s}, script: {self.script_path}, dest: {self.dest_base}, '
             f'run: {self.dest_run_base}, logs: {self.dest_logs_base}, bak: {self.dest_bak_base}, update: {self.update}, '
             f'no_download: {self.no_download}, no_update: {self.no_update}, ignored_args: {self.ignored_args!s}, '
             f'id_overrides: {self.override_ids!s}, max_cmd_len: {self.max_cmd_len}'

@@ -6,7 +6,6 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
-import json
 import os
 import re
 from collections.abc import Iterable
@@ -14,87 +13,21 @@ from subprocess import CalledProcessError, check_output
 from threading import Lock, Thread
 
 from config import Config
-from containers import Queries
 from defs import (
-    BOOL_STRS,
     COLOR_LOG_DOWNLOADERS,
     DOWNLOADERS,
-    MAX_CATEGORY_NAME_LENGTH,
     MIN_IDS_SEQ_LENGTH,
-    PAGE_DOWNLOADERS,
-    PATH_APPEND_DOWNLOAD_IDS,
-    PATH_APPEND_DOWNLOAD_PAGES,
-    PATH_APPEND_REQUIREMENTS,
-    PATH_APPEND_UPDATE,
-    PROXY_ARG,
     RUXX_DOWNLOADERS,
     UTF8,
     IntSequence,
-    StrPair,
 )
 from executor import register_queries
-from logger import ensure_logfile, trace
+from logger import trace
+from parsers import create_parser
 from sequences import form_queries, report_queries, report_unoptimized, validate_runners, validate_sequences
-from strings import NEWLINE, SLASH, all_tags_negative, all_tags_positive, datetime_str_nfull, normalize_path, remove_trailing_comments
-from util import assert_notnull
-from validators import positive_int, valid_dir_path
+from strings import NEWLINE, SLASH, datetime_str_nfull
 
-__all__ = ('prepare_queries', 'read_queries_file', 'update_next_ids')
-
-re_title = re.compile(r'^### TITLE:[A-zÀ-ʯА-я\d_+\-!]{,20}$')
-re_title_incr = re.compile(r'^### TITLEINCREMENT:\d$')
-re_dest_base = re.compile(r'^### DESTPATH:.+?$')
-re_dest_bak = re.compile(r'^### BAKPATH:.+?$')
-re_dest_run = re.compile(r'^### RUNPATH:.+?$')
-re_dest_log = re.compile(r'^### LOGPATH:.+?$')
-re_datesub = re.compile(r'^### DATESUB:.+?$')
-re_update = re.compile(r'^### UPDATE:.+?$')
-re_update_offsets = re.compile(r'^### UPDATE_OFFSETS:.+?$')
-re_noproxy_fetches = re.compile(r'^### NOPROXY_FETCHES:.+?$')
-re_category = re.compile(r'^### \(([A-zÀ-ʯА-я\d_+\-! ]+)\) ###$')
-re_comment = re.compile(r'^##[^#].*?$')
-re_python_exec = re.compile(r'^### PYTHON:.+?$')
-re_downloader_type = re.compile(fr'^# (?:{"|".join(DOWNLOADERS)}|{"|".join(DOWNLOADERS).upper()})(?: .*?)?$')
-re_ids_list = re.compile(r'^#(?:(?: \d+)+| -\d+)$')
-re_pages_list = re.compile(r'^# p\d+(?: s\d+)?$')
-re_downloader_basepath = re.compile(r'^# downloader:[A-Z/~].+?$')
-re_common_arg = re.compile(r'^# common:-.+?$')
-re_sub_begin = re.compile(r'^# sub:[^ ].*?$')
-re_sub_end = re.compile(r'^# send$')
-re_downloader_finalize = re.compile(r'^# end$')
-
-queries = Queries()
-
-
-def ensure_logfile_wrapper() -> None:
-    if Config.title_increment > 0 and not Config.title_increment_value:
-        if not Config.title:
-            trace('Warning: title suffix increment is defined but no title set!')
-        else:
-            if Config.dest_logs_base == Config.DEFAULT_PATH:
-                trace('Warning: logs path is unset, title suffix increment will use base path to look for log files')
-            calculate_title_suffix()
-    ensure_logfile()
-
-
-def calculate_title_suffix() -> None:
-    trace('Calculating title suffix...')
-    max_suffix_len = Config.title_increment
-    max_suffix_val = 0
-    if os.path.isdir(Config.dest_logs_base):
-        log_prefixes = tuple(f'{_}_{Config.title}' for _ in ('log', 'run'))
-        base_idx = len(log_prefixes[0])
-        with os.scandir(Config.dest_logs_base) as listing:
-            logsdir_files: list[str] = [f.name for f in listing if f.is_file() and f.name.startswith(log_prefixes)]
-        for fname in logsdir_files:
-            sep_idx = fname.find('_', base_idx)
-            if sep_idx > base_idx:
-                suffix_val = fname[base_idx:sep_idx]
-                if suffix_val.isnumeric():
-                    max_suffix_len = max(max_suffix_len, len(suffix_val))
-                    max_suffix_val = max(max_suffix_val, int(suffix_val))
-    Config.title_increment_value = f'{max_suffix_val + 1:0{max_suffix_len:d}d}'
-    trace(f'Suffix calculated: \'{Config.title_increment_value}\'. Full title: \'{Config.full_title}\'')
+__all__ = ('make_parser', 'prepare_queries', 'read_queries_file', 'update_next_ids')
 
 
 def fetch_maxids(dts: Iterable[str]) -> dict[str, str]:
@@ -102,6 +35,7 @@ def fetch_maxids(dts: Iterable[str]) -> dict[str, str]:
         if not dts:
             return {}
         trace('Fetching max ids...')
+        queries = Config.parser.queries
         re_maxid_fetch_result = re.compile(r'^[A-Z]{2}: \d+$')
         grab_threads: list[Thread] = []
         results: dict[str, str] = {dt: '' for dt in dts if queries.sequences_paths_update[dt] is not None}
@@ -152,324 +86,20 @@ def fetch_maxids(dts: Iterable[str]) -> dict[str, str]:
         raise
 
 
+def make_parser() -> None:
+    assert Config.parser is None, 'Error: make_parser() should only be called once'
+    Config.parser = create_parser()
+
+
 def read_queries_file() -> None:
     trace(f'\nReading queries file: \'{Config.script_path}\'')
     with open(Config.script_path, 'rt', encoding=UTF8) as qfile:
-        queries.queries_file_lines[:] = qfile.readlines()
-
-
-def try_parse_proxy(pargs: list[str], dl: str) -> None:
-    proxy_idx = pargs.index(PROXY_ARG) if PROXY_ARG in pargs else -1
-    if proxy_idx >= 0:
-        assert len(pargs) > proxy_idx + 1
-        queries.proxies_update[dl] = StrPair(pargs[proxy_idx], pargs[proxy_idx + 1])
-
-
-def parse_queries_file() -> None:
-    def cur_ct() -> str:
-        try:
-            return assert_notnull(cur_cat)
-        except AssertionError:
-            trace(f'\nat line {i + 1:d}: current download category isn\'t selected!')
-            raise
-
-    def cur_dl() -> str:
-        try:
-            return cur_ct() and assert_notnull(cur_dwn)
-        except AssertionError:
-            trace(f'\nat line {i + 1:d}: current downloader isn\'t selected!')
-            raise
-
-    args_to_ignore = Config.ignored_args.copy()
-    cur_cat = cur_dwn = ''
-    cur_tags_list: list[str] = []
-
-    for i, line in enumerate(queries.queries_file_lines):
-        try:
-            line = line.strip(' \n\ufeff')  # remove BOM too
-            if line == '':
-                continue
-            if line.startswith('###'):
-                if re_title.fullmatch(line):
-                    title_base = line[line.find(':') + 1:]
-                    trace(f'Parsed title: \'{title_base}\'')
-                    assert Config.title == '', 'Title can only be declared once!'
-                    Config.title = title_base
-                    continue
-                if re_title_incr.fullmatch(line):
-                    title_incr_base = line[line.find(':') + 1:]
-                    trace(f'Parsed title increment: \'{title_incr_base}\'')
-                    assert Config.title_increment == 0, 'Title increment can only be declared once!'
-                    Config.title_increment = positive_int(title_incr_base)
-                    continue
-                if re_dest_base.fullmatch(line):
-                    dest_base = line[line.find(':') + 1:]
-                    trace(f'Parsed download dest base: \'{dest_base}\'')
-                    assert Config.dest_base == Config.DEFAULT_PATH, f'Destination re-declaration! Was \'{Config.dest_base}\''
-                    Config.dest_base = valid_dir_path(dest_base)
-                    continue
-                if re_dest_bak.fullmatch(line):
-                    dest_bak = line[line.find(':') + 1:]
-                    trace(f'Parsed backup dest base: \'{dest_bak}\'')
-                    assert Config.dest_bak_base == Config.DEFAULT_PATH, f'Backup path re-declaration! Was \'{Config.dest_bak_base}\''
-                    Config.dest_bak_base = valid_dir_path(dest_bak)
-                    continue
-                if re_dest_run.fullmatch(line):
-                    dest_run = line[line.find(':') + 1:]
-                    trace(f'Parsed run dest base: \'{dest_run}\'')
-                    assert Config.dest_run_base == Config.DEFAULT_PATH, f'Run path re-declaration! Was \'{Config.dest_run_base}\''
-                    Config.dest_run_base = valid_dir_path(dest_run)
-                    continue
-                if re_dest_log.fullmatch(line):
-                    dest_log = line[line.find(':') + 1:]
-                    trace(f'Parsed logs dest base: \'{dest_log}\'')
-                    assert Config.dest_logs_base == Config.DEFAULT_PATH, f'Logs path re-declaration! Was \'{Config.dest_logs_base}\''
-                    Config.dest_logs_base = valid_dir_path(dest_log)
-                    continue
-                if re_datesub.fullmatch(line):
-                    datesub_str = line[line.find(':') + 1:]
-                    trace(f'Parsed date subfolder flag value: \'{datesub_str}\' ({BOOL_STRS[datesub_str]!s})')
-                    Config.datesub = BOOL_STRS[datesub_str]
-                    continue
-                if re_update.fullmatch(line):
-                    update_str = line[line.find(':') + 1:]
-                    trace(f'Parsed update flag value: \'{update_str}\' ({BOOL_STRS[update_str]!s})')
-                    if Config.no_update:
-                        trace('UPDATE FLAG IS IGNORED DUE TO no_update FLAG')
-                        assert Config.update is False
-                    else:
-                        Config.update = BOOL_STRS[update_str]
-                    continue
-                if re_python_exec.fullmatch(line):
-                    python_str = line[line.find(':') + 1:]
-                    trace(f'Parsed python executable: \'{python_str}\'')
-                    assert Config.python == '', 'Python executable must be declared exactly once!'
-                    Config.python = python_str
-                    continue
-                if re_update_offsets.fullmatch(line):
-                    offsets_str = line[line.find(':') + 1:]
-                    trace(f'Parsed update offsets value: \'{offsets_str}\'')
-                    assert Config.update_offsets == {}, f'Update offsets re-declaration! Was \'{Config.update_offsets!s}\''
-                    Config.update_offsets = json.loads(offsets_str.lower())
-                    invalid_dts: list[str] = []
-                    for pdt in Config.update_offsets:
-                        if pdt not in DOWNLOADERS:
-                            invalid_dts.append(pdt)
-                            trace(f'Error: inavlid downloader type: \'{pdt}\'')
-                        try:
-                            int(Config.update_offsets[pdt])
-                        except ValueError:
-                            invalid_dts.append(pdt)
-                            trace(f'Error: invalid {pdt} offset int value: \'{Config.update_offsets[pdt]!s}\'')
-                    assert not invalid_dts, f'Invalid update offsets value: {offsets_str}'
-                    continue
-                if re_noproxy_fetches.fullmatch(line):
-                    modules_str = line[line.find(':') + 1:]
-                    trace(f'Parsed noproxy fetches value: \'{modules_str}\'')
-                    assert Config.noproxy_fetches == set(), f'Noproxy fetches re-declaration! Was \'{Config.noproxy_fetches!s}\''
-                    Config.noproxy_fetches = set(json.loads(modules_str.lower()))
-                    invalid_dts: list[str] = []
-                    for npdt in Config.noproxy_fetches:
-                        if npdt not in DOWNLOADERS:
-                            invalid_dts.append(npdt)
-                            trace(f'Error: inavlid downloader type: \'{npdt}\'')
-                    assert not invalid_dts, f'Invalid update offsets value: {modules_str}'
-                    continue
-                ensure_logfile_wrapper()
-                cat_match = re_category.fullmatch(line)
-                assert cat_match, f'at line {i + 1:d}: invalid category header format: \'{line}\'!'
-                cur_cat = cat_match.group(1)
-                if len(cur_ct()) > MAX_CATEGORY_NAME_LENGTH:
-                    cur_cat = cur_ct()[:MAX_CATEGORY_NAME_LENGTH]
-                    trace(f'Category name \'{cat_match.group(1)}\' is too long ({len(cat_match.group(1))} > {len(cur_ct())})! Shrinked.')
-                if cur_ct() != cur_ct().strip():
-                    trace(f'Category name \'{cur_ct()}\' will become \'{cur_ct().strip()}\' after stripping!')
-                assert cur_ct() not in queries.sequences_paths, f'Category \'{cur_ct()}\' already exists. Aborted!'
-                trace(f'Processing new category: \'{cur_ct()}\'...')
-                queries.sequences_ids.add_category(cur_ct())
-                queries.sequences_pages.add_category(cur_ct())
-                queries.sequences_paths.add_category(cur_ct())
-                queries.sequences_common.add_category(cur_ct(), list)
-                queries.sequences_tags.add_category(cur_ct(), list)
-                queries.sequences_subfolders.add_category(cur_ct(), list)
-                cur_tags_list.clear()
-                continue
-            if line[0] not in '(-*#' and not line[0].isalnum():
-                trace(f'Error: corrupted line beginning found at line {i + 1:d}!')
-                raise OSError
-            line = remove_trailing_comments(line)
-            if line.startswith('#'):
-                if re_comment.fullmatch(line):
-                    continue
-                ignored_idx: int
-                for ignored_idx in reversed(range(len(args_to_ignore))):
-                    ignored_arg = args_to_ignore[ignored_idx]
-                    start_idx = line.find(ignored_arg.name, line.find(':') + 1)
-                    if start_idx > 0 and line[start_idx - 1] == '-':
-                        start_idx -= 1
-                        while start_idx and line[start_idx - 1] == '-':
-                            start_idx -= 1
-                        end_idx = start_idx + len(ignored_arg.name)
-                        num_to_skip: int
-                        for num_to_skip in reversed(range(ignored_arg.len)):
-                            end_idx = line.find(' ', end_idx) + 1
-                            if end_idx == 0:
-                                if num_to_skip == 0:
-                                    end_idx = len(line)
-                                else:
-                                    break
-                            if num_to_skip == 0:
-                                # remove ignored arg(s) and consume ignored arg from config
-                                new_line = f'{line[:start_idx]}{line[min(end_idx, len(line)):]}'
-                                trace(f'Info: ignoring argument \'{ignored_arg!s}\' found at line {i + 1:d}:\n  \'{line}\' -->'
-                                      f'\n  {" " * start_idx}^{" " * (end_idx - start_idx)}^\n  {new_line}')
-                                line = new_line
-                                del args_to_ignore[ignored_idx]
-                if not line or line.endswith(':'):
-                    trace(f'Ignoring remnants of now consumed line {i + 1:d}: \'{line}\'')
-                    continue
-                if re_downloader_type.fullmatch(line):
-                    assert not cur_tags_list, f'at line {i + 1:d}: unclosed previous downloader section \'{cur_dl()}\'!'
-                    cur_dwn = line.split(' ')[1].lower()
-                    assert cur_dl() in DOWNLOADERS, f'at line {i + 1:d}: unknown downloader \'{cur_dl()}\'!'
-                    trace(f'Processing \'{cur_dl().upper()}\' arguments...')
-                    if cur_dl() in COLOR_LOG_DOWNLOADERS:
-                        queries.sequences_common.at_cur_cat[cur_dl()].append('--disable-log-colors')
-                elif re_ids_list.fullmatch(line):
-                    cdt = cur_dl()
-                    cat = cur_ct()
-                    idseq = IntSequence([int(num) for num in line.split(' ')[1:]], i + 1)
-                    for ids_override in Config.override_ids:
-                        if ids_override.name == f'{cat}:{cdt}':
-                            idseq_temp = IntSequence(ids_override.ids, i + 1)
-                            trace(f'Using \'{cat}:{cdt}\' ids override: {idseq!s} -> {idseq_temp!s}')
-                            idseq = idseq_temp
-                    if queries.sequences_pages.at_cur_cat[cdt]:
-                        assert len(idseq) <= 2, f'{cdt} has pages but defines ids range of {len(idseq):d} > 2!\n\tat line {i + 1}: {line}'
-                    queries.sequences_ids.at_cur_cat[cdt] = idseq
-                    if len(idseq) < MIN_IDS_SEQ_LENGTH:
-                        if cdt in Config.downloaders:
-                            negative_str = ' NEGATIVE' if idseq[0] < 0 else ''
-                            trace(f'{cdt} at line {i + 1:d} provides a single{negative_str} id hence requires maxid autoupdate')
-                            if cat not in queries.autoupdate_seqs:
-                                queries.autoupdate_seqs.add_category(cat)
-                            queries.autoupdate_seqs[cat][cdt] = idseq
-                        else:
-                            idseq.ints.append(2**31 - 1)
-                elif re_pages_list.fullmatch(line):
-                    cdt = cur_dl()
-                    assert cdt in PAGE_DOWNLOADERS, f'{cdt} doesn\'t support pages search!\n\tat line {i + 1}: {line}'
-                    idseq = queries.sequences_ids.at_cur_cat[cdt]
-                    if idseq:
-                        assert len(idseq) <= 2, f'{cdt} defines pages but has ids range of {len(idseq):d} > 2!\n\tat line {i + 1}: {line}'
-                    pageseq = IntSequence([int(num[1:]) for num in line.split(' ')[1:]], i + 1)
-                    queries.sequences_pages.at_cur_cat[cdt] = pageseq
-                    if len(pageseq) < MIN_IDS_SEQ_LENGTH:
-                        pageseq.ints.append(1)
-                elif re_downloader_basepath.fullmatch(line):
-                    cdt = cur_dl()
-                    basepath = line[line.find(':') + 1:]
-                    basepath_n = normalize_path(basepath)
-                    path_append = PATH_APPEND_DOWNLOAD_PAGES if queries.sequences_pages.at_cur_cat[cdt] else PATH_APPEND_DOWNLOAD_IDS
-                    path_downloader = f'{basepath_n}{path_append[cdt]}'
-                    path_requirements = f'{basepath_n}{PATH_APPEND_REQUIREMENTS}'
-                    path_updater = f'{basepath_n}{PATH_APPEND_UPDATE[cdt]}'
-                    if Config.test is False:
-                        assert os.path.isdir(basepath)
-                        assert os.path.isfile(path_downloader)
-                        if Config.install:
-                            assert os.path.isfile(path_requirements)
-                        if Config.update:
-                            assert os.path.isfile(path_updater)
-                    queries.sequences_paths.at_cur_cat[cur_dl()] = path_downloader
-                    queries.sequences_paths_reqs[cur_dl()] = path_requirements
-                    queries.sequences_paths_update[cur_dl()] = normalize_path(os.path.abspath(path_updater), False)
-                elif re_common_arg.fullmatch(line):
-                    common_args = line[line.find(':') + 1:].split(' ')
-                    try_parse_proxy(common_args, cur_dl())
-                    queries.sequences_common.at_cur_cat[cur_dl()].extend(common_args)
-                elif re_sub_begin.fullmatch(line):
-                    cdt = cur_dl()
-                    seq_subs, seq_tags = queries.sequences_subfolders, queries.sequences_tags
-                    assert len(seq_subs.at_cur_cat[cdt]) == len(seq_tags.at_cur_cat[cdt]), f'Error: unclosed {cdt} sub!'
-                    queries.sequences_subfolders.at_cur_cat[cur_dl()].append(line[line.find(':') + 1:])
-                elif re_sub_end.fullmatch(line):
-                    queries.sequences_tags.at_cur_cat[cur_dl()].append(cur_tags_list.copy())
-                elif re_downloader_finalize.fullmatch(line):
-                    cat, cdt = cur_ct(), cur_dl()
-                    for extra_args in Config.extra_args:
-                        if extra_args.name == f'{cat}:{cdt}':
-                            trace(f'Using \'{cat}:{cdt}\' extra args: {extra_args.args!s} -> {" ".join(extra_args.args)}')
-                            try_parse_proxy(extra_args.args, cur_dl())
-                            queries.sequences_common.at_cur_cat[cur_dl()].extend(f'"{arg}"' for arg in extra_args.args)
-                    cur_tags_list.clear()
-                    cur_dwn = ''
-                else:
-                    trace(f'Error: unknown param at line {i + 1:d}!')
-                    raise OSError
-            else:  # elif line[0] in '(-*' or line[0].isalpha():
-                assert queries.sequences_ids.at_cur_cat[cur_dl()] or queries.sequences_pages.at_cur_cat[cur_dl()]
-                if '  ' in line:
-                    trace(f'Error: double space found in tags at line {i + 1:d}!')
-                    raise OSError
-                if line[0] != '(' and not line.startswith('-+(') and '~' in line:
-                    trace(f'Error: unsupported ungrouped OR symbol at line {i + 1:d}!')
-                    raise OSError
-                need_append = True
-                if all_tags_negative(line.split(' ')):  # line[0] === '-'
-                    if line[1] in '-+':
-                        # remove --tag(s) or -+tag(s) from list, convert: --a --b -> [-a, -b] OR -+a -+b -> [a, b]
-                        tags_to_remove = [tag[2 if tag[1] == '+' else 1:] for tag in line.split(' ')]
-                        for k in reversed(range(len(tags_to_remove))):
-                            for j in reversed(range(len(cur_tags_list))):
-                                if cur_tags_list[j] == tags_to_remove[k]:
-                                    del cur_tags_list[j]
-                                    del tags_to_remove[k]
-                                    break
-                        assert len(tags_to_remove) == 0, f'Tags weren\'t consumed: "{" ".join(tags_to_remove)}" at line {i + 1}: {line}'
-                        continue
-                    else:
-                        tags_split = [tag[1:] for tag in line.split(' ')]
-                        split_len = len(tags_split)
-                        assert all(len(tag) > 0 for tag in tags_split)
-                        need_find_previous_or_group = True
-                        tags_rem = '~'.join(tags_split)
-                        tags_search = ','.join(tags_split)
-                        start_idx = 1 if split_len > 1 else 0
-                        end_idx = -1 if split_len > 1 else None
-                        j: int
-                        for j in reversed(range(len(cur_tags_list))):
-                            cur_tag = cur_tags_list[j]
-                            prev_tag = cur_tags_list[j - 1] if j > 0 else ''
-                            try_match_search = j > 0 and prev_tag.startswith('-search')
-                            if try_match_search and cur_tag == tags_search:
-                                del cur_tags_list[j]
-                                del cur_tags_list[j - 1]
-                                need_find_previous_or_group = False
-                                if prev_tag == '-search' or prev_tag.startswith('-search_rule'):
-                                    need_append = False
-                                break
-                            try_match_rem = split_len == 1 or cur_tag[::len(cur_tag) - 1] == '()'
-                            if try_match_rem and cur_tag[start_idx:end_idx] == tags_rem:
-                                del cur_tags_list[j]
-                                need_find_previous_or_group = False
-                                break
-                        if need_find_previous_or_group is True:
-                            trace(f'Info: exclusion(s) at {i + 1:d}, no previous matching tag or \'or\' group found. Line: \'{line}\'')
-                elif not all_tags_positive(line.split(' ')):
-                    param_like = line[0] == '-' and len(line.split(' ')) == 2
-                    if not (param_like and (line.startswith(('-search', '-quality')))):
-                        trace(f'Warning (W2): mixed positive / negative tags at line {i + 1:d}, '
-                              f'{"param" if param_like else "error"}? Line: \'{line}\'')
-                if need_append:
-                    cur_tags_list.extend(line.split(' '))
-        except Exception as e:
-            trace(f'Error: issue encountered while parsing queries file at line {i + 1:d}!\n - {e!s}')
-            raise
+        Config.parser.queries.queries_file_lines[:] = qfile.readlines()
 
 
 def run_autoupdates() -> None:
     trace('Running max ID autoupdates...\n')
+    queries = Config.parser.queries
     unsolved_idseqs: list[str] = []
     autoupdate_seqs = queries.autoupdate_seqs
     needed_updates = [dt for dt in DOWNLOADERS if any(dt in autoupdate_seqs[c] for c in autoupdate_seqs if autoupdate_seqs[c][dt])]
@@ -499,9 +129,10 @@ def run_autoupdates() -> None:
     assert len(unsolved_idseqs) == 0
 
 
-def prepare_queries_impl() -> None:
+def prepare_queries() -> None:
+    queries = Config.parser.queries
     trace('Analyzing queries file strings...')
-    parse_queries_file()
+    Config.parser.parse_queries_file()
     trace('Sequences parsed successfully\n')
     if queries.autoupdate_seqs:
         trace('[Autoupdate] validating runners...\n')
@@ -521,10 +152,6 @@ def prepare_queries_impl() -> None:
     register_queries(queries_final)
 
 
-def prepare_queries() -> None:
-    prepare_queries_impl()
-
-
 def update_next_ids() -> None:
     if Config.update is False:
         trace('\nNext ids update SKIPPED due to no --update flag!')
@@ -536,6 +163,7 @@ def update_next_ids() -> None:
     # save backup and write a new one
     trace('\nNext ids update initiated...')
 
+    queries = Config.parser.queries
     queries_file_name = Config.script_path[Config.script_path.rfind(SLASH) + 1:]
 
     filename_bak = f'{queries_file_name}_bak_{datetime_str_nfull()}.list'

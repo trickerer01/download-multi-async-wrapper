@@ -6,6 +6,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
+import os
 from locale import getpreferredencoding
 from typing import TextIO
 
@@ -29,11 +30,6 @@ def _open_logfile() -> None:
     logfile.reset(open(f'{Config.dest_logs_base}{log_basename}', 'at', encoding=UTF8, errors=IO_ERR_POLICY, buffering=1))
     if buffered_strings:
         trace('\n#^^Buffered strings dumped^^#\n', False)
-
-
-def ensure_logfile() -> None:
-    if not logfile:
-        _open_logfile()
 
 
 def close_logfile() -> None:
@@ -72,6 +68,38 @@ def trace(msg: str, add_timestamp=True) -> None:
         logfile.val.write(t_msg)
     else:
         buffered_strings.append(t_msg)
+
+
+def ensure_logfile() -> None:
+    if Config.title_increment > 0 and not Config.title_increment_value:
+        if not Config.title:
+            trace('Warning: title suffix increment is defined but no title set!')
+        else:
+            if Config.dest_logs_base == Config.DEFAULT_PATH:
+                trace('Warning: logs path is unset, title suffix increment will use base path to look for log files')
+            calculate_title_suffix()
+    if not logfile:
+        _open_logfile()
+
+
+def calculate_title_suffix() -> None:
+    trace('Calculating title suffix...')
+    max_suffix_len = Config.title_increment
+    max_suffix_val = 0
+    if os.path.isdir(Config.dest_logs_base):
+        log_prefixes = tuple(f'{_}_{Config.title}' for _ in ('log', 'run'))
+        base_idx = len(log_prefixes[0])
+        with os.scandir(Config.dest_logs_base) as listing:
+            logsdir_files: list[str] = [f.name for f in listing if f.is_file() and f.name.startswith(log_prefixes)]
+        for fname in logsdir_files:
+            sep_idx = fname.find('_', base_idx)
+            if sep_idx > base_idx:
+                suffix_val = fname[base_idx:sep_idx]
+                if suffix_val.isnumeric():
+                    max_suffix_len = max(max_suffix_len, len(suffix_val))
+                    max_suffix_val = max(max_suffix_val, int(suffix_val))
+    Config.title_increment_value = f'{max_suffix_val + 1:0{max_suffix_len:d}d}'
+    trace(f'Suffix calculated: \'{Config.title_increment_value}\'. Full title: \'{Config.full_title}\'')
 
 #
 #
