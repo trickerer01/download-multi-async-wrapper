@@ -1,4 +1,5 @@
-Here is a JSON representation of improvised script explaining every statement and overall cmdline composition process
+Here is a JSON representation of improvised script explaining every statement and overall cmdline composition process  
+**If you need a base json script to build upon look in examples folder**
 
 ```json
 {

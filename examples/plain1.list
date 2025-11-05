@@ -1,0 +1,276 @@
+### TITLE:01daily
+### TITLEINCREMENT:1
+### DESTPATH:P:/daily/dest/
+### BAKPATH:P:/daily/bak/
+### RUNPATH:P:/daily/!logs/
+### LOGPATH:P:/daily/!logs/
+### DATESUB:0
+### UPDATE:0
+### NOPROXY_FETCHES:["rg"]
+### PYTHON:python3
+
+## Average amount of new posts per downloader:
+## RV: 1200
+## NM: 60
+## RG: 120
+
+## Do not create subfolder for this script
+
+### ( ) ###
+## In this category we scan last X ids for each downloader, let's call it 'IDs' category
+# RV
+# -2000
+# downloader:D:/projects/RV/
+## download everything available including unpublished posts, up to 30 min duration
+# common:--log-level trace -timeout 20 -retries 20 -throttle 100 -lookahead 50 -fsdepth 2 -duration 0-1800
+# common:--throttle-auto --no-rename-move --report-duplicates --check-title-pos --check-title-neg --solve-tag-conflicts --continue-mode
+# common:--dump-tags --dump-descriptions --dump-comments --skip-empty-lists --merge-lists --download-without-proxy --predict-id-gaps auto
+## Add base filters
+## Here we use pretty much every tag syntax supported by the downloader
+## Here filters are separated into 4 group: general, character / species, series / category, author / uploader
+## Currently non-existing tags can be wildcard'ed to be future-proof
+## RV filters are validated against tags/categories/artist
+# common:-gay* -*yaoi -male/male -male_on_male -male_only -male_penetrating_male -(solo,male*|man|guy|1boy*|*femboy*) -solo_male -son -mother_and_son -brothers -scat -gore -guro -fart* -vomit -pmv* -hmv* -c[ou]mpilation* -c[ou]mpi`? -fap_`?hero -beat_`?banger -teaser* -advertisement -taker_pov -cuckold -vore -*_vore
+# common:-orisa* -sanghe?li* -vulpera* -worgen* -pandaren -dog_b* -dogs -*knot* -cani* -were* -wolf
+# common:-*steven_universe* -*transformers* -*second_`?life* -rick*morty* -american_dad -one_punch* -rayman* -*mlp* -my_little_pony* -*sonic* -*roblox* -minecraft -spyro* -amazing_world_of_gumball -*scooby* -*fnaf* -*five_nights* -the_sims* -*simpson* -*undertale* -*family_guy* -*futurama* -*team_fortess* -*crash* -*goof_troop* -*zootopia* -*adventure_time* -*animal_crossing* -teenage_mutant_ninja_turtles -*tmnt* -friday_night_f* -dragon*ball* -plants_vs* -ratchet_and_clank*
+# common:-kenfurfox -prznai -bazett -ntrman -minwa -*shisui4sui* -*legendado* -double_soft_cream -futadomworld -toro_toro_resistance -purinpu -trestlesky* -axl020431 -u:*rusty?`?fc* -u:patreon?`?gamer -u:hdiddy?`? -u:top?`?heavy?`?production -u:drawwer -u:journal?`?jonathan2 -u:unival?`?
+# sub:02s
+-quality 1080p
+(wildeer*~guiltyk)
+# send
+
+# sub:07sl
+## No need to explicitly exclude previous sub +filters so we just remove them
+-+(wildeer*~guiltyk)
+## Override quality for this sub onward
+--quality -+1080p
+-quality 720p
+(*_slave*~slave*)
+-male_* -*_male -?male* -boy_* -*_boy -?boy* -male
+# send
+
+# sub:10ab
+## Here quality is still 720p
+-+(*_slave*~slave*)
+(anal_beads~*plug)
+# send
+
+# sub:13sl
+## Here quality is still 720p
+## Exclusion of previous -filter
+-+(anal_beads~*plug)
+(slime~slime_girl~goo_girl)
+# send
+
+# sub:15tl
+## Here quality is still 720p
+-+(slime~slime_girl~goo_girl)
+(tentacle*~*_tentac*)
+## Sometimes wildcrds can be to generous and gather something we do not want
+-tentaclesgames*
+# send
+
+# sub:31tu
+--tentaclesgames*
+## This set of -filters was included in every previous sub but here we remove it
+--male_* --*_male --?male* --boy_* --*_boy --?boy* --male
+-+(tentacle*~*_tentac*)
+## Override quality (again)
+--quality -+720p
+-quality 1080p
+*tutorial*
+# send
+# end
+
+# NM
+# -100
+# downloader:D:/projects/NM/
+## We may need a proxy sometime
+## common:-proxy socks5://127.0.0.1:222
+# common:--log-level trace -timeout 20 -retries 20 -throttle 100 -lookahead 50 -fsdepth 2
+# common:--throttle-auto --no-rename-move --report-duplicates --check-title-pos --check-title-neg --solve-tag-conflicts --continue-mode
+# common:--dump-tags --dump-descriptions --dump-comments --skip-empty-lists --merge-lists --download-without-proxy
+## Effective filter selection may differ between downloaders
+## NM filters are not validated
+# common:-gay* -bara -yaoi -male*/male* -maleonmale -malewithmale -malexmale -(solo|solo*action,male*|man|guy|boy|femboy*) -solo_male -son -scat -gore -guro -fart* -vomit* -*pmv -*hmv -compil* -teaser* -castrat* -shota*
+# common:-orisa -sanghe?li* -head*crab -vulpera* -worgen* -pandaren* -dog -dogs -*knot* -canine -canid -canis -wolf -wolve* -werewol* -werecanid -ursine -ursid -wereursi*
+# common:-*steven*universe* -*transformers* -second*life* -rick*morty* -american*dad -one*punch* -rayman* -*mlp* -my*little*pony* -*sonic* -mugen* -*roblox* -minecraft -spyro* -*gumball* -*scooby* -*fnaf* -*five*nights* -the*sims* -sims* -*simpson* -*undertale* -*family*guy* -*futurama* -*team*fortess* -*crash* -*goof*troop* -*zootopia* -*adventure*time* -*animal*crossing* -teenage*ninja* -*tmnt* -friday*night* -dragon*ball* -plants*vs*
+# common:-dismorph -kenfurfox -*spicysims* -demlilcarlisle -bazett
+# sub:02s
+-quality 1080p
+(wildeer*~guiltyk)
+# send
+
+# sub:07sl
+## No need to explicitly exclude previous sub +filters so we just remove them
+-+(wildeer*~guiltyk)
+## Override quality for this sub onward
+--quality -+1080p
+-quality 720p
+(*_slave*~slave*)
+-male_* -*_male -?male* -boy_* -*_boy -?boy* -male
+# send
+
+# sub:10ab
+## Here quality is still 720p
+-+(*_slave*~slave*)
+(anal_beads~*plug)
+# send
+
+# sub:13sl
+## Here quality is still 720p
+## Exclusion of previous -filter
+-+(anal_beads~*plug)
+(slime~slime_girl~goo_girl)
+# send
+
+# sub:15tl
+## Here quality is still 720p
+-+(slime~slime_girl~goo_girl)
+(tentacle*~*_tentac*)
+## Sometimes wildcrds can be to generous and gather something we do not want
+-tentaclesgames*
+# send
+
+# sub:31tu
+--tentaclesgames*
+## This set of -filters was included in every previous sub but here we remove it
+--male_* --*_male --?male* --boy_* --*_boy --?boy* --male
+-+(tentacle*~*_tentac*)
+## Override quality (again)
+--quality -+720p
+-quality 1080p
+*tutorial*
+# send
+# end
+
+## Oh look, we examine AI slop, too!
+# RG
+# -200
+# downloader:D:/projects/RG/
+## common:-proxy socks5://127.0.0.1:222
+# common:--log-level trace -timeout 20 -retries 20 -throttle 100 -lookahead 50 -fsdepth 2
+# common:--throttle-auto --no-rename-move --report-duplicates --check-title-pos --check-title-neg --solve-tag-conflicts --continue-mode
+# common:--dump-tags --dump-descriptions --dump-comments --skip-empty-lists --merge-lists --predict-id-gaps auto
+## It's pretty rare for cdn server to be unavailable in some countries but RG actually has those so we only use proxy to download
+# common:--html-without-proxy
+# common:-gay* -*yaoi -male*/male -male*_on_male -male*_only -male*_penetrating_male -(solo,male*|man|guy|1boy*|*femboy*) -solo_male* -mother*_and_son -brothers* -scat -gore -guro -fart* -vomit -pmv* -hmv* -c[ou]mpilation* -c[ou]mpi`? -fap_`?hero -beat_`?banger -teaser* -advertisement -granny
+# common:-quality 1080p
+# sub:02s
+-quality 1080p
+(wildeer*~guiltyk)
+# send
+
+# sub:07sl
+## No need to explicitly exclude previous sub +filters so we just remove them
+-+(wildeer*~guiltyk)
+## Override quality for this sub onward
+--quality -+1080p
+-quality 720p
+(*_slave*~slave*)
+-male_* -*_male -?male* -boy_* -*_boy -?boy* -male
+# send
+
+# sub:10ab
+## Here quality is still 720p
+-+(*_slave*~slave*)
+(anal_beads~*plug)
+# send
+
+# sub:13sl
+## Here quality is still 720p
+## Exclusion of previous -filter
+-+(anal_beads~*plug)
+(slime~slime_girl~goo_girl)
+# send
+
+# sub:15tl
+## Here quality is still 720p
+-+(slime~slime_girl~goo_girl)
+(tentacle*~*_tentac*)
+## Sometimes wildcrds can be to generous and gather something we do not want
+-tentaclesgames*
+# send
+
+# sub:31tu
+--tentaclesgames*
+## This set of -filters was included in every previous sub but here we remove it
+--male_* --*_male --?male* --boy_* --*_boy --?boy* --male
+-+(tentacle*~*_tentac*)
+## Override quality (again)
+--quality -+720p
+-quality 1080p
+*tutorial*
+# send
+# end
+
+
+## This category results will be downloaded to the same folder as the first one: strip(" ") == string("  ") == ""
+### (  ) ###
+# RV
+## Let's call this category 'Pages'. In this category we scan up to 50 pages...
+# p50
+## ...but only 2000 last ids
+# -2000
+## Configuration can be mostly copied from IDs category
+# downloader:D:/projects/RV/
+## Here '-fsdepth 1 -fslevel 1' is different because unlike IDs where optimized query would target top-level dest folder here each query will target a separate subs
+# common:--log-level trace -timeout 20 -retries 20 -throttle 100 -lookahead 50 -fsdepth 1 -fslevel 1 -duration 0-1800
+# common:--throttle-auto --no-rename-move --report-duplicates --check-title-pos --check-title-neg --solve-tag-conflicts --continue-mode
+## Here we do not use id gaps prediction because it cannot be used with search
+# common:--dump-tags --dump-descriptions --dump-comments --skip-empty-lists --merge-lists --download-without-proxy
+# common:-gay* -*yaoi -male/male -male_on_male -male_only -male_penetrating_male -(solo,male*|man|guy|1boy*|*femboy*) -solo_male -son -mother_and_son -brothers -scat -gore -guro -fart* -vomit -pmv* -hmv* -c[ou]mpilation* -c[ou]mpi`? -fap_`?hero -beat_`?banger -teaser* -advertisement -taker_pov -cuckold -vore -*_vore
+# common:-orisa* -sanghe?li* -vulpera* -worgen* -pandaren -dog_b* -dogs -*knot* -cani* -were* -wolf
+# common:-*steven_universe* -*transformers* -*second_`?life* -rick*morty* -american_dad -one_punch* -rayman* -*mlp* -my_little_pony* -*sonic* -*roblox* -minecraft -spyro* -amazing_world_of_gumball -*scooby* -*fnaf* -*five_nights* -the_sims* -*simpson* -*undertale* -*family_guy* -*futurama* -*team_fortess* -*crash* -*goof_troop* -*zootopia* -*adventure_time* -*animal_crossing* -teenage_mutant_ninja_turtles -*tmnt* -friday_night_f* -dragon*ball* -plants_vs* -ratchet_and_clank*
+# common:-kenfurfox -prznai -bazett -ntrman -minwa -*shisui4sui* -*legendado* -double_soft_cream -futadomworld -toro_toro_resistance -purinpu -trestlesky* -axl020431 -u:*rusty?`?fc* -u:patreon?`?gamer -u:hdiddy?`? -u:top?`?heavy?`?production -u:drawwer -u:journal?`?jonathan2 -u:unival?`?
+# sub:02s
+-quality 1080p
+-search wildeer
+# send
+# sub:02s
+-wildeer
+-search guiltyk
+# send
+
+# sub:07sl
+-guiltyk
+--quality -+1080p
+-quality 720p
+-search slave
+-male_* -*_male -?male* -boy_* -*_boy -?boy* -male
+# send
+
+# sub:10ab
+-slave
+-search bead
+# send
+## It's okay to use the same sub for a different search
+# sub:10ab
+-bead
+-search plug
+# send
+
+# sub:13sl
+-plug
+-search slime
+-*slime*datta*
+# send
+
+# sub:15tl
+-slime
+--*slime*datta*
+-search tentacl
+-tentaclesgames*
+# send
+
+# sub:31tu
+--tentaclesgames*
+--male_* --*_male --?male* --boy_* --*_boy --?boy* --male
+-tentacl
+--quality -+720p
+-quality 1080p
+-search tutorial
+# send
+# end
+
+## RV is the only downloader we use here

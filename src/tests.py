@@ -39,7 +39,7 @@ args_argparse_str_1 = '-script ../tests/queries.list'
 args_argparse_str_2_1 = '--debug --no-update -ignore dmode,2 -ignore dmode,2 -downloaders rv,rx,rn,rs -script ../tests/queries.list'
 args_argparse_str_2_2 = args_argparse_str_2_1.replace('queries.list', 'queries.json')
 args_argparse_str_3 = '-script ../tests/queries2.list -append VIDEOS,nm,-continue'
-args_argparse_str_4_1 = '--debug -script ../exmamples/plain1.list'
+args_argparse_str_4_1 = '--debug -script ../examples/plain1.list'
 args_argparse_str_4_2 = args_argparse_str_4_1.replace('plain1.list', 'json1.json')
 
 
@@ -263,6 +263,21 @@ class QueriesFormTests(TestCase):
         parser1 = Config.parser
         parser1.parse_queries_file()
         parse_arglist(args_argparse_str_2_2.split())
+        make_parser()
+        read_queries_file()
+        parser2 = Config.parser
+        parser2.parse_queries_file()
+        self.assertEqual(parser1.queries, parser2.queries)
+        print(f'{self._testMethodName} passed')
+
+    @test_prepare()
+    def test_queries5_exampleq(self) -> None:
+        parse_arglist(args_argparse_str_4_1.split())
+        make_parser()
+        read_queries_file()
+        parser1 = Config.parser
+        parser1.parse_queries_file()
+        parse_arglist(args_argparse_str_4_2.split())
         make_parser()
         read_queries_file()
         parser2 = Config.parser

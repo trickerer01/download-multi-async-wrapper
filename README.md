@@ -20,9 +20,10 @@ This is a small scripting engine that basically processes different r34 download
 
 ### Scripting Syntax
 - Te engine supports scripts composed in both plain text and simple JSON format
-- Check docs for script composition guidelines and tips:
+- Check **docs** for script composition guidelines and tips:
   - [SCRIPTING_SYNTAX_PLAIN](https://github.com/trickerer01/download-multi-async-wrapper/blob/master/docs/SCRIPTING_SYNTAX_PLAIN.md) 
-  - [SCRIPTING_SYNTAX_JSON](https://github.com/trickerer01/download-multi-async-wrapper/blob/master/docs/SCRIPTING_SYNTAX_JSON.md)  
-Invoke `python src/main.py --help` to list all cmdline arguments
+  - [SCRIPTING_SYNTAX_JSON](https://github.com/trickerer01/download-multi-async-wrapper/blob/master/docs/SCRIPTING_SYNTAX_JSON.md)
+- Check **examples** for potential base scripts
+- Invoke `python src/main.py --help` to list all cmdline arguments
 
 Once you are done with initial script setup you only need to invoke a single cmd command to download the next batch without any need to even update next max id manually, ever (ideally)

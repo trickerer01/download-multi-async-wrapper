@@ -1,0 +1,224 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$comment": "TODO:",
+    "title": "01daily",
+    "title_increment": "1",
+    "dest_path": "P:/daily/dest/",
+    "bak_path": "P:/daily/bak/",
+    "run_path": "P:/daily/!logs/",
+    "log_path": "P:/daily/!logs/",
+    "date_sub": "0",
+    "update": "0",
+    "update_offsets": {},
+    "noproxy_fetches": ["rg"],
+    "python": "python3",
+    "compose": {
+        " ": {
+            "RV": {
+                "downloader": "D:/projects/RV/",
+                "pages": null,
+                "ids": ["-2000"],
+                "common": [
+                    "--log-level trace -timeout 20 -retries 20 -throttle 100 -lookahead 50 -fsdepth 2 -duration 0-1800",
+                    "--throttle-auto --no-rename-move --report-duplicates --check-title-pos --check-title-neg --solve-tag-conflicts --continue-mode",
+                    "--dump-tags --dump-descriptions --dump-comments --skip-empty-lists --merge-lists --download-without-proxy --predict-id-gaps auto",
+                    "-gay* -*yaoi -male/male -male_on_male -male_only -male_penetrating_male -(solo,male*|man|guy|1boy*|*femboy*) -solo_male -son -mother_and_son -brothers -scat -gore -guro -fart* -vomit -pmv* -hmv* -c[ou]mpilation* -c[ou]mpi`? -fap_`?hero -beat_`?banger -teaser* -advertisement -taker_pov -cuckold -vore -*_vore",
+                    "-orisa* -sanghe?li* -vulpera* -worgen* -pandaren -dog_b* -dogs -*knot* -cani* -were* -wolf",
+                    "-*steven_universe* -*transformers* -*second_`?life* -rick*morty* -american_dad -one_punch* -rayman* -*mlp* -my_little_pony* -*sonic* -*roblox* -minecraft -spyro* -amazing_world_of_gumball -*scooby* -*fnaf* -*five_nights* -the_sims* -*simpson* -*undertale* -*family_guy* -*futurama* -*team_fortess* -*crash* -*goof_troop* -*zootopia* -*adventure_time* -*animal_crossing* -teenage_mutant_ninja_turtles -*tmnt* -friday_night_f* -dragon*ball* -plants_vs* -ratchet_and_clank*",
+                    "-kenfurfox -prznai -bazett -ntrman -minwa -*shisui4sui* -*legendado* -double_soft_cream -futadomworld -toro_toro_resistance -purinpu -trestlesky* -axl020431 -u:*rusty?`?fc* -u:patreon?`?gamer -u:hdiddy?`? -u:top?`?heavy?`?production -u:drawwer -u:journal?`?jonathan2 -u:unival?`?"
+                ],
+                "subs": [
+                    {"02s": [
+                        "-quality 1080p",
+                        "(wildeer*~guiltyk)"
+                    ]},
+                    {"07sl": [
+                        "-+(wildeer*~guiltyk)",
+                        "--quality -+1080p",
+                        "-quality 720p",
+                        "(*_slave*~slave*)",
+                        "-male_* -*_male -?male* -boy_* -*_boy -?boy* -male"
+                    ]},
+                    {"10ab": [
+                        "-+(*_slave*~slave*)",
+                        "(anal_beads~*plug)"
+                    ]},
+                    {"13sl": [
+                        "-+(anal_beads~*plug)",
+                        "(slime~slime_girl~goo_girl)"
+                    ]},
+                    {"15tl": [
+                        "-+(slime~slime_girl~goo_girl)",
+                        "(tentacle*~*_tentac*)",
+                        "-tentaclesgames*"
+                    ]},
+                    {"31tu": [
+                        "--tentaclesgames*",
+                        "--male_* --*_male --?male* --boy_* --*_boy --?boy* --male",
+                        "-+(tentacle*~*_tentac*)",
+                        "--quality -+720p",
+                        "-quality 1080p",
+                        "*tutorial*"
+                    ]}
+                ]
+            },
+            "NM": {
+                "downloader": "D:/projects/NM/",
+                "pages": null,
+                "ids": ["-100"],
+                "$comment": "-proxy socks5://127.0.0.1:222",
+                "common": [
+                    "--log-level trace -timeout 20 -retries 20 -throttle 100 -lookahead 50 -fsdepth 2",
+                    "--throttle-auto --no-rename-move --report-duplicates --check-title-pos --check-title-neg --solve-tag-conflicts --continue-mode",
+                    "--dump-tags --dump-descriptions --dump-comments --skip-empty-lists --merge-lists --download-without-proxy",
+                    "-gay* -bara -yaoi -male*/male* -maleonmale -malewithmale -malexmale -(solo|solo*action,male*|man|guy|boy|femboy*) -solo_male -son -scat -gore -guro -fart* -vomit* -*pmv -*hmv -compil* -teaser* -castrat* -shota*",
+                    "-orisa -sanghe?li* -head*crab -vulpera* -worgen* -pandaren* -dog -dogs -*knot* -canine -canid -canis -wolf -wolve* -werewol* -werecanid -ursine -ursid -wereursi*",
+                    "-*steven*universe* -*transformers* -second*life* -rick*morty* -american*dad -one*punch* -rayman* -*mlp* -my*little*pony* -*sonic* -mugen* -*roblox* -minecraft -spyro* -*gumball* -*scooby* -*fnaf* -*five*nights* -the*sims* -sims* -*simpson* -*undertale* -*family*guy* -*futurama* -*team*fortess* -*crash* -*goof*troop* -*zootopia* -*adventure*time* -*animal*crossing* -teenage*ninja* -*tmnt* -friday*night* -dragon*ball* -plants*vs*",
+                    "-dismorph -kenfurfox -*spicysims* -demlilcarlisle -bazett"
+                ],
+                "subs": [
+                    {"02s": [
+                        "-quality 1080p",
+                        "(wildeer*~guiltyk)"
+                    ]},
+                    {"07sl": [
+                        "-+(wildeer*~guiltyk)",
+                        "--quality -+1080p",
+                        "-quality 720p",
+                        "(*_slave*~slave*)",
+                        "-male_* -*_male -?male* -boy_* -*_boy -?boy* -male"
+                    ]},
+                    {"10ab": [
+                        "-+(*_slave*~slave*)",
+                        "(anal_beads~*plug)"
+                    ]},
+                    {"13sl": [
+                        "-+(anal_beads~*plug)",
+                        "(slime~slime_girl~goo_girl)"
+                    ]},
+                    {"15tl": [
+                        "-+(slime~slime_girl~goo_girl)",
+                        "(tentacle*~*_tentac*)",
+                        "-tentaclesgames*"
+                    ]},
+                    {"31tu": [
+                        "--tentaclesgames*",
+                        "--male_* --*_male --?male* --boy_* --*_boy --?boy* --male",
+                        "-+(tentacle*~*_tentac*)",
+                        "--quality -+720p",
+                        "-quality 1080p",
+                        "*tutorial*"
+                    ]}
+                ]
+            },
+            "RG": {
+                "downloader": "D:/projects/RG/",
+                "pages": null,
+                "ids": ["-200"],
+                "$comment": "-proxy socks5://127.0.0.1:222",
+                "common": [
+                    "--log-level trace -timeout 20 -retries 20 -throttle 100 -lookahead 50 -fsdepth 2",
+                    "--throttle-auto --no-rename-move --report-duplicates --check-title-pos --check-title-neg --solve-tag-conflicts --continue-mode",
+                    "--dump-tags --dump-descriptions --dump-comments --skip-empty-lists --merge-lists --predict-id-gaps auto",
+                    "--html-without-proxy",
+                    "-gay* -*yaoi -male*/male -male*_on_male -male*_only -male*_penetrating_male -(solo,male*|man|guy|1boy*|*femboy*) -solo_male* -mother*_and_son -brothers* -scat -gore -guro -fart* -vomit -pmv* -hmv* -c[ou]mpilation* -c[ou]mpi`? -fap_`?hero -beat_`?banger -teaser* -advertisement -granny",
+                    "-quality 1080p"
+                ],
+                "subs": [
+                    {"02s": [
+                        "-quality 1080p",
+                        "(wildeer*~guiltyk)"
+                    ]},
+                    {"07sl": [
+                        "-+(wildeer*~guiltyk)",
+                        "--quality -+1080p",
+                        "-quality 720p",
+                        "(*_slave*~slave*)",
+                        "-male_* -*_male -?male* -boy_* -*_boy -?boy* -male"
+                    ]},
+                    {"10ab": [
+                        "-+(*_slave*~slave*)",
+                        "(anal_beads~*plug)"
+                    ]},
+                    {"13sl": [
+                        "-+(anal_beads~*plug)",
+                        "(slime~slime_girl~goo_girl)"
+                    ]},
+                    {"15tl": [
+                        "-+(slime~slime_girl~goo_girl)",
+                        "(tentacle*~*_tentac*)",
+                        "-tentaclesgames*"
+                    ]},
+                    {"31tu": [
+                        "--tentaclesgames*",
+                        "--male_* --*_male --?male* --boy_* --*_boy --?boy* --male",
+                        "-+(tentacle*~*_tentac*)",
+                        "--quality -+720p",
+                        "-quality 1080p",
+                        "*tutorial*"
+                    ]}
+                ]
+            }
+        },
+        "  ": {
+            "RV": {
+                "downloader": "D:/projects/RV/",
+                "pages": ["p50"],
+                "ids": ["-2000"],
+                "common": [
+                    "--log-level trace -timeout 20 -retries 20 -throttle 100 -lookahead 50 -fsdepth 1 -fslevel 1 -duration 0-1800",
+                    "--throttle-auto --no-rename-move --report-duplicates --check-title-pos --check-title-neg --solve-tag-conflicts --continue-mode",
+                    "--dump-tags --dump-descriptions --dump-comments --skip-empty-lists --merge-lists --download-without-proxy",
+                    "-gay* -*yaoi -male/male -male_on_male -male_only -male_penetrating_male -(solo,male*|man|guy|1boy*|*femboy*) -solo_male -son -mother_and_son -brothers -scat -gore -guro -fart* -vomit -pmv* -hmv* -c[ou]mpilation* -c[ou]mpi`? -fap_`?hero -beat_`?banger -teaser* -advertisement -taker_pov -cuckold -vore -*_vore",
+                    "-orisa* -sanghe?li* -vulpera* -worgen* -pandaren -dog_b* -dogs -*knot* -cani* -were* -wolf",
+                    "-*steven_universe* -*transformers* -*second_`?life* -rick*morty* -american_dad -one_punch* -rayman* -*mlp* -my_little_pony* -*sonic* -*roblox* -minecraft -spyro* -amazing_world_of_gumball -*scooby* -*fnaf* -*five_nights* -the_sims* -*simpson* -*undertale* -*family_guy* -*futurama* -*team_fortess* -*crash* -*goof_troop* -*zootopia* -*adventure_time* -*animal_crossing* -teenage_mutant_ninja_turtles -*tmnt* -friday_night_f* -dragon*ball* -plants_vs* -ratchet_and_clank*",
+                    "-kenfurfox -prznai -bazett -ntrman -minwa -*shisui4sui* -*legendado* -double_soft_cream -futadomworld -toro_toro_resistance -purinpu -trestlesky* -axl020431 -u:*rusty?`?fc* -u:patreon?`?gamer -u:hdiddy?`? -u:top?`?heavy?`?production -u:drawwer -u:journal?`?jonathan2 -u:unival?`?"
+                ],
+                "subs": [
+                    {"02s": [
+                        "-quality 1080p",
+                        "-search wildeer"
+                    ]},
+                    {"02s": [
+                        "-wildeer",
+                        "-search guiltyk"
+                    ]},
+                    {"07sl": [
+                        "-guiltyk",
+                        "--quality -+1080p",
+                        "-quality 720p",
+                        "-search slave",
+                        "-male_* -*_male -?male* -boy_* -*_boy -?boy* -male"
+                    ]},
+                    {"10ab": [
+                        "-slave",
+                        "-search bead"
+                    ]},
+                    {"10ab": [
+                        "-bead",
+                        "-search plug"
+                    ]},
+                    {"13sl": [
+                        "-plug",
+                        "-search slime",
+                        "-*slime*datta*"
+                    ]},
+                    {"15tl": [
+                        "-slime",
+                        "--*slime*datta*",
+                        "-search tentacl",
+                        "-tentaclesgames*"
+                    ]},
+                    {"31tu": [
+                        "--tentaclesgames*",
+                        "--male_* --*_male --?male* --boy_* --*_boy --?boy* --male",
+                        "-tentacl",
+                        "--quality -+720p",
+                        "-quality 1080p",
+                        "-search tutorial"
+                    ]}
+                ]
+            }
+        }
+    }
+}
