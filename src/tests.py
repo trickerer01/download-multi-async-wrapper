@@ -35,24 +35,12 @@ from strings import date_str_md
 
 __all__ = ()
 
-args_argparse_str1 = (
-    '-script ../tests/queries.list'
-)
-
-args_argparse_str2 = (
-    '--debug '
-    '--no-update '
-    '-ignore dmode,2 -ignore dmode,2 '
-    '-downloaders rv,rx,rn,rs '
-    '-script "../tests/queries.list"'
-)
-
-args_argparse_str3 = (
-    '-script ../tests/queries2.list '
-    '-append VIDEOS,nm,-continue'
-)
-
-args_argparse_str4 = args_argparse_str2.replace('queries.list', 'queries.json')
+args_argparse_str_1 = '-script ../tests/queries.list'
+args_argparse_str_2_1 = '--debug --no-update -ignore dmode,2 -ignore dmode,2 -downloaders rv,rx,rn,rs -script ../tests/queries.list'
+args_argparse_str_2_2 = args_argparse_str_2_1.replace('queries.list', 'queries.json')
+args_argparse_str_3 = '-script ../tests/queries2.list -append VIDEOS,nm,-continue'
+args_argparse_str_4_1 = '--debug -script ../exmamples/plain1.list'
+args_argparse_str_4_2 = args_argparse_str_4_1.replace('plain1.list', 'json1.json')
 
 
 def test_prepare(*, console_log=False) -> Callable[[], Callable[[], None]]:
@@ -77,7 +65,7 @@ def test_prepare(*, console_log=False) -> Callable[[], Callable[[], None]]:
 class ArgParseTests(TestCase):
     @test_prepare()
     def test_argparse1(self) -> None:
-        parse_arglist(args_argparse_str1.split())
+        parse_arglist(args_argparse_str_1.split())
         self.assertEqual(
             'debug: False, '
             'parser_type_str: auto, parser_type: NoneType, '
@@ -90,7 +78,7 @@ class ArgParseTests(TestCase):
 
     @test_prepare()
     def test_argparse2(self) -> None:
-        parse_arglist(args_argparse_str2.split())
+        parse_arglist(args_argparse_str_2_1.split())
         self.assertEqual(
             'debug: True, '
             'parser_type_str: auto, parser_type: NoneType, '
@@ -106,7 +94,7 @@ class QueriesFormTests(TestCase):
     @test_prepare()
     def test_queries1(self) -> None:
         cat_vid, cat_img, cat_vid_ = 'VIDEOS', 'IMAGES', 'VIDEOS '
-        parse_arglist(args_argparse_str2.split())
+        parse_arglist(args_argparse_str_2_1.split())
         make_parser()
         read_queries_file()
         prepare_queries()
@@ -237,7 +225,7 @@ class QueriesFormTests(TestCase):
     @test_prepare()
     def test_queries2(self) -> None:
         cat_vid = 'VIDEOS'
-        parse_arglist(args_argparse_str3.split())
+        parse_arglist(args_argparse_str_3.split())
         make_parser()
         read_queries_file()
         prepare_queries()
@@ -254,7 +242,7 @@ class QueriesFormTests(TestCase):
         num_dummys = 6
         dummy_paths: list[str] = []
         self.assertLess(num_dummys, 9)
-        parse_arglist(args_argparse_str1.split())
+        parse_arglist(args_argparse_str_1.split())
         make_parser()
         read_queries_file()
         with ExitStack() as ctxm:
@@ -268,13 +256,13 @@ class QueriesFormTests(TestCase):
         print(f'{self._testMethodName} passed')
 
     @test_prepare()
-    def test_queries4(self) -> None:
-        parse_arglist(args_argparse_str2.split())
+    def test_queries4_testq(self) -> None:
+        parse_arglist(args_argparse_str_2_1.split())
         make_parser()
         read_queries_file()
         parser1 = Config.parser
         parser1.parse_queries_file()
-        parse_arglist(args_argparse_str4.split())
+        parse_arglist(args_argparse_str_2_2.split())
         make_parser()
         read_queries_file()
         parser2 = Config.parser
