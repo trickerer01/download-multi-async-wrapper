@@ -1,9 +1,9 @@
 ### TITLE:01daily
 ### TITLEINCREMENT:1
-### DESTPATH:P:/daily/dest/
-### BAKPATH:P:/daily/bak/
-### RUNPATH:P:/daily/!logs/
-### LOGPATH:P:/daily/!logs/
+### DESTPATH:../tests/
+### BAKPATH:../bak/
+### RUNPATH:../run/
+### LOGPATH:../logs/
 ### DATESUB:0
 ### UPDATE:0
 ### NOPROXY_FETCHES:["rg"]
