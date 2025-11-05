@@ -34,6 +34,9 @@ from validators import valid_categories_list, valid_downloaders_list, valid_file
 
 __all__ = ('parse_arglist',)
 
+CDA_LIST_I = IDLIST_SEPARATOR.join(('CAT', 'DWN', 'ARGS'))
+CDA_LIST_A = APPEND_SEPARATOR.join(('CAT', 'DWN', 'ARGS'))
+
 
 def parse_arglist(args: Sequence[str]) -> None:
     parser = ArgumentParser(add_help=False)
@@ -44,10 +47,8 @@ def parse_arglist(args: Sequence[str]) -> None:
     parser.add_argument('--no-update', action=ACTION_STORE_TRUE, help=HELP_NO_UPDATE)
     parser.add_argument('--install', action=ACTION_STORE_TRUE, help=HELP_INSTALL)
     parser.add_argument('-ignore', metavar='ARG,LEN', default=[], action=ACTION_APPEND, help=HELP_IGNORE_ARGUMENT, type=IgnoredArg)
-    parser.add_argument('-idlist', metavar=IDLIST_SEPARATOR.join(('CAT', 'DWN', 'ARGS')),
-                        default=[], action=ACTION_APPEND, help=HELP_IDLIST, type=CatDwnIds)
-    parser.add_argument('-append', metavar=APPEND_SEPARATOR.join(('CAT', 'DWN', 'ARGS')),
-                        default=[], action=ACTION_APPEND, help=HELP_APPEND, type=ExtraArgs)
+    parser.add_argument('-idlist', metavar=CDA_LIST_I, default=[], action=ACTION_APPEND, help=HELP_IDLIST, type=CatDwnIds)
+    parser.add_argument('-append', metavar=CDA_LIST_A, default=[], action=ACTION_APPEND, help=HELP_APPEND, type=ExtraArgs)
     parser.add_argument('-categories', metavar='L,I,S,T', default=[], help=HELP_CATEGORIES, type=valid_categories_list)
     parser.add_argument('-downloaders', metavar='L,I,S,T', default=DOWNLOADERS, help=HELP_DOWNLOADERS, type=valid_downloaders_list)
     parser.add_argument('-script', metavar='PATH_TO_FILE', required=True, help=HELP_SCRIPT_PATH, type=valid_file_path)

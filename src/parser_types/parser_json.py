@@ -268,7 +268,7 @@ class ParserJson:
                                             break
                                     if need_find_previous_or_group is True:
                                         trace(f'Info: exclusion(s): no previous matching tag or \'or\' group found '
-                                              f'in {cat}:{cdt} sub \'{sub_name}\' at offset {i:d}')
+                                              f'in {cat}:{cdt} sub \'{sub_name}\' at offset {i:d}: {stage}')
                             elif not all_tags_positive(stage.split(' ')):
                                 param_like = stage[0] == '-' and len(stage.split(' ')) == 2
                                 if not (param_like and (stage.startswith(('-search', '-quality')))):

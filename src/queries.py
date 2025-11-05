@@ -105,7 +105,7 @@ def run_autoupdates() -> None:
     needed_updates = [dt for dt in DOWNLOADERS if any(dt in autoupdate_seqs[c] for c in autoupdate_seqs if autoupdate_seqs[c][dt])]
     maxids = fetch_maxids(needed_updates)
     for dt in needed_updates:
-        maxid = int(maxids[dt][4:])
+        maxid = int(maxids[dt][4:])  # "RV: 1234567"
         for cat in autoupdate_seqs:
             uidseq: IntSequence | None = autoupdate_seqs[cat][dt]
             if uidseq:
