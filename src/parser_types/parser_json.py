@@ -62,16 +62,27 @@ class ParserJson:
             raise
 
         Config.title = self._json['title']
+        trace(f'Parsed title: \'{Config.title}\'')
         Config.title_increment = positive_int(self._json['title_increment'])
+        trace(f'Parsed title increment: \'{Config.title_increment}\'')
         Config.dest_base = valid_dir_path(self._json['dest_path'])
+        trace(f'Parsed download dest base: \'{Config.dest_base}\'')
         Config.dest_bak_base = valid_dir_path(self._json['bak_path'])
+        trace(f'Parsed backup dest base: \'{Config.dest_bak_base}\'')
         Config.dest_run_base = valid_dir_path(self._json['run_path'])
+        trace(f'Parsed run dest base: \'{Config.dest_run_base}\'')
         Config.dest_logs_base = valid_dir_path(self._json['log_path'])
+        trace(f'Parsed logs dest base: \'{Config.dest_logs_base}\'')
         Config.datesub = BOOL_STRS[self._json['date_sub']]
+        trace(f'Parsed date subfolder flag value: \'{self._json["date_sub"]}\' ({BOOL_STRS[self._json["date_sub"]]!s})')
         Config.update = BOOL_STRS[self._json['update']]
+        trace(f'Parsed update flag value: \'{self._json["update"]}\' ({BOOL_STRS[self._json["update"]]!s})')
         Config.update_offsets.update({k.lower(): v for k, v in self._json['update_offsets'].items()})
+        trace(f'Parsed update offsets value: \'{Config.update_offsets!s}\'')
         Config.noproxy_fetches.update(self._json['noproxy_fetches'])
+        trace(f'Parsed noproxy fetches value: \'{Config.noproxy_fetches!s}\'')
         Config.python = self._json['python']
+        trace(f'Parsed python executable: \'{Config.python}\'')
 
         ensure_logfile()
 
@@ -198,19 +209,22 @@ class ParserJson:
                     self.try_parse_proxy(common_args, cdt)
                     self.queries.sequences_common.at_cur_cat[cdt].extend(common_args)
                 subs: list[dict[str, list[str]]] = entries['subs']
-                for sub in subs:
-                    for sub_name, stages in sub.items():
+                for sub_index, sub in enumerate(subs):
+                    assert len(sub) == 1, f'Malformed {cat}:{cdt} sub at offest {sub_index:d}!'
+                    # this ineffecient way of assignment helps the linter and saves 2 lines of annotations
+                    sub_name, stages = next(iter(sub.keys())), next(iter(sub.values()))
+                    if stages:
                         self.queries.sequences_subfolders.at_cur_cat[cdt].append(sub_name)
                         for i, stage in enumerate(stages):
-                            assert stage, f'{cat}:{cdt} has empty arguments string found in sub \'{sub}\' at offset {i:d}!'
+                            assert stage, f'{cat}:{cdt} has empty arguments string found in sub \'{sub_name}\' at offset {i:d}!'
                             if stage[0] not in '(-*' and not stage[0].isalnum():
-                                trace(f'Error: corrupted {cat}:{cdt} sub line beginning in sub \'{sub}\' at offset {i:d}!')
+                                trace(f'Error: corrupted {cat}:{cdt} sub line beginning in sub \'{sub_name}\' at offset {i:d}!')
                                 raise OSError
                             if '  ' in stage:
-                                trace(f'Error: double space found in {cat}:{cdt} sub \'{sub}\' tags at offset {i:d}!')
+                                trace(f'Error: double space found in {cat}:{cdt} sub \'{sub_name}\' tags at offset {i:d}!')
                                 raise OSError
                             if stage[0] != '(' and not stage.startswith('-+(') and '~' in stage:
-                                trace(f'Error: unsupported ungrouped OR symbol in {cat}:{cdt} sub \'{sub}\' at offset {i:d}!')
+                                trace(f'Error: unsupported ungrouped OR symbol in {cat}:{cdt} sub \'{sub_name}\' at offset {i:d}!')
                                 raise OSError
                             need_append = True
                             if all_tags_negative(stage.split(' ')):  # line[0] === '-'
@@ -224,7 +238,7 @@ class ParserJson:
                                                 del tags_to_remove[k]
                                                 break
                                     assert len(tags_to_remove) == 0, (f'Tags weren\'t consumed: "{" ".join(tags_to_remove)}" '
-                                                                      f'in {cat}:{cdt} sub \'{sub}\' at offset {i:d}')
+                                                                      f'in {cat}:{cdt} sub \'{sub_name}\' at offset {i:d}')
                                     continue
                                 else:
                                     tags_split = [tag[1:] for tag in stage.split(' ')]
@@ -254,15 +268,15 @@ class ParserJson:
                                             break
                                     if need_find_previous_or_group is True:
                                         trace(f'Info: exclusion(s): no previous matching tag or \'or\' group found '
-                                              f'in {cat}:{cdt} sub \'{sub}\' at offset {i:d}')
+                                              f'in {cat}:{cdt} sub \'{sub_name}\' at offset {i:d}')
                             elif not all_tags_positive(stage.split(' ')):
                                 param_like = stage[0] == '-' and len(stage.split(' ')) == 2
                                 if not (param_like and (stage.startswith(('-search', '-quality')))):
-                                    trace(f'Warning (W2): mixed positive / negative tags at line {i + 1:d}, '
+                                    trace(f'Warning (W2): mixed positive / negative tags in {cat}:{cdt} sub\'{sub_name}\' at offset {i:d}, '
                                           f'{"param" if param_like else "error"}? Line: \'{stage}\'')
                             if need_append:
                                 cur_tags_list.extend(stage.split(' '))
-                    self.queries.sequences_tags.at_cur_cat[cdt].append(cur_tags_list.copy())
+                        self.queries.sequences_tags.at_cur_cat[cdt].append(cur_tags_list.copy())
                 for extra_args in Config.extra_args:
                     if extra_args.name == f'{cat}:{cdt}':
                         trace(f'Using \'{cat}:{cdt}\' extra args: {extra_args.args!s} -> {" ".join(extra_args.args)}')
