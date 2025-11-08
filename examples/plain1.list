@@ -214,7 +214,7 @@
 # -2000
 ## Configuration can be mostly copied from IDs category
 # downloader:D:/projects/RV/
-## Here '-fsdepth 1 -fslevel 1' is different because unlike IDs where optimized query would target top-level dest folder here each query will target a separate subs
+## Here '-fsdepth 1 -fslevel 1' is different because unlike IDs where optimized query would target top-level dest folder here each query will target separate subs each with its own subfolder
 # common:--log-level trace -timeout 20 -retries 20 -throttle 100 -lookahead 50 -fsdepth 1 -fslevel 1 -duration 0-1800
 # common:--throttle-auto --no-rename-move --report-duplicates --check-title-pos --check-title-neg --solve-tag-conflicts --continue-mode
 ## Here we do not use id gaps prediction because it cannot be used with search
