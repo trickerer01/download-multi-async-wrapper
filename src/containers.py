@@ -70,7 +70,6 @@ class Wrapper(Generic[AT]):
 class Queries:
     __slots__ = frozenset[str]((
         'autoupdate_seqs',
-        'maxid_fetched',
         'proxies_update',
         'queries_file_lines',
         'sequences_common',
@@ -83,9 +82,7 @@ class Queries:
         'sequences_tags',
     ))
 
-    compare_exclude_slots = frozenset[str]((
-        'queries_file_lines',
-    ))
+    compare_exclude_slots = frozenset[str](('queries_file_lines',))
 
     def __init__(self) -> None:
         self.queries_file_lines: list[str] | dict = []
@@ -102,7 +99,6 @@ class Queries:
         self.sequences_paths_reqs: dict[str, str | None] = dict.fromkeys(DOWNLOADERS)
         self.sequences_paths_update: dict[str, str | None] = dict.fromkeys(DOWNLOADERS)
         self.proxies_update: dict[str, StrPair | None] = dict.fromkeys(DOWNLOADERS)
-        self.maxid_fetched: dict[str, int] = {}
 
     def __eq__(self, other) -> bool:
         return isinstance(other, Queries) and all(

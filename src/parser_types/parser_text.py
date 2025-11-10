@@ -310,7 +310,7 @@ class ParserText:
                     elif re_downloader_finalize.fullmatch(line):
                         cat, cdt = cur_ct(), cur_dl()
                         for extra_args in Config.extra_args:
-                            if extra_args.name == f'{cat}:{cdt}':
+                            if extra_args.is_for(cat, cdt):
                                 trace(f'Using \'{cat}:{cdt}\' extra args: {extra_args.args!s} -> {" ".join(extra_args.args)}')
                                 self.try_parse_proxy(extra_args.args, cur_dl())
                                 self.queries.sequences_common.at_cur_cat[cur_dl()].extend(f'"{arg}"' for arg in extra_args.args)

@@ -278,7 +278,7 @@ class ParserJson:
                                 cur_tags_list.extend(stage.split(' '))
                         self.queries.sequences_tags.at_cur_cat[cdt].append(cur_tags_list.copy())
                 for extra_args in Config.extra_args:
-                    if extra_args.name == f'{cat}:{cdt}':
+                    if extra_args.is_for(cat, cdt):
                         trace(f'Using \'{cat}:{cdt}\' extra args: {extra_args.args!s} -> {" ".join(extra_args.args)}')
                         self.try_parse_proxy(extra_args.args, cdt)
                         self.queries.sequences_common.at_cur_cat[cdt].extend(f'"{arg}"' for arg in extra_args.args)

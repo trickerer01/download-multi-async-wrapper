@@ -30,27 +30,36 @@ from strings import NEWLINE, path_args
 
 __all__ = ('form_queries', 'report_queries', 'report_unoptimized', 'validate_runners', 'validate_sequences')
 
+validated_runners = set[str]()
+
 
 def validate_runners(queries: Queries) -> None:
-    try:
+    if 'all' in validated_runners:
+        return
+
+    checked_reqs = set[str]()
+    checked_paths = set[str]()
+
+    runner_type_python = 'python'
+    if runner_type_python not in validated_runners:
         trace('Looking for python executable...')
         re_py_ver = re.compile(r'^[Pp]ython (\d)\.(\d{1,2})\.(\d+)$')
         out_py = check_output((Config.python, '-V'))
         out_py_str = out_py.decode().strip()
         match_py_ver = re_py_ver.fullmatch(out_py_str)
-        assert match_py_ver
+        if not match_py_ver:
+            raise OSError(f'Error: invalid python executable \'{Config.python}\'!')
         fetched_py_ver = int(match_py_ver.group(1)), int(match_py_ver.group(2))
-        assert fetched_py_ver >= MIN_PYTHON_VERSION, f'Minimum python version required is {MIN_PYTHON_VERSION_STR}!'
+        if fetched_py_ver < MIN_PYTHON_VERSION:
+            raise OSError(f'Minimum python version required is {MIN_PYTHON_VERSION_STR}!')
+        validated_runners.add(runner_type_python)
         trace(f'Found python {".".join(match_py_ver.groups())}')
-    except Exception:
-        trace('Error: invalid python executable!')
-        raise OSError
     if Config.test is True:
         return
-    checked_reqs = set[str]()
     if Config.install:
         for dtr, rpath in queries.sequences_paths_reqs.items():
-            if not rpath or dtr not in Config.downloaders:
+            runner_type_install = f'{dtr}_install'
+            if not rpath or runner_type_install in validated_runners or dtr not in Config.downloaders:
                 continue
             if rpath in checked_reqs:
                 trace(f'{dtr} requirements path is already checked!')
@@ -59,11 +68,11 @@ def validate_runners(queries: Queries) -> None:
             try:
                 trace(f'Installing {dtr} requirements...')
                 trace(check_output((Config.python, '-m', 'pip', 'install', '-r', rpath), universal_newlines=True).strip())
+                validated_runners.add(runner_type_install)
                 trace('Done')
             except Exception:
                 trace(f'Error: invalid {dtr} requirements path found: \'{rpath}\'!')
                 raise OSError
-    checked_paths = set[str]()
     if not Config.no_download:
         for cat in queries.sequences_paths:
             for dtd in queries.sequences_paths[cat]:
@@ -72,6 +81,9 @@ def validate_runners(queries: Queries) -> None:
                     continue
                 dtype = ('pages' if dpath.endswith(PATH_APPEND_DOWNLOAD_PAGES[dtd]) else
                          'ids' if dpath.endswith(PATH_APPEND_DOWNLOAD_IDS[dtd]) else 'unknown')
+                runner_type_download = f'{dtd}_{dtype}'
+                if runner_type_download in validated_runners:
+                    continue
                 if dpath in checked_paths:
                     trace(f'{dtd} {dtype} downloader path is already checked!')
                     continue
@@ -82,6 +94,7 @@ def validate_runners(queries: Queries) -> None:
                     out_d_str = out_d.decode().strip()
                     out_d_str = out_d_str[out_d_str.rfind('\n') + 1:]
                     assert out_d_str.startswith(APP_NAMES[dtd]), f'Unexpected output for {dtd}: {out_d_str[:min(len(out_d_str), 20)]}!'
+                    validated_runners.add(runner_type_download)
                     trace(f'Found \'{dpath}\'')
                 except Exception:
                     trace(f'Error: invalid {dtd} {dtype} downloader found at: \'{dpath}\' ({cat})!')
@@ -89,6 +102,9 @@ def validate_runners(queries: Queries) -> None:
     if Config.update:
         for dtu, upath in queries.sequences_paths_update.items():
             if not upath or dtu not in Config.downloaders:
+                continue
+            runner_type_update = f'{dtu}_update'
+            if runner_type_update in validated_runners:
                 continue
             if upath in checked_paths:
                 trace(f'{dtu} updater path is already checked!')
@@ -100,10 +116,12 @@ def validate_runners(queries: Queries) -> None:
                 out_u_str = out_u.decode().strip()
                 out_u_str = out_u_str[out_u_str.rfind('\n') + 1:]
                 assert out_u_str.startswith(APP_NAMES[dtu]), f'Unexpected output for {dtu}: {out_u_str[:min(len(out_u_str), 20)]}!'
+                validated_runners.add(runner_type_update)
                 trace(f'Found \'{upath}\'')
             except Exception:
                 trace(f'Error: invalid {dtu} updater found at: \'{upath}\'!')
                 raise OSError
+    validated_runners.add('all')
 
 
 def validate_sequences(queries: Queries) -> None:

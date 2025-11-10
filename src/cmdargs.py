@@ -26,6 +26,7 @@ from defs import (
     HELP_NO_UPDATE,
     HELP_PARSER,
     HELP_SCRIPT_PATH,
+    HELP_UPDATE_PREFETCH,
     IDLIST_SEPARATOR,
     PARSER_DEFAULT,
     SUPPORTED_PARSER_TYPES,
@@ -41,10 +42,12 @@ CDA_LIST_A = APPEND_SEPARATOR.join(('CAT', 'DWN', 'ARGS'))
 def parse_arglist(args: Sequence[str]) -> None:
     parser = ArgumentParser(add_help=False)
     parser.usage = 'main.py -script PATH_TO_FILE [options...]'
+    update_args = parser.add_mutually_exclusive_group()
     parser.add_argument('--help', action='help', help='Print this message')
     parser.add_argument('--debug', action=ACTION_STORE_TRUE, help=HELP_DEBUG)
     parser.add_argument('--no-download', action=ACTION_STORE_TRUE, help=HELP_NO_DOWNLOAD)
-    parser.add_argument('--no-update', action=ACTION_STORE_TRUE, help=HELP_NO_UPDATE)
+    update_args.add_argument('--no-update', action=ACTION_STORE_TRUE, help=HELP_NO_UPDATE)
+    update_args.add_argument('--update-prefetch', action=ACTION_STORE_TRUE, help=HELP_UPDATE_PREFETCH)
     parser.add_argument('--install', action=ACTION_STORE_TRUE, help=HELP_INSTALL)
     parser.add_argument('-ignore', metavar='ARG,LEN', default=[], action=ACTION_APPEND, help=HELP_IGNORE_ARGUMENT, type=IgnoredArg)
     parser.add_argument('-idlist', metavar=CDA_LIST_I, default=[], action=ACTION_APPEND, help=HELP_IDLIST, type=CatDwnIds)

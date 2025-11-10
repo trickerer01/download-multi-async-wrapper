@@ -82,6 +82,9 @@ class ExtraArgs:
         except Exception:
             raise ValueError(f'Invalid extra arg(s) format: \'{cat_dwn_args_fmt}\'')
 
+    def is_for(self, category: str, downloader_type: str) -> bool:
+        return self.name == f'{category}:{downloader_type}'
+
     @property
     def name(self) -> str:
         return self._name
@@ -109,6 +112,7 @@ class BaseConfig:
         self.debug: bool = False
         self.no_download: bool = False
         self.no_update: bool = False
+        self.update_prefetch: bool = False
         self.install: bool = False
         self.ignored_args: list[IgnoredArg] = []
         self.override_ids: list[CatDwnIds] = []
@@ -134,6 +138,7 @@ class BaseConfig:
         self.title_increment_value: str = ''
         self.max_cmd_len: int = MAX_CMD_LEN[OS_WINDOWS] // 2  # MAX_CMD_LEN.get(running_system())
         self.disabled_downloaders: dict[str, set[str]] = {}
+        self.fetched_maxids: dict[str, str] = {}
         # internal
         self.test: bool = test
         self.console_log: bool = console_log or not test
@@ -145,6 +150,7 @@ class BaseConfig:
         self.debug = params.debug or self.debug
         self.no_download = params.no_download or self.no_download
         self.no_update = params.no_update or self.no_update
+        self.update_prefetch = params.update_prefetch or self.update_prefetch
         self.install = params.install or self.install
         self.ignored_args = params.ignore or self.ignored_args
         self.override_ids = params.idlist or self.override_ids
@@ -164,8 +170,8 @@ class BaseConfig:
             f'parser_type_str: {self.parser_type}, parser_type: {self.parser.__class__.__name__!s}, '
             f'downloaders: {self.downloaders!s}, script: {self.script_path}, dest: {self.dest_base}, '
             f'run: {self.dest_run_base}, logs: {self.dest_logs_base}, bak: {self.dest_bak_base}, update: {self.update}, '
-            f'no_download: {self.no_download}, no_update: {self.no_update}, ignored_args: {self.ignored_args!s}, '
-            f'id_overrides: {self.override_ids!s}, max_cmd_len: {self.max_cmd_len}'
+            f'no_download: {self.no_download}, no_update: {self.no_update}, update_prefetch: {self.update_prefetch}, '
+            f'ignored_args: {self.ignored_args!s}, id_overrides: {self.override_ids!s}, max_cmd_len: {self.max_cmd_len}'
         )
 
     __repr__ = __str__

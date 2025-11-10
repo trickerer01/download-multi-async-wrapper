@@ -7,7 +7,6 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 
 import os
-import re
 from collections.abc import Iterable
 from subprocess import CalledProcessError, check_output
 from threading import Lock, Thread
@@ -30,19 +29,44 @@ from strings import NEWLINE, SLASH, datetime_str_nfull
 __all__ = ('make_parser', 'prepare_queries', 'read_queries_file', 'update_next_ids')
 
 
-def fetch_maxids(dts: Iterable[str]) -> dict[str, str]:
+class MaxIdFetchContext:
+    CONTEXT_PREFETCH = 1
+    CONTEXT_AUTOUPDATE = 2
+    CONTEXT_UPDATE_NEXT = 3
+
+
+def fetch_maxids_if_needed(*, context: int) -> None:
+    is_context_prefetch = context == MaxIdFetchContext.CONTEXT_PREFETCH
+    if is_context_prefetch and not Config.update_prefetch:
+        return
+
+    queries = Config.parser.queries
+    autoupdate_seqs = queries.autoupdate_seqs
+    needed_autoupdates = [dt for dt in DOWNLOADERS if any(dt in autoupdate_seqs[c] for c in autoupdate_seqs if autoupdate_seqs[c][dt])
+                          and dt not in Config.fetched_maxids] if autoupdate_seqs else [''] * 0
+    ids_downloaders = [dt for dt in Config.downloaders if any(queries.sequences_ids[cat][dt] for cat in queries.sequences_ids)
+                       and dt not in Config.fetched_maxids] if Config.update else [''] * 0
+
+    if bool(needed_autoupdates or ids_downloaders):
+        if is_context_prefetch:
+            trace('Max id fetch was triggered by prefetcher!')
+        validate_runners(queries)
+        fetch_maxids(set(needed_autoupdates).union(ids_downloaders))
+
+
+def fetch_maxids(dts: Iterable[str]) -> None:
     try:
         if not dts:
-            return {}
+            return
         trace('Fetching max ids...')
         queries = Config.parser.queries
-        re_maxid_fetch_result = re.compile(r'^[A-Z]{2}: \d+$')
         grab_threads: list[Thread] = []
         results: dict[str, str] = {dt: '' for dt in dts if queries.sequences_paths_update[dt] is not None}
         rlock = Lock()
 
         if Config.test:
-            return {dt: f'{dt.upper()}: {10 ** 18:d}' for dt in results}
+            Config.fetched_maxids.update(dict.fromkeys(results, f'{10 ** 18:d}'))
+            return
 
         def get_max_id(dtype: str) -> None:
             update_file_path: str = queries.sequences_paths_update[dtype]
@@ -50,15 +74,21 @@ def fetch_maxids(dts: Iterable[str]) -> dict[str, str]:
             if dtype in COLOR_LOG_DOWNLOADERS:
                 module_arguments.append('--disable-log-colors')
             if dtype in queries.proxies_update and queries.proxies_update[dtype] and dtype not in Config.noproxy_fetches:
-                module_arguments.extend((queries.proxies_update[dtype].first, queries.proxies_update[dtype].second))
-            arguments = [Config.python, update_file_path, '-get_maxid', '-timeout', '30', *module_arguments]
+                if queries.proxies_update[dtype].second:
+                    module_arguments.extend((queries.proxies_update[dtype].first, queries.proxies_update[dtype].second))
+            for extra_args in Config.extra_args:
+                if extra_args.is_for(queries.sequences_common.cur_cat, dtype):
+                    module_arguments.extend(extra_args.args)
+            arguments = [Config.python, update_file_path, *module_arguments, '-get_maxid', '-timeout', '20', '-retries', '1']
             try:
                 trace(f'Executing "{" ".join(arguments)}"...')
                 res = check_output(arguments).decode(errors='replace').strip()
+                # DEBUG: do not remove
+                # trace(f'Output of {dtype.upper()}: {res}')
             except (KeyboardInterrupt, CalledProcessError):
                 res = 'ERROR'
             with rlock:
-                results[dtype] = res[res.rfind('\n') + 1:]
+                results[dtype] = res[res.rfind('\n') + 1:][4:]  # "RV: 1234567"
 
         for dt in results:
             grab_threads.append(Thread(target=get_max_id, args=(dt,)))
@@ -73,14 +103,14 @@ def fetch_maxids(dts: Iterable[str]) -> dict[str, str]:
         res_errors: list[str] = []
         for dt, result in results.items():
             try:
-                assert re_maxid_fetch_result.fullmatch(result)
+                assert result.isnumeric()
             except AssertionError:
                 res_errors.append(f'Error in fetch \'{dt}\' max id result!')
                 continue
         assert len(res_errors) == 0, '\n ' + '\n '.join(res_errors)
 
-        trace(NEWLINE.join(results[dt] for dt in results))
-        return results
+        trace(NEWLINE.join(f'{dt.upper()}: {id_str}' for dt, id_str in results.items()))
+        Config.fetched_maxids.update(results)
     except AssertionError:
         trace('\nError: failed to fetch next ids!\n')
         raise
@@ -102,10 +132,9 @@ def run_autoupdates() -> None:
     queries = Config.parser.queries
     unsolved_idseqs: list[str] = []
     autoupdate_seqs = queries.autoupdate_seqs
-    needed_updates = [dt for dt in DOWNLOADERS if any(dt in autoupdate_seqs[c] for c in autoupdate_seqs if autoupdate_seqs[c][dt])]
-    maxids = fetch_maxids(needed_updates)
-    for dt in needed_updates:
-        maxid = int(maxids[dt][4:])  # "RV: 1234567"
+    fetch_maxids_if_needed(context=MaxIdFetchContext.CONTEXT_AUTOUPDATE)
+    for dt, maxid_str in Config.fetched_maxids.items():
+        maxid = int(maxid_str)
         for cat in autoupdate_seqs:
             uidseq: IntSequence | None = autoupdate_seqs[cat][dt]
             if uidseq:
@@ -120,7 +149,6 @@ def run_autoupdates() -> None:
                 else:
                     uidseq.ints.append(maxid)
                 trace(f'{update_str_base}{uidseq.ints!s}')
-                queries.maxid_fetched[dt] = maxid
     for cat in queries.sequences_ids:
         for dt in queries.sequences_ids[cat]:
             if queries.sequences_ids[cat][dt] is not None and len(queries.sequences_ids[cat][dt]) < MIN_IDS_SEQ_LENGTH:
@@ -134,14 +162,14 @@ def prepare_queries() -> None:
     trace('Analyzing queries file strings...')
     Config.parser.parse_queries_file()
     trace('Sequences parsed successfully\n')
+    fetch_maxids_if_needed(context=MaxIdFetchContext.CONTEXT_PREFETCH)
     if queries.autoupdate_seqs:
         trace('[Autoupdate] validating runners...\n')
         validate_runners(queries)
         run_autoupdates()
     trace('Validating sequences...\n')
     validate_sequences(queries)
-    if not queries.autoupdate_seqs:
-        validate_runners(queries)
+    validate_runners(queries)
     trace('Sequences validated. Finalizing...\n')
     if Config.debug:
         trace('[DEBUG] Unoptimized:')
@@ -169,9 +197,8 @@ def update_next_ids() -> None:
     filename_bak = f'{queries_file_name}_bak_{datetime_str_nfull()}.list'
     trace(f'File: \'{queries_file_name}\', backup file: \'{filename_bak}\'')
     try:
-        if ids_downloaders := [dt for dt in Config.downloaders if any(queries.sequences_ids[cat][dt] for cat in queries.sequences_ids)]:
-            [ids_downloaders.remove(dt) for dt in queries.maxid_fetched if dt in ids_downloaders]
-            results = fetch_maxids(ids_downloaders)
+        fetch_maxids_if_needed(context=MaxIdFetchContext.CONTEXT_UPDATE_NEXT)
+        if Config.fetched_maxids:
             trace(f'\nSaving backup to \'{filename_bak}\'...')
             bak_fullpath = f'{Config.dest_bak_base}{filename_bak}'
             with open(bak_fullpath, 'wt', encoding=UTF8, buffering=1) as outfile_bak:
@@ -191,8 +218,7 @@ def update_next_ids() -> None:
                 trace('Warning: permissions not updated, manual fix required')
 
             trace(f'\nWriting updated queries to \'{queries_file_name}\'...')
-            maxids: dict[str, int] = {dt: int(results[dt][4:]) for dt in results}
-            maxids.update(queries.maxid_fetched)
+            maxids: dict[str, int] = {dt: int(Config.fetched_maxids[dt]) for dt in Config.fetched_maxids}
             for dt in Config.update_offsets:
                 uoffset = Config.update_offsets[dt]
                 if dt in maxids:
