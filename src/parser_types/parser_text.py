@@ -67,10 +67,10 @@ class ParserText:
     def get_type_names() -> set[str]:
         return {PARSER_TYPE_LIST, PARSER_TYPE_TXT}
 
-    def try_parse_proxy(self, pargs: list[str], dl: str) -> None:
+    def try_parse_proxy(self, pargs: list[str], ct: str, dl: str) -> None:
         proxy_idx = pargs.index(PROXY_ARG) if PROXY_ARG in pargs else -1
         if proxy_idx >= 0:
-            assert len(pargs) > proxy_idx + 1
+            assert len(pargs) > proxy_idx + 1, f'No {ct}:{dl} proxy argument found after \'-proxy\' argument'
             self.queries.proxies_update[dl] = StrPair(pargs[proxy_idx], pargs[proxy_idx + 1])
 
     def parse_queries_file(self) -> None:
@@ -95,13 +95,13 @@ class ParserText:
         for i, line in enumerate(self.queries.queries_file_lines):
             try:
                 line = line.strip(' \n\ufeff')  # remove BOM too
-                if line == '':
+                if not line:
                     continue
                 if line.startswith('###'):
                     if re_title.fullmatch(line):
                         title_base = line[line.find(':') + 1:]
                         trace(f'Parsed title: \'{title_base}\'')
-                        assert Config.title == '', 'Title can only be declared once!'
+                        assert not Config.title, 'Title can only be declared once!'
                         Config.title = title_base
                         continue
                     if re_title_incr.fullmatch(line):
@@ -151,7 +151,7 @@ class ParserText:
                     if re_python_exec.fullmatch(line):
                         python_str = line[line.find(':') + 1:]
                         trace(f'Parsed python executable: \'{python_str}\'')
-                        assert Config.python == '', 'Python executable must be declared exactly once!'
+                        assert not Config.python, 'Python executable must be declared exactly once!'
                         Config.python = python_str
                         continue
                     if re_update_offsets.fullmatch(line):
@@ -247,37 +247,38 @@ class ParserText:
                     elif re_ids_list.fullmatch(line):
                         cdt = cur_dl()
                         cat = cur_ct()
-                        idseq = IntSequence([int(num) for num in line.split(' ')[1:]], i + 1)
+                        idseq_i = IntSequence([int(num) for num in line.split(' ')[1:]], i + 1)
                         for ids_override in Config.override_ids:
                             if ids_override.name == f'{cat}:{cdt}':
                                 idseq_temp = IntSequence(ids_override.ids, i + 1)
-                                trace(f'Using \'{cat}:{cdt}\' ids override: {idseq!s} -> {idseq_temp!s}')
-                                idseq = idseq_temp
+                                trace(f'Using \'{cat}:{cdt}\' ids override: {idseq_i!s} -> {idseq_temp!s}')
+                                idseq_i.ints[:] = idseq_temp.ints[:]
                         if self.queries.sequences_pages.at_cur_cat[cdt]:
-                            assert len(idseq) <= 2, (f'{cdt} has pages but defines ids range of '
-                                                     f'{len(idseq):d} > 2!\n\tat line {i + 1}: {line}')
-                        self.queries.sequences_ids.at_cur_cat[cdt] = idseq
-                        if len(idseq) < MIN_IDS_SEQ_LENGTH:
+                            assert len(idseq_i) <= 2, (f'{cdt} has pages but defines ids range of '
+                                                       f'{len(idseq_i):d} > 2!\n\tat line {i + 1}: {line}')
+                        self.queries.sequences_ids.at_cur_cat[cdt] = idseq_i
+                        if len(idseq_i) < MIN_IDS_SEQ_LENGTH:
                             if cdt in Config.downloaders:
-                                negative_str = ' NEGATIVE' if idseq[0] < 0 else ''
+                                negative_str = ' NEGATIVE' if idseq_i[0] < 0 else ''
                                 trace(f'{cdt} at line {i + 1:d} provides a single{negative_str} id hence requires maxid autoupdate')
                                 if cat not in self.queries.autoupdate_seqs:
                                     self.queries.autoupdate_seqs.add_category(cat)
-                                self.queries.autoupdate_seqs[cat][cdt] = idseq
+                                self.queries.autoupdate_seqs[cat][cdt] = idseq_i
                             else:
-                                idseq.ints.append(2**31 - 1)
+                                idseq_i.ints.append(2**31 - 1)
                     elif re_pages_list.fullmatch(line):
                         cdt = cur_dl()
                         assert cdt in PAGE_DOWNLOADERS, f'{cur_cat}:{cdt} doesn\'t support pages search!\n\tat line {i + 1}: {line}'
-                        idseq = self.queries.sequences_ids.at_cur_cat[cdt]
-                        if idseq:
-                            assert len(idseq) <= 2, (f'{cur_cat}:{cdt} defines pages but has ids range of '
-                                                     f'{len(idseq):d} > 2!\n\tat line {i + 1}: {line}')
+                        idseq_p = self.queries.sequences_ids.at_cur_cat[cdt]
+                        if idseq_p:
+                            assert len(idseq_p) <= 2, (f'{cur_cat}:{cdt} defines pages but has ids range of '
+                                                       f'{len(idseq_p):d} > 2!\n\tat line {i + 1}: {line}')
                         pageseq = IntSequence([int(num[1:]) for num in line.split(' ')[1:]], i + 1)
                         self.queries.sequences_pages.at_cur_cat[cdt] = pageseq
                         if len(pageseq) < MIN_IDS_SEQ_LENGTH:
                             pageseq.ints.append(1)
                     elif re_downloader_basepath.fullmatch(line):
+                        cat = cur_ct()
                         cdt = cur_dl()
                         basepath = line[line.find(':') + 1:]
                         basepath_n = normalize_path(basepath)
@@ -287,18 +288,18 @@ class ParserText:
                         path_requirements = f'{basepath_n}{PATH_APPEND_REQUIREMENTS}'
                         path_updater = f'{basepath_n}{PATH_APPEND_UPDATE[cdt]}'
                         if Config.test is False:
-                            assert os.path.isdir(basepath)
-                            assert os.path.isfile(path_downloader)
+                            assert os.path.isdir(basepath), f'{cat}:{cdt} base path \'{basepath}\' doesn\'t exist!'
+                            assert os.path.isfile(path_downloader), f'{cat}:{cdt} downloader path \'{path_downloader}\' doesn\'t exist!'
                             if Config.install:
-                                assert os.path.isfile(path_requirements)
+                                assert os.path.isfile(path_requirements), f'{cat}:{cdt} reqs file \'{path_requirements}\' doesn\'t exist!'
                             if Config.update:
-                                assert os.path.isfile(path_updater)
+                                assert os.path.isfile(path_updater), f'{cat}:{cdt} updater file \'{path_updater}\' doesn\'t exist!'
                         self.queries.sequences_paths.at_cur_cat[cur_dl()] = path_downloader
                         self.queries.sequences_paths_reqs[cur_dl()] = path_requirements
                         self.queries.sequences_paths_update[cur_dl()] = normalize_path(os.path.abspath(path_updater), False)
                     elif re_common_arg.fullmatch(line):
                         common_args = line[line.find(':') + 1:].split(' ')
-                        self.try_parse_proxy(common_args, cur_dl())
+                        self.try_parse_proxy(common_args, cur_ct(), cur_dl())
                         self.queries.sequences_common.at_cur_cat[cur_dl()].extend(common_args)
                     elif re_sub_begin.fullmatch(line):
                         cdt = cur_dl()
@@ -312,7 +313,7 @@ class ParserText:
                         for extra_args in Config.extra_args:
                             if extra_args.is_for(cat, cdt):
                                 trace(f'Using \'{cat}:{cdt}\' extra args: {extra_args.args!s} -> {" ".join(extra_args.args)}')
-                                self.try_parse_proxy(extra_args.args, cur_dl())
+                                self.try_parse_proxy(extra_args.args, cur_ct(), cur_dl())
                                 self.queries.sequences_common.at_cur_cat[cur_dl()].extend(f'"{arg}"' for arg in extra_args.args)
                         cur_tags_list.clear()
                         cur_dwn = ''
@@ -320,7 +321,8 @@ class ParserText:
                         trace(f'Error: unknown param at line {i + 1:d}!')
                         raise OSError
                 else:  # elif line[0] in '(-*' or line[0].isalpha():
-                    assert self.queries.sequences_ids.at_cur_cat[cur_dl()] or self.queries.sequences_pages.at_cur_cat[cur_dl()]
+                    assert self.queries.sequences_ids.at_cur_cat[cur_dl()] or self.queries.sequences_pages.at_cur_cat[cur_dl()], (
+                        f'Unbound tags found at line {i + 1:d}: {line}')
                     if '  ' in line:
                         trace(f'Error: double space found in tags at line {i + 1:d}!')
                         raise OSError
@@ -343,7 +345,7 @@ class ParserText:
                         else:
                             tags_split = [tag[1:] for tag in line.split(' ')]
                             split_len = len(tags_split)
-                            assert all(len(tag) > 0 for tag in tags_split)
+                            assert all(bool(_) for _ in tags_split), f'Invalid tag string at line {i + 1:d}: {line}'
                             need_find_previous_or_group = True
                             tags_rem = '~'.join(tags_split)
                             tags_search = ','.join(tags_split)

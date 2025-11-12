@@ -21,7 +21,7 @@ def assert_notnull(obj: AT) -> AT:
     return obj
 
 
-def sum_lists(lists: Iterable[Iterable[AT]]) -> list[str]:
+def sum_lists(lists: Iterable[Iterable[AT]]) -> list[AT]:
     total: list[AT] = list(itertools.chain(*lists))
     return total
 

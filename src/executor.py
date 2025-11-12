@@ -14,7 +14,7 @@ from config import Config
 from containers import DownloadCollection, Wrapper
 from defs import DOWNLOADERS, RUN_FILE_DOWNLOADERS, UTF8
 from logger import log_to, trace
-from strings import datetime_str_nfull, normalize_path, unquote
+from strings import datetime_str_nfull, normalize_path, split_into_args
 from util import sum_lists
 
 __all__ = ('execute', 'register_queries')
@@ -38,34 +38,6 @@ def register_queries(queries: DownloadCollection[list[str]]) -> None:
     queries_all.update(queries)
     max_queries_per_downloader = max(sum(len(queries[cat][dt]) for cat in queries) for dt in DOWNLOADERS)
     dtqn_fmt.reset(f'0{math.ceil(math.log10(max_queries_per_downloader + 1)):d}d')
-
-
-def split_into_args(query: str) -> list[str]:
-    r"""'a "b c" d "e" f g "{\\"h\\":\\"j\\",\\"k\\":\\"l\\"}"' -> ['a', 'b c', 'd', 'e', 'f', 'g', '{"h":"j","k":"l"}']"""
-    def append_result(res_str: str) -> None:
-        res_str = unquote(res_str.replace('\\"', '\u2033')).replace('\u2033', '"')
-        result.append(res_str)
-
-    result: list[str] = []
-    idx1 = idx2 = idxdq = 0
-    while idx2 < len(query):
-        idx2 += 1
-        if idx2 == len(query) - 1:
-            result.append(unquote(query[idx1:]))
-            break
-        if query[idx2] == '"':
-            if idx2 == 0 or query[idx2 - 1] != '\\':
-                if idxdq != 0:
-                    idx2 += 1
-                    append_result(query[idxdq:idx2])
-                    idxdq = 0
-                    idx1 = idx2 + 1
-                else:
-                    idxdq = idx2
-        elif query[idx2] == ' ' and idxdq == 0:
-            append_result(query[idx1:idx2])
-            idx1 = idx2 + 1
-    return result
 
 
 async def run_cmd(query: str, dt: str, qn: int, qm: int, qt: str, qtn: int, qtm: int) -> None:

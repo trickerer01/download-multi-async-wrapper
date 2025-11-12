@@ -17,6 +17,34 @@ def unquote(tag: str) -> str:
     return tag.strip('"\'')
 
 
+def split_into_args(query: str) -> list[str]:
+    r"""'a "b c" d "e" f g "{\\"h\\":\\"j\\",\\"k\\":\\"l\\"}"' -> ['a', 'b c', 'd', 'e', 'f', 'g', '{"h":"j","k":"l"}']"""
+    def append_result(res_str: str) -> None:
+        res_str = unquote(res_str.replace('\\"', '\u2033')).replace('\u2033', '"')
+        result.append(res_str)
+
+    result: list[str] = []
+    idx1 = idx2 = idxdq = 0
+    while idx2 < len(query):
+        idx2 += 1
+        if idx2 == len(query) - 1:
+            result.append(unquote(query[idx1:]))
+            break
+        if query[idx2] == '"':
+            if idx2 == 0 or query[idx2 - 1] != '\\':
+                if idxdq != 0:
+                    idx2 += 1
+                    append_result(query[idxdq:idx2])
+                    idxdq = 0
+                    idx1 = idx2 + 1
+                else:
+                    idxdq = idx2
+        elif query[idx2] == ' ' and idxdq == 0:
+            append_result(query[idx1:idx2])
+            idx1 = idx2 + 1
+    return result
+
+
 def first_not_of(string: str, char: str, *, start_idx=0, reverse=False) -> int:
     assert start_idx is None or (0 <= start_idx < len(string))
 

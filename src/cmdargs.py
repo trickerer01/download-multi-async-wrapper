@@ -35,8 +35,9 @@ from validators import valid_categories_list, valid_downloaders_list, valid_file
 
 __all__ = ('parse_arglist',)
 
-CDA_LIST_I = IDLIST_SEPARATOR.join(('CAT', 'DWN', 'ARGS'))
-CDA_LIST_A = APPEND_SEPARATOR.join(('CAT', 'DWN', 'ARGS'))
+CDA_LIST = ('CAT', 'DWN', 'ARGS')
+CDA_LIST_I = IDLIST_SEPARATOR.join(CDA_LIST)
+CDA_LIST_A = APPEND_SEPARATOR.join(CDA_LIST)
 
 
 def parse_arglist(args: Sequence[str]) -> None:

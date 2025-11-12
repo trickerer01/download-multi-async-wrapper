@@ -27,11 +27,11 @@ from defs import (
     DOWNLOADER_RX,
     DOWNLOADER_XB,
 )
-from executor import queries_all, split_into_args
+from executor import queries_all
 from logger import close_logfile
 from main import main_sync
 from queries import make_parser, prepare_queries, read_queries_file
-from strings import date_str_md
+from strings import date_str_md, split_into_args
 
 __all__ = ()
 

@@ -43,10 +43,10 @@ class ParserJson:
     def get_type_names() -> set[str]:
         return {PARSER_TYPE_JSON}
 
-    def try_parse_proxy(self, pargs: list[str], dl: str) -> None:
+    def try_parse_proxy(self, pargs: list[str], ct: str, dl: str) -> None:
         proxy_idx = pargs.index(PROXY_ARG) if PROXY_ARG in pargs else -1
         if proxy_idx >= 0:
-            assert len(pargs) > proxy_idx + 1
+            assert len(pargs) > proxy_idx + 1, f'No {ct}:{dl} proxy argument found after \'-proxy\' argument'
             self.queries.proxies_update[dl] = StrPair(pargs[proxy_idx], pargs[proxy_idx + 1])
 
     def parse_queries_file(self) -> None:
@@ -108,7 +108,7 @@ class ParserJson:
                     trace(f'Error: inavlid downloader type: \'{npdt}\'')
             assert not invalid_dts, f'Invalid update offsets value: {self._json["noproxy_fetches"]!s}'
 
-        compose: dict[str, dict[str, dict[str, None | str | list[str] | list[dict[str, list[str]]]]]] = self._json['compose']
+        compose: dict[str, dict[str, dict[str, str | list[str] | list[dict[str, list[str]]] | None]]] = self._json['compose']
 
         for cat, dts in compose.items():
             if len(cat) > MAX_CATEGORY_NAME_LENGTH:
@@ -133,32 +133,32 @@ class ParserJson:
                 pages: list[str] | None = entries['pages']
                 if pages:
                     assert cdt in PAGE_DOWNLOADERS, f'{cat}:{cdt} doesn\'t support pages search!'
-                    idseq = self.queries.sequences_ids.at_cur_cat[cdt]
-                    if idseq:
-                        assert len(idseq) <= 2, f'{cat}:{cdt} defines pages but has ids range of {len(idseq):d} > 2!\n\t{idseq!s}'
+                    idseq_p = self.queries.sequences_ids.at_cur_cat[cdt]
+                    if idseq_p:
+                        assert len(idseq_p) <= 2, f'{cat}:{cdt} defines pages but has ids range of {len(idseq_p):d} > 2!\n\t{idseq_p!s}'
                     pageseq = IntSequence([int(num[1:]) for num in pages], 0)
                     self.queries.sequences_pages.at_cur_cat[cdt] = pageseq
                     if len(pageseq) < MIN_IDS_SEQ_LENGTH:
                         pageseq.ints.append(1)
                 ids: list[str] = entries['ids']
-                idseq = IntSequence([int(num) for num in ids], 0)
+                idseq_i = IntSequence([int(num) for num in ids], 0)
                 for ids_override in Config.override_ids:
                     if ids_override.name == f'{cat}:{cdt}':
                         idseq_temp = IntSequence(ids_override.ids, 0)
-                        trace(f'Using \'{cat}:{cdt}\' ids override: {idseq!s} -> {idseq_temp!s}')
-                        idseq = idseq_temp
+                        trace(f'Using \'{cat}:{cdt}\' ids override: {idseq_i!s} -> {idseq_temp!s}')
+                        idseq_i.ints[:] = idseq_temp.ints[:]
                 if self.queries.sequences_pages.at_cur_cat[cdt]:
-                    assert len(idseq) <= 2, f'{cat}:{cdt} has pages but defines ids range of {len(idseq):d} > 2!\n\t{ids!s}'
-                self.queries.sequences_ids.at_cur_cat[cdt] = idseq
-                if len(idseq) < MIN_IDS_SEQ_LENGTH:
+                    assert len(idseq_i) <= 2, f'{cat}:{cdt} has pages but defines ids range of {len(idseq_i):d} > 2!\n\t{ids!s}'
+                self.queries.sequences_ids.at_cur_cat[cdt] = idseq_i
+                if len(idseq_i) < MIN_IDS_SEQ_LENGTH:
                     if cdt in Config.downloaders:
-                        negative_str = ' NEGATIVE' if idseq[0] < 0 else ''
+                        negative_str = ' NEGATIVE' if idseq_i[0] < 0 else ''
                         trace(f'{cat}:{cdt} provides a single{negative_str} id hence requires maxid autoupdate')
                         if cat not in self.queries.autoupdate_seqs:
                             self.queries.autoupdate_seqs.add_category(cat)
-                        self.queries.autoupdate_seqs[cat][cdt] = idseq
+                        self.queries.autoupdate_seqs[cat][cdt] = idseq_i
                     else:
-                        idseq.ints.append(2**31 - 1)
+                        idseq_i.ints.append(2 ** 31 - 1)
                 basepath: str = entries['downloader']
                 basepath_n = normalize_path(basepath)
                 path_append = PATH_APPEND_DOWNLOAD_PAGES if self.queries.sequences_pages.at_cur_cat[cdt] else PATH_APPEND_DOWNLOAD_IDS
@@ -166,12 +166,12 @@ class ParserJson:
                 path_requirements = f'{basepath_n}{PATH_APPEND_REQUIREMENTS}'
                 path_updater = f'{basepath_n}{PATH_APPEND_UPDATE[cdt]}'
                 if Config.test is False:
-                    assert os.path.isdir(basepath)
-                    assert os.path.isfile(path_downloader)
+                    assert os.path.isdir(basepath), f'{cat}:{cdt} base path \'{basepath}\' doesn\'t exist!'
+                    assert os.path.isfile(path_downloader), f'{cat}:{cdt} downloader path \'{path_downloader}\' doesn\'t exist!'
                     if Config.install:
-                        assert os.path.isfile(path_requirements)
+                        assert os.path.isfile(path_requirements), f'{cat}:{cdt} reqs file \'{path_requirements}\' doesn\'t exist!'
                     if Config.update:
-                        assert os.path.isfile(path_updater)
+                        assert os.path.isfile(path_updater), f'{cat}:{cdt} updater file \'{path_updater}\' doesn\'t exist!'
                 self.queries.sequences_paths.at_cur_cat[cdt] = path_downloader
                 self.queries.sequences_paths_reqs[cdt] = path_requirements
                 self.queries.sequences_paths_update[cdt] = normalize_path(os.path.abspath(path_updater), False)
@@ -206,7 +206,7 @@ class ParserJson:
                         trace(f'Common argument \'{common_orig}\' was fully consumed by ignored args (was offset {i:d})')
                         continue
                     common_args = common.split(' ')
-                    self.try_parse_proxy(common_args, cdt)
+                    self.try_parse_proxy(common_args, cat, cdt)
                     self.queries.sequences_common.at_cur_cat[cdt].extend(common_args)
                 subs: list[dict[str, list[str]]] = entries['subs']
                 for sub_index, sub in enumerate(subs):
@@ -217,6 +217,7 @@ class ParserJson:
                         self.queries.sequences_subfolders.at_cur_cat[cdt].append(sub_name)
                         for i, stage in enumerate(stages):
                             assert stage, f'{cat}:{cdt} has empty arguments string found in sub \'{sub_name}\' at offset {i:d}!'
+                            # assert self.queries.sequences_ids.at_cur_cat[cdt] or self.queries.sequences_pages.at_cur_cat[cdt]  # no need
                             if stage[0] not in '(-*' and not stage[0].isalnum():
                                 trace(f'Error: corrupted {cat}:{cdt} sub line beginning in sub \'{sub_name}\' at offset {i:d}!')
                                 raise OSError
@@ -243,7 +244,8 @@ class ParserJson:
                                 else:
                                     tags_split = [tag[1:] for tag in stage.split(' ')]
                                     split_len = len(tags_split)
-                                    assert all(len(tag) > 0 for tag in tags_split)
+                                    assert all(bool(_) for _ in tags_split), (f'Invalid tag string \'{stage}\' '
+                                                                              f'in {cat}:{cdt} sub \'{sub_name}\' at offset {i:d}')
                                     need_find_previous_or_group = True
                                     tags_rem = '~'.join(tags_split)
                                     tags_search = ','.join(tags_split)
@@ -280,7 +282,7 @@ class ParserJson:
                 for extra_args in Config.extra_args:
                     if extra_args.is_for(cat, cdt):
                         trace(f'Using \'{cat}:{cdt}\' extra args: {extra_args.args!s} -> {" ".join(extra_args.args)}')
-                        self.try_parse_proxy(extra_args.args, cdt)
+                        self.try_parse_proxy(extra_args.args, cat, cdt)
                         self.queries.sequences_common.at_cur_cat[cdt].extend(f'"{arg}"' for arg in extra_args.args)
                 cur_tags_list.clear()
 

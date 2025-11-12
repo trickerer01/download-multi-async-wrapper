@@ -8,7 +8,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 
 from collections.abc import Iterable
-from typing import NamedTuple, TypeVar
+from typing import NamedTuple, SupportsIndex, TypeVar
 
 UTF8 = 'utf-8'
 ACTION_STORE_TRUE = 'store_true'
@@ -35,10 +35,10 @@ class IntSequence:
     def __len__(self) -> int:
         return len(self.ints)
 
-    def __getitem__(self, item: int | slice) -> int | list[int]:
-        return self.ints.__getitem__(item)
+    def __getitem__(self, key: SupportsIndex) -> int | list[int]:
+        return self.ints.__getitem__(key)
 
-    def __setitem__(self, key: int | slice, value: int | Iterable[int]) -> None:
+    def __setitem__(self, key: SupportsIndex, value: int) -> None:
         self.ints.__setitem__(key, value)
 
     def __eq__(self, other) -> bool:
