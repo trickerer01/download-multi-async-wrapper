@@ -9,6 +9,8 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 import os
 from typing import Protocol
 
+from _parsers.parser_json import ParserJson
+from _parsers.parser_text import ParserText
 from config import Config
 from containers import Queries
 from defs import (
@@ -18,8 +20,6 @@ from defs import (
     PARSER_TYPE_TXT,
 )
 from logger import trace
-from parser_types.parser_json import ParserJson
-from parser_types.parser_text import ParserText
 
 __all__ = ('ParserMeta', 'create_parser', 'register_parser_type')
 
