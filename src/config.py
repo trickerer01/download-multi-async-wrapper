@@ -112,7 +112,6 @@ class BaseConfig:
         self.debug: bool = False
         self.no_download: bool = False
         self.no_update: bool = False
-        self.update_prefetch: bool = False
         self.install: bool = False
         self.ignored_args: list[IgnoredArg] = []
         self.override_ids: list[CatDwnIds] = []
@@ -132,6 +131,7 @@ class BaseConfig:
         self.python: str = ''
         self.datesub: bool = True
         self.update: bool = False
+        self.update_prefetch: bool = False
         self.update_offsets: dict[str, int] = {}
         self.noproxy_fetches: set[str] = set()
         # calculated
@@ -150,7 +150,6 @@ class BaseConfig:
         self.debug = params.debug or self.debug
         self.no_download = params.no_download or self.no_download
         self.no_update = params.no_update or self.no_update
-        self.update_prefetch = params.update_prefetch or self.update_prefetch
         self.install = params.install or self.install
         self.ignored_args = params.ignore or self.ignored_args
         self.override_ids = params.idlist or self.override_ids

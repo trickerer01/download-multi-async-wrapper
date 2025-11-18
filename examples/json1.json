@@ -9,6 +9,7 @@
     "log_path": "../logs/",
     "date_sub": "0",
     "update": "0",
+    "update_prefetch": "NO",
     "update_offsets": {},
     "noproxy_fetches": ["rg"],
     "python": "python3",

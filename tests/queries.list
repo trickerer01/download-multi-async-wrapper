@@ -6,6 +6,7 @@
 ### LOGPATH:../logs
 ### DATESUB:YES
 ### UPDATE:YES
+### UPDATE_PREFETCH:YES
 ### UPDATE_OFFSETS:{"NM":-100,"rc":-100,"RV":-800,"RS":-300}
 ### NOPROXY_FETCHES:["rg","nm"]
 ### PYTHON:python3

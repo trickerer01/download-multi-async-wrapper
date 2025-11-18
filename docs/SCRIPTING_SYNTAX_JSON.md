@@ -13,6 +13,7 @@ Here is a JSON representation of improvised script explaining every statement an
   "log_path": "../logs", "$comment": "Log files destination folder, logs will be saved to disk always, default: './'",
   "date_sub": "YES", "$comment": "Date subfolder '/MMDD/' in base dest folder creation flag, default: 'yes'. Can also use other values: 'False', 'True', 'no', 'yes', 'n', 'y', '0', '1', etc.",
   "update": "YES", "$comment": "ID range (see below) update with fetched max id flag, default: 'no'",
+  "update_prefetch": "YES", "$comment": "Fetch maximum ids before lauching any downloaders",
   "update_offsets": {
     "NM": -100,
     "rc": -100,

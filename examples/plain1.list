@@ -6,6 +6,7 @@
 ### LOGPATH:../logs/
 ### DATESUB:0
 ### UPDATE:0
+### UPDATE_PREFETCH:NO
 ### NOPROXY_FETCHES:["rg"]
 ### PYTHON:python3
 

@@ -77,6 +77,8 @@ class ParserJson:
         trace(f'Parsed date subfolder flag value: \'{self._json["date_sub"]}\' ({BOOL_STRS[self._json["date_sub"]]!s})')
         Config.update = BOOL_STRS[self._json['update']]
         trace(f'Parsed update flag value: \'{self._json["update"]}\' ({BOOL_STRS[self._json["update"]]!s})')
+        Config.update_prefetch = BOOL_STRS[self._json['update_prefetch']]
+        trace(f'Parsed update prefetch flag value: \'{self._json["update_prefetch"]}\' ({BOOL_STRS[self._json["update_prefetch"]]!s})')
         Config.update_offsets.update({k.lower(): v for k, v in self._json['update_offsets'].items()})
         trace(f'Parsed update offsets value: \'{Config.update_offsets!s}\'')
         Config.noproxy_fetches.update(self._json['noproxy_fetches'])

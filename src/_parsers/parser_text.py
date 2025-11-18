@@ -42,6 +42,7 @@ re_dest_run = re.compile(r'^### RUNPATH:.+?$')
 re_dest_log = re.compile(r'^### LOGPATH:.+?$')
 re_datesub = re.compile(r'^### DATESUB:.+?$')
 re_update = re.compile(r'^### UPDATE:.+?$')
+re_update_prefetch = re.compile(r'^### UPDATE_PREFETCH:.+?$')
 re_update_offsets = re.compile(r'^### UPDATE_OFFSETS:.+?$')
 re_noproxy_fetches = re.compile(r'^### NOPROXY_FETCHES:.+?$')
 re_category = re.compile(r'^### \(([A-zÀ-ʯА-я\d_+\-! ]+)\) ###$')
@@ -147,6 +148,11 @@ class ParserText:
                             assert Config.update is False
                         else:
                             Config.update = BOOL_STRS[update_str]
+                        continue
+                    if re_update_prefetch.fullmatch(line):
+                        update_prefetch_str = line[line.find(':') + 1:]
+                        trace(f'Parsed update prefetch flag value: \'{update_prefetch_str}\' ({BOOL_STRS[update_prefetch_str]!s})')
+                        Config.update_prefetch = BOOL_STRS[update_prefetch_str]
                         continue
                     if re_python_exec.fullmatch(line):
                         python_str = line[line.find(':') + 1:]

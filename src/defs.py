@@ -261,7 +261,6 @@ HELP_DOWNLOADERS = f'Enabled downloaders. Default is all: \'{",".join(DOWNLOADER
 HELP_CATEGORIES = 'Enabled categories. Default is all'
 HELP_NO_DOWNLOAD = 'Skip launching any downloaders'
 HELP_NO_UPDATE = 'Skip script ids update regardless of script update flag being set or not'
-HELP_UPDATE_PREFETCH = 'Fetch maximum ids before lauching any downloaders'
 HELP_INSTALL = 'Force install dependencies from enabled downloaders to a Python environment set within the script'
 HELP_SCRIPT_PATH = 'Full path to the script (queries) file'
 HELP_PARSER = 'Parser type override (if doesn\'t match script file extension)'
