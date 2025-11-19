@@ -115,7 +115,7 @@ class ParserJson:
         for cat, dts in compose.items():
             if len(cat) > MAX_CATEGORY_NAME_LENGTH:
                 cat_orig, cat = cat, cat[:MAX_CATEGORY_NAME_LENGTH]
-                trace(f'Category name \'{cat_orig}\' is too long ({len(cat_orig)} > {len(cat)})! Shrinked.')
+                trace(f'Category name \'{cat_orig}\' is too long ({len(cat_orig):d} > {len(cat):d})! Shrinked.')
             if cat != cat.strip():
                 trace(f'Category name \'{cat}\' will become \'{cat.strip()}\' after stripping!')
             trace(f'Processing new category: \'{cat}\'...')
@@ -178,7 +178,7 @@ class ParserJson:
                 self.queries.sequences_paths_reqs[cdt] = path_requirements
                 self.queries.sequences_paths_update[cdt] = normalize_path(os.path.abspath(path_updater), False)
                 common_args_list: list[str] = entries['common']
-                for i, common in enumerate(common_args_list):
+                for ci, common in enumerate(common_args_list):
                     common_orig = common
                     ignored_idx: int
                     for ignored_idx in reversed(range(len(args_to_ignore))):
@@ -200,12 +200,12 @@ class ParserJson:
                                 if num_to_skip == 0:
                                     # remove ignored arg(s) and consume ignored arg from config
                                     new_common = f'{common[:start_idx]}{common[min(end_idx, len(common)):]}'
-                                    trace(f'Info: ignoring argument \'{ignored_arg!s}\' found at common {i + 1:d}:\n  \'{common}\' -->'
+                                    trace(f'Info: ignoring argument \'{ignored_arg!s}\' found at common {ci + 1:d}:\n  \'{common}\' -->'
                                           f'\n  {" " * start_idx}^{" " * (end_idx - start_idx)}^\n  {new_common}')
                                     common = new_common
                                     del args_to_ignore[ignored_idx]
                     if not common:
-                        trace(f'Common argument \'{common_orig}\' was fully consumed by ignored args (was offset {i:d})')
+                        trace(f'Common argument \'{common_orig}\' was fully consumed by ignored args (was offset {ci:d})')
                         continue
                     common_args = common.split(' ')
                     self.try_parse_proxy(common_args, cat, cdt)
@@ -242,7 +242,7 @@ class ParserJson:
                                             del cur_tags_list[j]
                                             del tags_to_remove[k]
                                             break
-                                assert len(tags_to_remove) == 0, (f'Tags weren\'t consumed: "{" ".join(tags_to_remove)}" '
+                                assert len(tags_to_remove) == 0, (f'Tags not consumed: "{" ".join(tags_to_remove)}" '
                                                                   f'in {cat}:{cdt} sub \'{sub_name}\' at offset {i:d}')
                                 continue
                             else:

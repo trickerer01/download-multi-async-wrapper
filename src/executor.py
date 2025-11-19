@@ -112,7 +112,7 @@ async def run_all_cmds() -> None:
         return
     enabled_dts = [dt for dt in Config.downloaders if any(bool(queries_all[cat][dt]) for cat in queries_all)]
     finished_dts: list[str] = []
-    trace(f'\nRunning {len(enabled_dts)} downloader(s): {", ".join(dt.upper() for dt in enabled_dts)}')
+    trace(f'\nRunning {len(enabled_dts):d} downloader(s): {", ".join(dt.upper() for dt in enabled_dts)}')
     trace('Working...')
     cv: Future[str | None]
     for cv in as_completed(map(
@@ -125,9 +125,9 @@ async def run_all_cmds() -> None:
         if finished_dt is None:
             continue
         finished_dts.append(finished_dt)
-        trace(f'{len(finished_dts)} / {len(enabled_dts)} DOWNLOADERS COMPLETED: {", ".join(dt.upper() for dt in finished_dts)}')
+        trace(f'{len(finished_dts):d} / {len(enabled_dts):d} DOWNLOADERS COMPLETED: {", ".join(dt.upper() for dt in finished_dts)}')
         if remaining_dts := [dt for dt in enabled_dts if dt not in finished_dts]:
-            trace(f'WAITING FOR {len(remaining_dts)} MORE: {", ".join(dt.upper() for dt in remaining_dts)}')
+            trace(f'WAITING FOR {len(remaining_dts):d} MORE: {", ".join(dt.upper() for dt in remaining_dts)}')
 
     trace('ALL DOWNLOADERS FINISHED WORK\n')
 

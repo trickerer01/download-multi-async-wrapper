@@ -163,7 +163,7 @@ class ParserText:
                     if re_update_offsets.fullmatch(line):
                         offsets_str = line[line.find(':') + 1:]
                         trace(f'Parsed update offsets value: \'{offsets_str}\'')
-                        assert Config.update_offsets == {}, f'Update offsets re-declaration! Was \'{Config.update_offsets!s}\''
+                        assert not Config.update_offsets, f'Update offsets re-declaration! Was \'{Config.update_offsets!s}\''
                         Config.update_offsets = json.loads(offsets_str.lower())
                         invalid_dts: list[str] = []
                         for pdt in Config.update_offsets:
@@ -180,7 +180,7 @@ class ParserText:
                     if re_noproxy_fetches.fullmatch(line):
                         modules_str = line[line.find(':') + 1:]
                         trace(f'Parsed noproxy fetches value: \'{modules_str}\'')
-                        assert Config.noproxy_fetches == set(), f'Noproxy fetches re-declaration! Was \'{Config.noproxy_fetches!s}\''
+                        assert not Config.noproxy_fetches, f'Noproxy fetches re-declaration! Was \'{Config.noproxy_fetches!s}\''
                         Config.noproxy_fetches = set(json.loads(modules_str.lower()))
                         invalid_dts: list[str] = []
                         for npdt in Config.noproxy_fetches:
@@ -196,7 +196,7 @@ class ParserText:
                     if len(cur_ct()) > MAX_CATEGORY_NAME_LENGTH:
                         cur_cat = cur_ct()[:MAX_CATEGORY_NAME_LENGTH]
                         trace(f'Category name \'{cat_match.group(1)}\' is too long '
-                              f'({len(cat_match.group(1))} > {len(cur_ct())})! Shrinked.')
+                              f'({len(cat_match.group(1)):d} > {len(cur_ct()):d})! Shrinked.')
                     if cur_ct() != cur_ct().strip():
                         trace(f'Category name \'{cur_ct()}\' will become \'{cur_ct().strip()}\' after stripping!')
                     assert cur_ct() not in self.queries.sequences_paths, f'Category \'{cur_ct()}\' already exists. Aborted!'
@@ -261,7 +261,7 @@ class ParserText:
                                 idseq_i.ints[:] = idseq_temp.ints[:]
                         if self.queries.sequences_pages.at_cur_cat[cdt]:
                             assert len(idseq_i) <= 2, (f'{cdt} has pages but defines ids range of '
-                                                       f'{len(idseq_i):d} > 2!\n\tat line {i + 1}: {line}')
+                                                       f'{len(idseq_i):d} > 2!\n\tat line {i + 1:d}: {line}')
                         self.queries.sequences_ids.at_cur_cat[cdt] = idseq_i
                         if len(idseq_i) < MIN_IDS_SEQ_LENGTH:
                             if cdt in Config.downloaders:
@@ -274,11 +274,11 @@ class ParserText:
                                 idseq_i.ints.append(2**31 - 1)
                     elif re_pages_list.fullmatch(line):
                         cdt = cur_dl()
-                        assert cdt in PAGE_DOWNLOADERS, f'{cur_cat}:{cdt} doesn\'t support pages search!\n\tat line {i + 1}: {line}'
+                        assert cdt in PAGE_DOWNLOADERS, f'{cur_cat}:{cdt} doesn\'t support pages search!\n\tat line {i + 1:d}: {line}'
                         idseq_p = self.queries.sequences_ids.at_cur_cat[cdt]
                         if idseq_p:
                             assert len(idseq_p) <= 2, (f'{cur_cat}:{cdt} defines pages but has ids range of '
-                                                       f'{len(idseq_p):d} > 2!\n\tat line {i + 1}: {line}')
+                                                       f'{len(idseq_p):d} > 2!\n\tat line {i + 1:d}: {line}')
                         pageseq = IntSequence([int(num[1:]) for num in line.split(' ')[1:]], i + 1)
                         self.queries.sequences_pages.at_cur_cat[cdt] = pageseq
                         if len(pageseq) < MIN_IDS_SEQ_LENGTH:
@@ -346,7 +346,7 @@ class ParserText:
                                         del cur_tags_list[j]
                                         del tags_to_remove[k]
                                         break
-                            assert len(tags_to_remove) == 0, f'Tags weren\'t consumed: "{" ".join(tags_to_remove)}" at line {i + 1}: {line}'
+                            assert len(tags_to_remove) == 0, f'Tags not consumed: "{" ".join(tags_to_remove)}" at line {i + 1:d}: {line}'
                             continue
                         else:
                             tags_split = [tag[1:] for tag in line.split(' ')]

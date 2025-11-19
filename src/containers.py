@@ -37,7 +37,7 @@ class DownloadCollection(Dict[str, Dict[str, DT | None]]):
         return init_type(*args, **kwargs) if init_type else None
 
     def _sub_to_str(self, cat: str) -> str:
-        return f'\'{self[cat]}\': {",".join(f"{dt}[{len(self[cat][dt])}]" for dt in self[cat] if self[cat][dt]) or "None"}'
+        return f'\'{self[cat]}\': {",".join(f"{dt}[{len(self[cat][dt]):d}]" for dt in self[cat] if self[cat][dt]) or "None"}'
 
     def __str__(self) -> str:
         return '\n'.join(self._sub_to_str(cat) for cat in self)
