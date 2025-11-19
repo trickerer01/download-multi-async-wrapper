@@ -213,74 +213,76 @@ class ParserJson:
                 subs: list[dict[str, list[str]]] = entries['subs']
                 for sub_index, sub in enumerate(subs):
                     assert len(sub) == 1, f'Malformed {cat}:{cdt} sub at offest {sub_index:d}!'
-                    # this ineffecient way of assignment helps the linter and saves 2 lines of annotations
-                    sub_name, stages = next(iter(sub.keys())), next(iter(sub.values()))
-                    if stages:
-                        self.queries.sequences_subfolders.at_cur_cat[cdt].append(sub_name)
-                        for i, stage in enumerate(stages):
-                            assert stage, f'{cat}:{cdt} has empty arguments string found in sub \'{sub_name}\' at offset {i:d}!'
-                            # assert self.queries.sequences_ids.at_cur_cat[cdt] or self.queries.sequences_pages.at_cur_cat[cdt]  # no need
-                            if stage[0] not in '(-*' and not stage[0].isalnum():
-                                trace(f'Error: corrupted {cat}:{cdt} sub line beginning in sub \'{sub_name}\' at offset {i:d}!')
-                                raise OSError
-                            if '  ' in stage:
-                                trace(f'Error: double space found in {cat}:{cdt} sub \'{sub_name}\' tags at offset {i:d}!')
-                                raise OSError
-                            if stage[0] != '(' and not stage.startswith('-+(') and '~' in stage:
-                                trace(f'Error: unsupported ungrouped OR symbol in {cat}:{cdt} sub \'{sub_name}\' at offset {i:d}!')
-                                raise OSError
-                            need_append = True
-                            if all_tags_negative(stage.split(' ')):  # line[0] === '-'
-                                if stage[1] in '-+':
-                                    # remove --tag(s) or -+tag(s) from list, convert: --a --b -> [-a, -b] OR -+a -+b -> [a, b]
-                                    tags_to_remove = [tag[2 if tag[1] == '+' else 1:] for tag in stage.split(' ')]
-                                    for k in reversed(range(len(tags_to_remove))):
-                                        for j in reversed(range(len(cur_tags_list))):
-                                            if cur_tags_list[j] == tags_to_remove[k]:
-                                                del cur_tags_list[j]
-                                                del tags_to_remove[k]
-                                                break
-                                    assert len(tags_to_remove) == 0, (f'Tags weren\'t consumed: "{" ".join(tags_to_remove)}" '
-                                                                      f'in {cat}:{cdt} sub \'{sub_name}\' at offset {i:d}')
-                                    continue
-                                else:
-                                    tags_split = [tag[1:] for tag in stage.split(' ')]
-                                    split_len = len(tags_split)
-                                    assert all(bool(_) for _ in tags_split), (f'Invalid tag string \'{stage}\' '
-                                                                              f'in {cat}:{cdt} sub \'{sub_name}\' at offset {i:d}')
-                                    need_find_previous_or_group = True
-                                    tags_rem = '~'.join(tags_split)
-                                    tags_search = ','.join(tags_split)
-                                    start_idx = 1 if split_len > 1 else 0
-                                    end_idx = -1 if split_len > 1 else None
-                                    j: int
+                    sub_name: str = next(iter(sub.keys()))
+                    stages: list[str] = sub[sub_name]
+                    if not stages:
+                        trace(f'Warning: {cat}:{cdt} has empty argument list for sub \'{sub_name}\'! Sub will be skipped!')
+                        continue
+                    self.queries.sequences_subfolders.at_cur_cat[cdt].append(sub_name)
+                    for i, stage in enumerate(stages):
+                        assert stage, f'{cat}:{cdt} has empty arguments string found in sub \'{sub_name}\' at offset {i:d}!'
+                        # assert self.queries.sequences_ids.at_cur_cat[cdt] or self.queries.sequences_pages.at_cur_cat[cdt]  # no need
+                        if stage[0] not in '(-*' and not stage[0].isalnum():
+                            trace(f'Error: corrupted {cat}:{cdt} sub line beginning in sub \'{sub_name}\' at offset {i:d}!')
+                            raise OSError
+                        if '  ' in stage:
+                            trace(f'Error: double space found in {cat}:{cdt} sub \'{sub_name}\' tags at offset {i:d}!')
+                            raise OSError
+                        if stage[0] != '(' and not stage.startswith('-+(') and '~' in stage:
+                            trace(f'Error: unsupported ungrouped OR symbol in {cat}:{cdt} sub \'{sub_name}\' at offset {i:d}!')
+                            raise OSError
+                        need_append = True
+                        if all_tags_negative(stage.split(' ')):  # line[0] === '-'
+                            if stage[1] in '-+':
+                                # remove --tag(s) or -+tag(s) from list, convert: --a --b -> [-a, -b] OR -+a -+b -> [a, b]
+                                tags_to_remove = [tag[2 if tag[1] == '+' else 1:] for tag in stage.split(' ')]
+                                for k in reversed(range(len(tags_to_remove))):
                                     for j in reversed(range(len(cur_tags_list))):
-                                        cur_tag = cur_tags_list[j]
-                                        prev_tag = cur_tags_list[j - 1] if j > 0 else ''
-                                        try_match_search = j > 0 and prev_tag.startswith('-search')
-                                        if try_match_search and cur_tag == tags_search:
+                                        if cur_tags_list[j] == tags_to_remove[k]:
                                             del cur_tags_list[j]
-                                            del cur_tags_list[j - 1]
-                                            need_find_previous_or_group = False
-                                            if prev_tag == '-search' or prev_tag.startswith('-search_rule'):
-                                                need_append = False
+                                            del tags_to_remove[k]
                                             break
-                                        try_match_rem = split_len == 1 or cur_tag[::max(len(cur_tag) - 1, 1)] == '()'
-                                        if try_match_rem and cur_tag[start_idx:end_idx] == tags_rem:
-                                            del cur_tags_list[j]
-                                            need_find_previous_or_group = False
-                                            break
-                                    if need_find_previous_or_group is True:
-                                        trace(f'Info: exclusion(s): no previous matching tag or \'or\' group found '
-                                              f'in {cat}:{cdt} sub \'{sub_name}\' at offset {i:d}: {stage}')
-                            elif not all_tags_positive(stage.split(' ')):
-                                param_like = stage[0] == '-' and len(stage.split(' ')) == 2
-                                if not (param_like and (stage.startswith(('-search', '-quality')))):
-                                    trace(f'Warning (W2): mixed positive / negative tags in {cat}:{cdt} sub\'{sub_name}\' at offset {i:d}, '
-                                          f'{"param" if param_like else "error"}? Line: \'{stage}\'')
-                            if need_append:
-                                cur_tags_list.extend(stage.split(' '))
-                        self.queries.sequences_tags.at_cur_cat[cdt].append(cur_tags_list.copy())
+                                assert len(tags_to_remove) == 0, (f'Tags weren\'t consumed: "{" ".join(tags_to_remove)}" '
+                                                                  f'in {cat}:{cdt} sub \'{sub_name}\' at offset {i:d}')
+                                continue
+                            else:
+                                tags_split = [tag[1:] for tag in stage.split(' ')]
+                                split_len = len(tags_split)
+                                assert all(bool(_) for _ in tags_split), (f'Invalid tag string \'{stage}\' '
+                                                                          f'in {cat}:{cdt} sub \'{sub_name}\' at offset {i:d}')
+                                need_find_previous_or_group = True
+                                tags_rem = '~'.join(tags_split)
+                                tags_search = ','.join(tags_split)
+                                start_idx = 1 if split_len > 1 else 0
+                                end_idx = -1 if split_len > 1 else None
+                                j: int
+                                for j in reversed(range(len(cur_tags_list))):
+                                    cur_tag = cur_tags_list[j]
+                                    prev_tag = cur_tags_list[j - 1] if j > 0 else ''
+                                    try_match_search = j > 0 and prev_tag.startswith('-search')
+                                    if try_match_search and cur_tag == tags_search:
+                                        del cur_tags_list[j]
+                                        del cur_tags_list[j - 1]
+                                        need_find_previous_or_group = False
+                                        if prev_tag == '-search' or prev_tag.startswith('-search_rule'):
+                                            need_append = False
+                                        break
+                                    try_match_rem = split_len == 1 or cur_tag[::max(len(cur_tag) - 1, 1)] == '()'
+                                    if try_match_rem and cur_tag[start_idx:end_idx] == tags_rem:
+                                        del cur_tags_list[j]
+                                        need_find_previous_or_group = False
+                                        break
+                                if need_find_previous_or_group is True:
+                                    trace(f'Info: exclusion(s): no previous matching tag or \'or\' group found '
+                                          f'in {cat}:{cdt} sub \'{sub_name}\' at offset {i:d}: {stage}')
+                        elif not all_tags_positive(stage.split(' ')):
+                            param_like = stage[0] == '-' and len(stage.split(' ')) == 2
+                            if not (param_like and (stage.startswith(('-search', '-quality')))):
+                                trace(f'Warning (W2): mixed positive / negative tags in {cat}:{cdt} sub\'{sub_name}\' at offset {i:d}, '
+                                      f'{"param" if param_like else "error"}? Line: \'{stage}\'')
+                        if need_append:
+                            cur_tags_list.extend(stage.split(' '))
+                    self.queries.sequences_tags.at_cur_cat[cdt].append(cur_tags_list.copy())
                 for extra_args in Config.extra_args:
                     if extra_args.is_for(cat, cdt):
                         trace(f'Using \'{cat}:{cdt}\' extra args: {extra_args.args!s} -> {" ".join(extra_args.args)}')

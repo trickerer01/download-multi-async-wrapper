@@ -25,6 +25,7 @@ MIN_PYTHON_VERSION_STR = f'{MIN_PYTHON_VERSION[0]:d}.{MIN_PYTHON_VERSION[1]:d}'
 
 # Types
 class IntSequence:
+    """list[int] wrapper with extra info"""
     def __init__(self, ints: Iterable[int], line_num: int) -> None:
         self.ints = list(ints or [])
         self.line_num = line_num or -1
