@@ -6,12 +6,12 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
-from typing import Dict, Generic, Type
+from typing import Dict, Generic, NamedTuple, Type
 
 from defs import AT, DOWNLOADERS, DT, IntSequence, StrPair
 from util import assert_notnull
 
-__all__ = ('DownloadCollection', 'Queries', 'Wrapper')
+__all__ = ('CmdRunParams', 'DownloadCollection', 'Queries', 'Wrapper')
 
 
 class DownloadCollection(Dict[str, Dict[str, DT | None]]):
@@ -43,6 +43,40 @@ class DownloadCollection(Dict[str, Dict[str, DT | None]]):
         return '\n'.join(self._sub_to_str(cat) for cat in self)
 
     __repr__ = __str__
+
+
+class CmdRunParams(NamedTuple):
+    query: str
+    downloader: str
+    downloader_query_num: int
+    downloader_query_max: int
+    category: str
+    category_query_num: int
+    category_query_max: int
+
+    @property
+    def dwn(self) -> str:
+        return self.downloader
+
+    @property
+    def dqn(self) -> int:
+        return self.downloader_query_num
+
+    @property
+    def dqm(self) -> int:
+        return self.downloader_query_max
+
+    @property
+    def cat(self) -> str:
+        return self.category
+
+    @property
+    def cqn(self) -> int:
+        return self.category_query_num
+
+    @property
+    def cqm(self) -> int:
+        return self.category_query_max
 
 
 class Wrapper(Generic[AT]):

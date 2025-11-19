@@ -11,7 +11,7 @@ import os
 from asyncio import AbstractEventLoop, Future, SubprocessProtocol, as_completed, new_event_loop, sleep
 
 from config import Config
-from containers import DownloadCollection, Wrapper
+from containers import CmdRunParams, DownloadCollection, Wrapper
 from defs import DOWNLOADERS, RUN_FILE_DOWNLOADERS, UTF8
 from logger import log_to, trace
 from strings import datetime_str_nfull, normalize_path, split_into_args
@@ -31,19 +31,20 @@ class DummyResultProtocol(SubprocessProtocol):
 executor_event_loop: Wrapper[AbstractEventLoop] = Wrapper()
 
 queries_all: DownloadCollection[list[str]] = DownloadCollection()
-dtqn_fmt = Wrapper('02d')
+dwqn_fmt = Wrapper('02d')
 
 
 def register_queries(queries: DownloadCollection[list[str]]) -> None:
     queries_all.update(queries)
     max_queries_per_downloader = max(sum(len(queries[cat][dt]) for cat in queries) for dt in DOWNLOADERS)
-    dtqn_fmt.reset(f'0{math.ceil(math.log10(max_queries_per_downloader + 1)):d}d')
+    dwqn_fmt.reset(f'0{math.ceil(math.log10(max_queries_per_downloader + 1)):d}d')
 
 
-async def run_cmd(query: str, dt: str, qn: int, qm: int, qt: str, qtn: int, qtm: int) -> None:
+async def run_cmd(params: CmdRunParams) -> None:
+    query, dwn, dqn, dqm, cat, cqn, cqm = params.query, params.dwn, params.dqn, params.dqm, params.cat, params.cqn, params.cqm
     suffix = f'{Config.full_title}_' if Config.title else ''
-    begin_msg = f'\n[{Config.full_title}] Executing \'{qt}\' {dt} query {qtn:d} / {qtm:d} ({dt} query {qn:d} / {qm:d}):\n{query}'
-    proc_file_name_body = f'{suffix}{dt}{qn:{dtqn_fmt.val}}_{qt.strip()}{qtn:{dtqn_fmt.val}}_{datetime_str_nfull()}'
+    begin_msg = f'\n[{Config.full_title}] Executing \'{cat}:{dwn}\' query {cqn:d} / {cqm:d} ({dwn} query {dqn:d} / {dqm:d}):\n{query}'
+    proc_file_name_body = f'{suffix}{dwn}{dqn:{dwqn_fmt.val}}_{cat.strip()}{cqn:{dwqn_fmt.val}}_{datetime_str_nfull()}'
     log_file_name = f'{Config.dest_logs_base}log_{proc_file_name_body}.log'
     with open(log_file_name, 'wt+', encoding=UTF8, errors='replace', buffering=1) as log_file:
         trace(begin_msg)
@@ -52,7 +53,7 @@ async def run_cmd(query: str, dt: str, qn: int, qm: int, qt: str, qtn: int, qtm:
         # DEBUG - do not remove
         # if DOWNLOADERS.index(dt) not in {0} or qn not in range(1, 2):
         #     return
-        if dt in RUN_FILE_DOWNLOADERS and len(query) > Config.max_cmd_len:
+        if dwn in RUN_FILE_DOWNLOADERS and len(query) > Config.max_cmd_len:
             run_file_name = f'{Config.dest_run_base}run_{proc_file_name_body}.conf'
             trace(f'Cmdline is too long ({len(query):d}/{Config.max_cmd_len:d})! Converting to run file: {run_file_name}')
             run_file_abspath = normalize_path(os.path.abspath(run_file_name), False)
@@ -69,36 +70,38 @@ async def run_cmd(query: str, dt: str, qn: int, qm: int, qt: str, qtn: int, qtm:
         trace(f'\n{log_file.read()}')
 
 
-async def run_dt_cmds(dt: str, qts: list[str], queries: list[str]) -> str | None:
+async def run_cmds(dwn: str, cats: list[str], queries: list[str]) -> str | None:
     if not queries:
         return None
 
-    assert len(qts) == len(queries)
+    assert len(cats) == len(queries)
 
-    if dt not in Config.downloaders:
+    if dwn not in Config.downloaders:
         await sleep(1.0)  # delay this message so it isn't printed somewhere inbetween initial cmds
-        trace(f'\n{dt.upper()} SKIPPED\n')
+        trace(f'\n{dwn.upper()} SKIPPED\n')
         return None
 
-    dt_qt_num = len(list(filter(None, [bool(queries_all[dcat][dt]) for dcat in queries_all])))
+    cats_count = len(list(filter(None, [bool(queries_all[cat][dwn]) for cat in queries_all])))
 
-    qt_skips = set[str]()
-    qns: dict[str, int] = dict.fromkeys(qts, 0)
-    qms: dict[str, int] = {}
-    [qms.update({_: len(list(filter(None, [qt_ for qt_ in qts if qt_ == _])))}) for _ in qts if _ not in qms]
-    for qi, qt in enumerate(qts):
-        qns[qt] += 1
+    cats_skipped = set[str]()
+    cat_query_nums: dict[str, int] = dict.fromkeys(cats, 0)
+    cat_query_maxs: dict[str, int] = {}
+    [cat_query_maxs.update({_: len(list(filter(None, [qt_ for qt_ in cats if qt_ == _])))}) for _ in cats if _ not in cat_query_maxs]
+    for query_idx in range(len(queries)):
+        query = queries[query_idx]
+        cat = cats[query_idx]
+        cat_query_nums[cat] += 1
         if Config.test:
             continue
-        if dt in Config.disabled_downloaders.get(qt, []):
-            if qt not in qt_skips:
-                qt_skips.add(qt)
+        if dwn in Config.disabled_downloaders.get(cat, []):
+            if cat not in cats_skipped:
+                cats_skipped.add(cat)
                 await sleep(1.0)
-                trace(f'{dt.upper()} category \'{qt}\' was disabled! Skipped!\n')
+                trace(f'{dwn.upper()} category \'{cat}\' was disabled! Skipped!\n')
             continue
-        await run_cmd(queries[qi], dt, qi + 1, len(qts), qt, qns[qt], qms[qt])
-    trace(f'{dt.upper()} COMPLETED ({dt_qt_num - len(qt_skips):d} / {dt_qt_num:d} categories processed)\n')
-    return dt
+        await run_cmd(CmdRunParams(query, dwn, query_idx + 1, len(queries), cat, cat_query_nums[cat], cat_query_maxs[cat]))
+    trace(f'{dwn.upper()} COMPLETED ({cats_count - len(cats_skipped):d} / {cats_count:d} categories processed)\n')
+    return dwn
 
 
 async def run_all_cmds() -> None:
@@ -113,7 +116,7 @@ async def run_all_cmds() -> None:
     trace('Working...')
     cv: Future[str | None]
     for cv in as_completed(map(
-        run_dt_cmds,
+        run_cmds,
         DOWNLOADERS,
         [sum_lists([str(cat)] * len(queries_all[cat][dt]) for cat in queries_all) for dt in DOWNLOADERS],
         [sum_lists(queries_all[cat][dt] for cat in queries_all) for dt in DOWNLOADERS],
