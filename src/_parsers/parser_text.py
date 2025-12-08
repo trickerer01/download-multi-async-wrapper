@@ -295,7 +295,7 @@ class ParserText:
                         path_updater = f'{basepath_n}{PATH_APPEND_UPDATE[cdt]}'
                         if Config.test is False:
                             assert os.path.isdir(basepath), f'{cat}:{cdt} base path \'{basepath}\' doesn\'t exist!'
-                            assert os.path.isfile(path_downloader), f'{cat}:{cdt} downloader path \'{path_downloader}\' doesn\'t exist!'
+                            assert os.path.exists(path_downloader), f'{cat}:{cdt} downloader path \'{path_downloader}\' doesn\'t exist!'
                             if Config.install:
                                 assert os.path.isfile(path_requirements), f'{cat}:{cdt} reqs file \'{path_requirements}\' doesn\'t exist!'
                             if Config.update:

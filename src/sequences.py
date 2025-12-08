@@ -16,6 +16,7 @@ from defs import (
     DOWNLOADERS,
     MIN_PYTHON_VERSION,
     MIN_PYTHON_VERSION_STR,
+    PAGE_DOWNLOADERS,
     PATH_APPEND_DOWNLOAD_IDS,
     PATH_APPEND_DOWNLOAD_PAGES,
     RANGE_TEMPLATE_IDS,
@@ -178,10 +179,15 @@ def _get_base_qs(queries: Queries) -> DownloadCollection[str]:
     irngs, prngs = ({
         k: {dt: IntPair(*ipseqs[k][dt][:2]) for dt in DOWNLOADERS if ipseqs[k][dt]} for k in ipseqs
     } for ipseqs in (queries.sequences_ids, queries.sequences_pages))
+    piargs: dict[str, dict[str, str]]
+    piargs = ({
+        k: {dt: 'pages ' if has_pages(k, dt) else 'ids ' if dt in PAGE_DOWNLOADERS else '' for dt in DOWNLOADERS}
+        for k in queries.sequences_paths
+    })
     base_qs: DownloadCollection[str] = DownloadCollection()
     [base_qs.update({
         k: {
-            dt: (f'{Config.python} "{queries.sequences_paths[k][dt]}" '
+            dt: (f'{Config.python} "{queries.sequences_paths[k][dt]}" {piargs[k][dt]}'
                  f'{(ri[dt].first % irngs[k][dt].first) if pure_ids(k, dt) else (rp[dt].first % prngs[k][dt].first)}'
                  f'{(ri[dt].second % (irngs[k][dt].second - 1)) if pure_ids(k, dt) else (rp[dt].second % prngs[k][dt].second)}'
                  f'{f" {rpi[dt].first % irngs[k][dt].first}" if page_ids(k, dt) and irngs[k][dt].first else ""}'

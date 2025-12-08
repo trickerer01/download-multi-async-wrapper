@@ -16,6 +16,7 @@ from defs import (
     COLOR_LOG_DOWNLOADERS,
     DOWNLOADERS,
     MIN_IDS_SEQ_LENGTH,
+    PAGE_DOWNLOADERS,
     RUXX_DOWNLOADERS,
     UTF8,
     IntSequence,
@@ -71,6 +72,8 @@ def fetch_maxids(dts: Iterable[str]) -> None:
         def get_max_id(dtype: str) -> None:
             update_file_path: str = queries.sequences_paths_update[dtype]
             module_arguments: list[str] = ['-module', dtype] if dtype in RUXX_DOWNLOADERS else []
+            if dtype in PAGE_DOWNLOADERS:
+                module_arguments.append('pages')
             if dtype in COLOR_LOG_DOWNLOADERS:
                 module_arguments.append('--disable-log-colors')
             if dtype in queries.proxies_update and queries.proxies_update[dtype] and dtype not in Config.noproxy_fetches:
