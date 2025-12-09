@@ -182,35 +182,35 @@ class QueriesFormTests(TestCase):
             queries_all[cat_vid][DOWNLOADER_RV][2],
         )
         self.assertEqual(
-            f'python3 "D:/old/ruxx/src/ruxx_cmd.py" id:2..7 -path "../tests/{date_str_md(cat_vid)}/k/" -module en k',
+            f'python3 "D:/old/ruxx/ruxx" id:2..7 -path "../tests/{date_str_md(cat_vid)}/k/" -module en k',
             queries_all[cat_vid][DOWNLOADER_EN][0],
         )
         self.assertEqual(
-            f'python3 "D:/old/ruxx/src/ruxx_cmd.py" id:2..7 -path "../tests/{date_str_md(cat_vid)}/pb/" -module en -k p b (o~q)',
+            f'python3 "D:/old/ruxx/ruxx" id:2..7 -path "../tests/{date_str_md(cat_vid)}/pb/" -module en -k p b (o~q)',
             queries_all[cat_vid][DOWNLOADER_EN][1],
         )
         self.assertEqual(
-            f'python3 "D:/ruxx/src/ruxx_cmd.py" id:>=1 id:<=1 -path "../tests/{date_str_md(cat_img)}/a/" -module rx a',
+            f'python3 "D:/ruxx/ruxx" id:>=1 id:<=1 -path "../tests/{date_str_md(cat_img)}/a/" -module rx a',
             queries_all[cat_img][DOWNLOADER_RX][0],
         )
         self.assertEqual(
-            f'python3 "D:/ruxx/src/ruxx_cmd.py" id:>=1 id:<=1 -path "../tests/{date_str_md(cat_img)}/b/" -module rx -a b (c~d)',
+            f'python3 "D:/ruxx/ruxx" id:>=1 id:<=1 -path "../tests/{date_str_md(cat_img)}/b/" -module rx -a b (c~d)',
             queries_all[cat_img][DOWNLOADER_RX][1],
         )
         self.assertEqual(
-            f'python3 "D:/ruxx/src/ruxx_cmd.py" id>=7 id<=8 -path "../tests/{date_str_md(cat_img)}/g/" -dmode 0 -module rp g',
+            f'python3 "D:/ruxx/ruxx" id>=7 id<=8 -path "../tests/{date_str_md(cat_img)}/g/" -dmode 0 -module rp g',
             queries_all[cat_img][DOWNLOADER_RP][0],
         )
         self.assertEqual(
-            f'python3 "D:/ruxx/src/ruxx_cmd.py" id:>=5 id:<=5 -path "../tests/{date_str_md(cat_img)}/z/" -dmode 1 -module xb z',
+            f'python3 "D:/ruxx/ruxx" id:>=5 id:<=5 -path "../tests/{date_str_md(cat_img)}/z/" -dmode 1 -module xb z',
             queries_all[cat_img][DOWNLOADER_XB][0],
         )
         self.assertEqual(
-            f'python3 "D:/ruxx/src/ruxx_cmd.py" id:>=5 id:<=5 -path "../tests/{date_str_md(cat_img)}/x/" -dmode 1 -module xb -z x (y~w)',
+            f'python3 "D:/ruxx/ruxx" id:>=5 id:<=5 -path "../tests/{date_str_md(cat_img)}/x/" -dmode 1 -module xb -z x (y~w)',
             queries_all[cat_img][DOWNLOADER_XB][1],
         )
         self.assertEqual(
-            f'python3 "D:/ruxx/src/ruxx_cmd.py" id:>=5 id:<=5 -path "../tests/{date_str_md(cat_img)}/z/" -dmode 1 -module bb z',
+            f'python3 "D:/ruxx/ruxx" id:>=5 id:<=5 -path "../tests/{date_str_md(cat_img)}/z/" -dmode 1 -module bb z',
             queries_all[cat_img][DOWNLOADER_BB][0],
         )
         self.assertEqual(  # same dest for 'vid' and 'vid_' categories

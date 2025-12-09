@@ -173,7 +173,7 @@ class ParserJson:
                     if Config.install:
                         assert os.path.isfile(path_requirements), f'{cat}:{cdt} reqs file \'{path_requirements}\' doesn\'t exist!'
                     if Config.update:
-                        assert os.path.isfile(path_updater), f'{cat}:{cdt} updater file \'{path_updater}\' doesn\'t exist!'
+                        assert os.path.exists(path_updater), f'{cat}:{cdt} updater file \'{path_updater}\' doesn\'t exist!'
                 self.queries.sequences_paths.at_cur_cat[cdt] = path_downloader
                 self.queries.sequences_paths_reqs[cdt] = path_requirements
                 self.queries.sequences_paths_update[cdt] = normalize_path(os.path.abspath(path_updater), False)
