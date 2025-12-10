@@ -11,8 +11,8 @@ from collections.abc import Iterable
 from subprocess import CalledProcessError, check_output
 from threading import Lock, Thread
 
-from config import Config
-from defs import (
+from .config import Config
+from .defs import (
     COLOR_LOG_DOWNLOADERS,
     DOWNLOADERS,
     MIN_IDS_SEQ_LENGTH,
@@ -21,11 +21,11 @@ from defs import (
     UTF8,
     IntSequence,
 )
-from executor import register_queries
-from logger import trace
-from parsers import create_parser
-from sequences import form_queries, report_queries, report_unoptimized, validate_runners, validate_sequences
-from strings import NEWLINE, SLASH, datetime_str_nfull
+from .executor import register_queries
+from .logger import trace
+from .parsers import create_parser
+from .sequences import form_queries, report_queries, report_unoptimized, validate_runners, validate_sequences
+from .strings import NEWLINE, SLASH, datetime_str_nfull
 
 __all__ = ('make_parser', 'prepare_queries', 'read_queries_file', 'update_next_ids')
 

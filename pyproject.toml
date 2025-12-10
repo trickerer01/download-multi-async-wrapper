@@ -4,7 +4,7 @@ build-backend = 'setuptools.build_meta'
 
 [project]
 name = 'download-multi-async-wrapper'
-version = '1.0.253'
+version = '1.0.254'
 authors = [
     {name = 'trickerer01'},
 ]
@@ -68,7 +68,10 @@ Documentation = 'https://github.com/trickerer01/download-multi-async-wrapper#rea
 Tracker = 'https://github.com/trickerer01/download-multi-async-wrapper/issues'
 
 [project.scripts]
-r34wrapper = 'main:main_sync'
+r34wrapper = 'r34wrapper:main'
+
+[tool.setuptools]
+py-modules = ['r34wrapper']
 
 [tool.ruff]
 line-length = 140
@@ -151,7 +154,7 @@ select = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-'src/containers.py' = [
+'r34wrapper/containers.py' = [
     'UP006',  # non-pep585-annotation
     'UP035',  # deprecated-import
 ]

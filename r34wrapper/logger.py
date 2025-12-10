@@ -10,10 +10,10 @@ import os
 from locale import getpreferredencoding
 from typing import TextIO
 
-from config import Config
-from containers import Wrapper
-from defs import UTF8
-from strings import NEWLINE, datetime_str_nfull, timestamped_string
+from .config import Config
+from .containers import Wrapper
+from .defs import UTF8
+from .strings import NEWLINE, datetime_str_nfull, timestamped_string
 
 __all__ = ('close_logfile', 'ensure_logfile', 'log_to', 'trace')
 

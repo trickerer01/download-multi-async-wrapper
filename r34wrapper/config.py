@@ -8,10 +8,10 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 
 from argparse import Namespace
 
-from defs import APPEND_SEPARATOR, IDLIST_SEPARATOR, MAX_CMD_LEN, OS_WINDOWS
+from .defs import APPEND_SEPARATOR, IDLIST_SEPARATOR, MAX_CMD_LEN, OS_WINDOWS
 
 if True is False:
-    from parsers import ParserMeta
+    from .parsers import ParserMeta
 
 __all__ = ('CatDwnIds', 'Config', 'ExtraArgs', 'IgnoredArg')
 

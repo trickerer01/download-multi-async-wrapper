@@ -28,7 +28,7 @@ body:
         Logfile opened...
         [2024-06-04_07_25_51] # Started at 04 Jun 2024 07:25:51 #
         [2024-06-04_07_25_51] Python 3.8.7 (tags/v3.8.7:6503f05, Dec 21 2020, 17:59:51) [MSC v.1928 64 bit (AMD64)]
-        [2024-06-04_07_25_51] Command-line args: D:/scrapers/src/main.py -script D:/scrapers/queries.txt.list
+        [2024-06-04_07_25_51] Command-line args: D:/scrapers/r34wrapper -script D:/scrapers/queries.txt.list
         [2024-06-04_07_25_51] Reading queries file: 'D:/scrapers/queries.txt.list'
       render: shell
     validations:

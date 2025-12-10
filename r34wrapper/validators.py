@@ -9,9 +9,9 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 import os
 from argparse import ArgumentError
 
-from defs import DOWNLOADERS
-from logger import trace
-from strings import normalize_path, unquote
+from .defs import DOWNLOADERS
+from .logger import trace
+from .strings import normalize_path, unquote
 
 
 def valid_dir_path(pathstr: str) -> str:

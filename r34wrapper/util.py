@@ -9,7 +9,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 import itertools
 from collections.abc import Iterable
 
-from defs import AT
+from .defs import AT
 
 
 def unused_argument(arg: AT) -> None:
