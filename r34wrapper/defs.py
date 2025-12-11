@@ -73,7 +73,7 @@ OS_MACOS = 'Darwin'
 SUPPORTED_SYSTEMS = (
     OS_WINDOWS,
     OS_LINUX,
-    # OS_MACOS,
+    OS_MACOS,
 )
 
 PARSER_TYPE_AUTO = 'auto'
