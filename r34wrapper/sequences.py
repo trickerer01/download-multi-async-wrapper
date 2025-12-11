@@ -9,9 +9,9 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 import re
 from subprocess import check_output
 
-from config import Config
-from containers import DownloadCollection, Queries
-from defs import (
+from .config import Config
+from .containers import DownloadCollection, Queries
+from .defs import (
     APP_NAMES,
     DOWNLOADERS,
     MIN_PYTHON_VERSION,
@@ -26,8 +26,8 @@ from defs import (
     IntPair,
     IntSequence,
 )
-from logger import trace
-from strings import NEWLINE, path_args
+from .logger import trace
+from .strings import NEWLINE, path_args
 
 __all__ = ('form_queries', 'report_queries', 'report_unoptimized', 'validate_runners', 'validate_sequences')
 

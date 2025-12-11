@@ -10,13 +10,13 @@ import sys
 from collections.abc import Sequence
 from platform import system as running_system
 
-from cmdargs import parse_arglist
-from config import Config
-from defs import MIN_PYTHON_VERSION, MIN_PYTHON_VERSION_STR, SUPPORTED_SYSTEMS
-from executor import execute
-from logger import close_logfile, trace
-from queries import make_parser, prepare_queries, read_queries_file, update_next_ids
-from strings import datetime_str_full
+from .cmdargs import parse_arglist
+from .config import Config
+from .defs import MIN_PYTHON_VERSION, MIN_PYTHON_VERSION_STR, SUPPORTED_SYSTEMS
+from .executor import execute
+from .logger import close_logfile, trace
+from .queries import make_parser, prepare_queries, read_queries_file, update_next_ids
+from .strings import datetime_str_full
 
 __all__ = ('main_sync',)
 

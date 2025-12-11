@@ -9,9 +9,9 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 import json
 import os
 
-from config import Config
-from containers import Queries
-from defs import (
+from r34wrapper.config import Config
+from r34wrapper.containers import Queries
+from r34wrapper.defs import (
     BOOL_STRS,
     COLOR_LOG_DOWNLOADERS,
     DOWNLOADERS,
@@ -27,9 +27,9 @@ from defs import (
     IntSequence,
     StrPair,
 )
-from logger import ensure_logfile, trace
-from strings import all_tags_negative, all_tags_positive, normalize_path, remove_trailing_comments
-from validators import positive_int, valid_dir_path
+from r34wrapper.logger import ensure_logfile, trace
+from r34wrapper.strings import all_tags_negative, all_tags_positive, normalize_path, remove_trailing_comments
+from r34wrapper.validators import positive_int, valid_dir_path
 
 __all__ = ('ParserJson',)
 

@@ -8,8 +8,8 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 
 from typing import Dict, Generic, NamedTuple, Type
 
-from defs import AT, DOWNLOADERS, DT, IntSequence, StrPair
-from util import assert_notnull
+from .defs import AT, DOWNLOADERS, DT, IntSequence, StrPair
+from .util import assert_notnull
 
 __all__ = ('CmdRunParams', 'DownloadCollection', 'Queries', 'Wrapper')
 

@@ -1,9 +1,9 @@
 ### TITLE:01daily
 ### TITLEINCREMENT:1
-### DESTPATH:../tests/
-### BAKPATH:../bak/
-### RUNPATH:../run/
-### LOGPATH:../logs/
+### DESTPATH:./tests/
+### BAKPATH:./bak/
+### RUNPATH:./run/
+### LOGPATH:./logs/
 ### DATESUB:0
 ### UPDATE:0
 ### UPDATE_PREFETCH:NO

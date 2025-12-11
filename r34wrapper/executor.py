@@ -10,12 +10,12 @@ import math
 import os
 from asyncio import AbstractEventLoop, Future, SubprocessProtocol, as_completed, new_event_loop, sleep
 
-from config import Config
-from containers import CmdRunParams, DownloadCollection, Wrapper
-from defs import DOWNLOADERS, RUN_FILE_DOWNLOADERS, UTF8
-from logger import log_to, trace
-from strings import datetime_str_nfull, normalize_path, split_into_args
-from util import sum_lists
+from .config import Config
+from .containers import CmdRunParams, DownloadCollection, Wrapper
+from .defs import DOWNLOADERS, RUN_FILE_DOWNLOADERS, UTF8
+from .logger import log_to, trace
+from .strings import datetime_str_nfull, normalize_path, split_into_args
+from .util import sum_lists
 
 __all__ = ('execute', 'register_queries')
 

@@ -81,7 +81,7 @@ Here is a JSON representation of improvised script explaining every statement an
       },
       "$comment": [
         "At this point 4 nm queries were created which will be then combined into a single download script",
-        "'python \"D:/projects/nm/src/ids.py\" -path \"<path>\" -start 50000 -end 50999",
+        "'python \"D:/projects/nm/nm\" ids -path \"<path>\" -start 50000 -end 50999",
         "-dmode touch -log trace --dump-tags -script",
         "\"a: -quality 1080p -a -b -c -dfff ggg;",
         "b: -quality 1080p -a -b -c -dfff -ggg -(x,z) (h~i~j~k);",
@@ -126,13 +126,13 @@ Here is a JSON representation of improvised script explaining every statement an
       },
       "$comment": [
         "At this point 3 rv queries were created which will not be optimized because of search being used",
-        "'python \"D:/projects/rv/src/ids.py\" -pages 10 -start 1 -stop_id 9000 -begin_id <fetched_max_id>",
+        "'python \"D:/projects/rv/rv\" pages -pages 10 -start 1 -stop_id 9000 -begin_id <fetched_max_id>",
         "-path \"/a\" -log info -timeout 30 -retries 100 -throttle 100 --dump-descriptions --dump-tags",
         "-quality 1080p -search aaa'",
-        "'python \"d:/projects/rv/src/ids.py\" -pages 10 -start 1 -stop_id 9000 -begin_id <fetched_max_id>",
+        "'python \"D:/projects/rv/rv\" pages -pages 10 -start 1 -stop_id 9000 -begin_id <fetched_max_id>",
         "-path \"/b\" -log info -timeout 30 -retries 100 -throttle 100 --dump-descriptions --dump-tags",
         "-quality 1080p -search_tag tag1,tag2,tag3 -search_rule_tag any'",
-        "'python \"d:/projects/rv/src/ids.py\" -pages 10 -start 1 -stop_id 9000 -begin_id <fetched_max_id>",
+        "'python \"D:/projects/rv/rv\" pages -pages 10 -start 1 -stop_id 9000 -begin_id <fetched_max_id>",
         "-path \"/c\" -log info -timeout 30 -retries 100 -throttle 100 --dump-descriptions --dump-tags",
         "-quality 1080p -tag1 -tag2 -tag3 -search_tag tag4,tag5 -search_rule_tag all'"
       ],

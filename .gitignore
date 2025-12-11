@@ -1,7 +1,4 @@
 # Dev
-*venv/
-/.ruff_cache/
-src/__pycache__/
 logs/*
 run/*
 tests/*
@@ -10,7 +7,6 @@ tests/*
 *.cfg
 *.lnk
 *.exe
-src/curr.py
 !setup.cfg
 
 # IDE

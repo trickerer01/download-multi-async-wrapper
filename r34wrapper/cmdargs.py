@@ -9,8 +9,8 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 from argparse import ArgumentParser
 from collections.abc import Sequence
 
-from config import CatDwnIds, Config, ExtraArgs, IgnoredArg
-from defs import (
+from .config import CatDwnIds, Config, ExtraArgs, IgnoredArg
+from .defs import (
     ACTION_APPEND,
     ACTION_STORE_TRUE,
     APPEND_SEPARATOR,
@@ -30,7 +30,7 @@ from defs import (
     PARSER_DEFAULT,
     SUPPORTED_PARSER_TYPES,
 )
-from validators import valid_categories_list, valid_downloaders_list, valid_file_path
+from .validators import valid_categories_list, valid_downloaders_list, valid_file_path
 
 __all__ = ('parse_arglist',)
 
