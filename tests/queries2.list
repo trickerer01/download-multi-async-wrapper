@@ -1,8 +1,8 @@
 ### TITLE:script_2
-### DESTPATH:C:/
-### BAKPATH:C:/
-### RUNPATH:C:/
-### LOGPATH:C:/
+### DESTPATH:../
+### BAKPATH:../
+### RUNPATH:../
+### LOGPATH:../
 ### PYTHON:python3
 ### (VIDEOS) ###
 # nm
