@@ -14,7 +14,7 @@ from .config import Config
 from .containers import CmdRunParams, DownloadCollection, Wrapper
 from .defs import DOWNLOADERS, RUN_FILE_DOWNLOADERS, UTF8
 from .logger import log_to, trace
-from .strings import datetime_str_nfull, normalize_path, split_into_args
+from .strings import datetime_str_nfull, split_into_args
 from .util import sum_lists
 
 __all__ = ('execute', 'register_queries')
@@ -45,8 +45,8 @@ async def run_cmd(params: CmdRunParams) -> None:
     suffix = f'{Config.full_title}_' if Config.title else ''
     begin_msg = f'\n[{Config.full_title}] Executing \'{cat}:{dwn}\' query {cqn:d} / {cqm:d} ({dwn} query {dqn:d} / {dqm:d}):\n{query}'
     proc_file_name_body = f'{suffix}{dwn}{dqn:{dwqn_fmt.val}}_{cat.strip()}{cqn:{dwqn_fmt.val}}_{datetime_str_nfull()}'
-    log_file_name = f'{Config.dest_logs_base}log_{proc_file_name_body}.log'
-    with open(log_file_name, 'wt+', encoding=UTF8, errors='replace', buffering=1) as log_file:
+    log_file_path = Config.dest_logs_base / f'log_{proc_file_name_body}.log'
+    with open(log_file_path, 'wt+', encoding=UTF8, errors='replace', buffering=1) as log_file:
         trace(begin_msg)
         log_to(begin_msg, log_file)
         cmd_args = split_into_args(query)
@@ -54,9 +54,9 @@ async def run_cmd(params: CmdRunParams) -> None:
         # if DOWNLOADERS.index(dt) not in {0} or qn not in range(1, 2):
         #     return
         if dwn in RUN_FILE_DOWNLOADERS and len(query) > Config.max_cmd_len:
-            run_file_name = f'{Config.dest_run_base}run_{proc_file_name_body}.conf'
-            trace(f'Cmdline is too long ({len(query):d}/{Config.max_cmd_len:d})! Converting to run file: {run_file_name}')
-            run_file_abspath = normalize_path(os.path.abspath(run_file_name), False)
+            run_file_path = Config.dest_run_base / f'run_{proc_file_name_body}.conf'
+            trace(f'Cmdline is too long ({len(query):d}/{Config.max_cmd_len:d})! Converting to run file: {run_file_path}')
+            run_file_abspath = run_file_path
             cmd_args_new = cmd_args[2:]
             cmd_args[2:] = ['file', '-path', run_file_abspath]
             with open(run_file_abspath, 'wt', encoding=UTF8, buffering=1) as run_file:

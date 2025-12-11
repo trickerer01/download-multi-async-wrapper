@@ -7,7 +7,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 
 import json
-import os
+import pathlib
 import re
 
 from r34wrapper.config import Config
@@ -21,16 +21,14 @@ from r34wrapper.defs import (
     PAGE_DOWNLOADERS,
     PARSER_TYPE_LIST,
     PARSER_TYPE_TXT,
-    PATH_APPEND_DOWNLOAD_IDS,
-    PATH_APPEND_DOWNLOAD_PAGES,
+    PATH_APPEND_DOWNLOADER,
     PATH_APPEND_REQUIREMENTS,
-    PATH_APPEND_UPDATE,
     PROXY_ARG,
     IntSequence,
     StrPair,
 )
 from r34wrapper.logger import ensure_logfile, trace
-from r34wrapper.strings import all_tags_negative, all_tags_positive, normalize_path, remove_trailing_comments
+from r34wrapper.strings import all_tags_negative, all_tags_positive, remove_trailing_comments
 from r34wrapper.util import assert_notnull
 from r34wrapper.validators import positive_int, valid_dir_path
 
@@ -114,25 +112,29 @@ class ParserText:
                     if re_dest_base.fullmatch(line):
                         dest_base = line[line.find(':') + 1:]
                         trace(f'Parsed download dest base: \'{dest_base}\'')
-                        assert Config.dest_base == Config.DEFAULT_PATH, f'Destination re-declaration! Was \'{Config.dest_base}\''
+                        assert Config.dest_base == Config.DEFAULT_PATH, (
+                            f'Destination re-declaration! Was \'{Config.dest_base.as_posix()}\'')
                         Config.dest_base = valid_dir_path(dest_base)
                         continue
                     if re_dest_bak.fullmatch(line):
                         dest_bak = line[line.find(':') + 1:]
                         trace(f'Parsed backup dest base: \'{dest_bak}\'')
-                        assert Config.dest_bak_base == Config.DEFAULT_PATH, f'Backup path re-declaration! Was \'{Config.dest_bak_base}\''
+                        assert Config.dest_bak_base == Config.DEFAULT_PATH, (
+                            f'Backup path re-declaration! Was \'{Config.dest_bak_base.as_posix()}\'')
                         Config.dest_bak_base = valid_dir_path(dest_bak)
                         continue
                     if re_dest_run.fullmatch(line):
                         dest_run = line[line.find(':') + 1:]
                         trace(f'Parsed run dest base: \'{dest_run}\'')
-                        assert Config.dest_run_base == Config.DEFAULT_PATH, f'Run path re-declaration! Was \'{Config.dest_run_base}\''
+                        assert Config.dest_run_base == Config.DEFAULT_PATH, (
+                            f'Run path re-declaration! Was \'{Config.dest_run_base.as_posix()}\'')
                         Config.dest_run_base = valid_dir_path(dest_run)
                         continue
                     if re_dest_log.fullmatch(line):
                         dest_log = line[line.find(':') + 1:]
                         trace(f'Parsed logs dest base: \'{dest_log}\'')
-                        assert Config.dest_logs_base == Config.DEFAULT_PATH, f'Logs path re-declaration! Was \'{Config.dest_logs_base}\''
+                        assert Config.dest_logs_base == Config.DEFAULT_PATH, (
+                            f'Logs path re-declaration! Was \'{Config.dest_logs_base.as_posix()}\'')
                         Config.dest_logs_base = valid_dir_path(dest_log)
                         continue
                     if re_datesub.fullmatch(line):
@@ -286,23 +288,16 @@ class ParserText:
                     elif re_downloader_basepath.fullmatch(line):
                         cat = cur_ct()
                         cdt = cur_dl()
-                        basepath = line[line.find(':') + 1:]
-                        basepath_n = normalize_path(basepath)
-                        path_append = (PATH_APPEND_DOWNLOAD_PAGES if self.queries.sequences_pages.at_cur_cat[cdt]
-                                       else PATH_APPEND_DOWNLOAD_IDS)
-                        path_downloader = f'{basepath_n}{path_append[cdt]}'
-                        path_requirements = f'{basepath_n}{PATH_APPEND_REQUIREMENTS}'
-                        path_updater = f'{basepath_n}{PATH_APPEND_UPDATE[cdt]}'
+                        basepath = pathlib.Path(line[line.find(':') + 1:]).resolve()
+                        path_downloader = basepath / PATH_APPEND_DOWNLOADER[cdt]
+                        path_reqs = basepath / PATH_APPEND_REQUIREMENTS
                         if Config.test is False:
-                            assert os.path.isdir(basepath), f'{cat}:{cdt} base path \'{basepath}\' doesn\'t exist!'
-                            assert os.path.exists(path_downloader), f'{cat}:{cdt} downloader path \'{path_downloader}\' doesn\'t exist!'
+                            assert path_downloader.is_dir(), f'{cat}:{cdt} downloader path \'{path_downloader.as_posix()}\' doesn\'t exist!'
                             if Config.install:
-                                assert os.path.isfile(path_requirements), f'{cat}:{cdt} reqs file \'{path_requirements}\' doesn\'t exist!'
-                            if Config.update:
-                                assert os.path.exists(path_updater), f'{cat}:{cdt} updater file \'{path_updater}\' doesn\'t exist!'
-                        self.queries.sequences_paths.at_cur_cat[cur_dl()] = path_downloader
-                        self.queries.sequences_paths_reqs[cur_dl()] = path_requirements
-                        self.queries.sequences_paths_update[cur_dl()] = normalize_path(os.path.abspath(path_updater), False)
+                                assert path_reqs.is_file(), f'{cat}:{cdt} reqs file \'{path_reqs.as_posix()}\' doesn\'t exist!'
+                        self.queries.sequences_paths.at_cur_cat[cur_dl()] = path_downloader.as_posix()
+                        self.queries.sequences_paths_reqs[cur_dl()] = path_reqs.as_posix()
+                        self.queries.sequences_paths_update[cur_dl()] = path_downloader.as_posix()
                     elif re_common_arg.fullmatch(line):
                         common_args = line[line.find(':') + 1:].split(' ')
                         self.try_parse_proxy(common_args, cur_ct(), cur_dl())

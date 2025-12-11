@@ -6,27 +6,27 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
-import os
+import pathlib
 from argparse import ArgumentError
 
 from .defs import DOWNLOADERS
 from .logger import trace
-from .strings import normalize_path, unquote
+from .strings import unquote
 
 
-def valid_dir_path(pathstr: str) -> str:
+def valid_dir_path(pathstr: str) -> pathlib.Path:
     try:
-        newpath = normalize_path(os.path.expanduser(unquote(pathstr)))
-        assert os.path.isdir(newpath)
+        newpath = pathlib.Path(unquote(pathstr)).resolve()
+        assert newpath.is_dir()
         return newpath
     except Exception:
         raise ArgumentError
 
 
-def valid_file_path(pathstr: str) -> str:
+def valid_file_path(pathstr: str) -> pathlib.Path:
     try:
-        newpath = normalize_path(os.path.expanduser(unquote(pathstr)), False)
-        assert os.path.isfile(newpath)
+        newpath = pathlib.Path(unquote(pathstr)).resolve()
+        assert newpath.is_file()
         return newpath
     except Exception:
         raise ArgumentError

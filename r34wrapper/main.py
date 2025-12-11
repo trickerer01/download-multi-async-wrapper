@@ -25,7 +25,7 @@ def at_startup() -> None:
     if __name__ == '__main__':
         trace(
             f'Python {sys.version}\nCommand-line args: {" ".join(sys.argv)}'
-            f'\nScript path: \'{Config.script_path}\''
+            f'\nScript path: \'{Config.script_path.as_posix()}\''
             f'\nSelected parser type: \'{Config.parser_type}\''
             f'\nEnabled downloaders: "{",".join(Config.downloaders) or "all"}"'
             f'\nEnabled categories: "{",".join(Config.categories) or "all"}"'

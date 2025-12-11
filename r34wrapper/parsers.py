@@ -6,7 +6,6 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
-import os
 from typing import Protocol
 
 from ._parsers import ParserJson, ParserText
@@ -49,7 +48,7 @@ def register_parser_type(parser_type_str: str, parser_type: ParserMeta):
 def select_parser_type() -> str:
     if Config.parser_type == PARSER_TYPE_AUTO:
         trace(f'Parser type is \'{PARSER_TYPE_AUTO}\', autopicking...')
-        ext = os.path.splitext(Config.script_path)[1]
+        ext = Config.script_path.suffix
         parser_type = ext[ext.rfind('.') + 1:]
         trace(f'...utopicked parser type \'{parser_type}\'')
     else:

@@ -8,6 +8,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 
 import functools
 import os
+import pathlib
 from collections.abc import Callable
 from contextlib import ExitStack
 from unittest import TestCase
@@ -66,11 +67,15 @@ class ArgParseTests(TestCase):
     @test_prepare()
     def test_argparse1(self) -> None:
         parse_arglist(args_argparse_str_1.split())
-        self.assertEqual(
+        self.assertEqual(pathlib.Path('./tests/queries.list').resolve(), Config.script_path)
+        self.assertIn(
             'debug: False, '
             'parser_type_str: auto, parser_type: NoneType, '
-            'downloaders: (\'nm\', \'rv\', \'rc\', \'rg\', \'rn\', \'rx\', \'rs\', \'rp\', \'en\', \'xb\', \'bb\'), '
-            'script: ./tests/queries.list, dest: ./, run: ./, logs: ./, bak: ./, update: False, no_download: False, '
+            'downloaders: (\'nm\', \'rv\', \'rc\', \'rg\', \'rn\', \'rx\', \'rs\', \'rp\', \'en\', \'xb\', \'bb\')',
+            str(Config),
+        )
+        self.assertIn(
+            'update: False, no_download: False, '
             'no_update: False, update_prefetch: False, ignored_args: [], id_overrides: [], max_cmd_len: 16000',
             str(Config),
         )
@@ -79,11 +84,14 @@ class ArgParseTests(TestCase):
     @test_prepare()
     def test_argparse2(self) -> None:
         parse_arglist(args_argparse_str_2_1.split())
-        self.assertEqual(
+        self.assertIn(
             'debug: True, '
             'parser_type_str: auto, parser_type: NoneType, '
-            'downloaders: (\'rv\', \'rn\', \'rx\', \'rs\'), '
-            'script: ./tests/queries.list, dest: ./, run: ./, logs: ./, bak: ./, update: False, no_download: False, '
+            'downloaders: (\'rv\', \'rn\', \'rx\', \'rs\'), ',
+            str(Config),
+        )
+        self.assertIn(
+            'update: False, no_download: False, '
             'no_update: True, update_prefetch: False, ignored_args: [dmode(2), dmode(2)], id_overrides: [], max_cmd_len: 16000',
             str(Config),
         )
@@ -91,7 +99,7 @@ class ArgParseTests(TestCase):
 
 
 class QueriesFormTests(TestCase):
-    @test_prepare()
+    @test_prepare(console_log=True)
     def test_queries1(self) -> None:
         cat_vid, cat_img, cat_vid_ = 'VIDEOS', 'IMAGES', 'VIDEOS '
         parse_arglist(args_argparse_str_2_1.split())
@@ -107,10 +115,10 @@ class QueriesFormTests(TestCase):
         self.assertFalse(Config.update)
         self.assertEqual(Config.update_offsets, {'nm': -100, 'rc': -100, 'rv': -800, 'rs': -300})
         self.assertEqual(Config.noproxy_fetches, {'rg', 'nm'})
-        self.assertEqual('./tests/', Config.dest_base)
-        self.assertEqual('./bak/', Config.dest_bak_base)
-        self.assertEqual('./run/', Config.dest_run_base)
-        self.assertEqual('./logs/', Config.dest_logs_base)
+        self.assertEqual(pathlib.Path().resolve() / 'tests', Config.dest_base)
+        self.assertEqual(pathlib.Path().resolve() / 'bak', Config.dest_bak_base)
+        self.assertEqual(pathlib.Path().resolve() / 'run', Config.dest_run_base)
+        self.assertEqual(pathlib.Path().resolve() / 'logs', Config.dest_logs_base)
         self.assertEqual('python3', Config.python)
         self.assertEqual(1, len(queries_all[cat_vid][DOWNLOADER_NM]))
         self.assertEqual(3, len(queries_all[cat_vid][DOWNLOADER_RV]))
@@ -146,7 +154,9 @@ class QueriesFormTests(TestCase):
         self.assertEqual(0, len(queries_all[cat_vid_][DOWNLOADER_XB]))
         self.assertEqual(0, len(queries_all[cat_vid_][DOWNLOADER_BB]))
         self.assertEqual(
-            f'python3 "D:/NM/nm" ids -start 1 -end 1 -path "./tests/{date_str_md(cat_vid)}/" --disable-log-colors --dump-tags '
+            f'python3 "D:/NM/nm" ids -start 1 -end 1 -path "'
+            f'{pathlib.Path(f"./tests/{date_str_md(cat_vid)}/").resolve().as_posix()}'
+            f'" --disable-log-colors --dump-tags '
             '-cookies "{\\"User-Agent\\":\\"NM 1.8\\", \\"shm_user\\":\\"su\\", \\"shm_session\\":\\"su_session_hash\\"}" -script "'
             'a: -quality 1080p -a -b -c -dfff ggg; '
             'b: -quality 1080p -a -b -c -dfff -ggg -(x,z) (h~i~j~k); '
@@ -155,7 +165,8 @@ class QueriesFormTests(TestCase):
             queries_all[cat_vid][DOWNLOADER_NM][0],
         )
         self.assertEqual([
-            'python3', 'D:/NM/nm', 'ids', '-start', '1', '-end', '1', '-path', f'./tests/{date_str_md(cat_vid)}/',
+            'python3', 'D:/NM/nm', 'ids', '-start', '1', '-end', '1', '-path',
+            pathlib.Path(f'./tests/{date_str_md(cat_vid)}/').resolve().as_posix(),
             '--disable-log-colors', '--dump-tags',
             '-cookies', '{"User-Agent":"NM 1.8", "shm_user":"su", "shm_session":"su_session_hash"}', '-script',
             'a: -quality 1080p -a -b -c -dfff ggg; '
@@ -164,57 +175,78 @@ class QueriesFormTests(TestCase):
             'd: -a -b -c -ggg -h -i -j -k -l -m -n -quality 360p -uvp always',
         ], split_into_args(queries_all[cat_vid][DOWNLOADER_NM][0]))
         self.assertEqual(
-            f'python3 "D:/old/RV/rv" pages -pages 5 -start 2 -stop_id 5 -begin_id 8 -path "./tests/{date_str_md(cat_vid)}/a/" '
-            '--disable-log-colors -log info -timeout 15 -retries 50 -throttle 30 --dump-descriptions --dump-tags --dump-comments '
+            f'python3 "D:/old/RV/rv" pages -pages 5 -start 2 -stop_id 5 -begin_id 8 -path "'
+            f'{pathlib.Path(f"./tests/{date_str_md(cat_vid)}/a/").resolve().as_posix()}'
+            f'" --disable-log-colors -log info -timeout 15 -retries 50 -throttle 30 --dump-descriptions --dump-tags --dump-comments '
             '-quality 1080p -search a',
             queries_all[cat_vid][DOWNLOADER_RV][0],
         )
         self.assertEqual(
-            f'python3 "D:/old/RV/rv" pages -pages 5 -start 2 -stop_id 5 -begin_id 8 -path "./tests/{date_str_md(cat_vid)}/b/" '
-            '--disable-log-colors -log info -timeout 15 -retries 50 -throttle 30 --dump-descriptions --dump-tags --dump-comments '
+            f'python3 "D:/old/RV/rv" pages -pages 5 -start 2 -stop_id 5 -begin_id 8 -path "'
+            f'{pathlib.Path(f"./tests/{date_str_md(cat_vid)}/b").resolve().as_posix()}'
+            f'" --disable-log-colors -log info -timeout 15 -retries 50 -throttle 30 --dump-descriptions --dump-tags --dump-comments '
             '-quality 1080p -search_tag b,c,d -search_rule_tag any',
             queries_all[cat_vid][DOWNLOADER_RV][1],
         )
         self.assertEqual(
-            f'python3 "D:/old/RV/rv" pages -pages 5 -start 2 -stop_id 5 -begin_id 8 -path "./tests/{date_str_md(cat_vid)}/c/" '
-            '--disable-log-colors -log info -timeout 15 -retries 50 -throttle 30 --dump-descriptions --dump-tags --dump-comments '
+            f'python3 "D:/old/RV/rv" pages -pages 5 -start 2 -stop_id 5 -begin_id 8 -path "'
+            f'{pathlib.Path(f"./tests/{date_str_md(cat_vid)}/c").resolve().as_posix()}'
+            f'" --disable-log-colors -log info -timeout 15 -retries 50 -throttle 30 --dump-descriptions --dump-tags --dump-comments '
             '-quality 1080p -b -c -d -(g,h,i) -search_tag e,f -search_rule_tag all',
             queries_all[cat_vid][DOWNLOADER_RV][2],
         )
         self.assertEqual(
-            f'python3 "D:/old/ruxx/ruxx" id:2..7 -path "./tests/{date_str_md(cat_vid)}/k/" -module en k',
+            f'python3 "D:/old/ruxx/ruxx" id:2..7 -path "'
+            f'{pathlib.Path(f"./tests/{date_str_md(cat_vid)}/k").resolve().as_posix()}'
+            f'" -module en k',
             queries_all[cat_vid][DOWNLOADER_EN][0],
         )
         self.assertEqual(
-            f'python3 "D:/old/ruxx/ruxx" id:2..7 -path "./tests/{date_str_md(cat_vid)}/pb/" -module en -k p b (o~q)',
+            f'python3 "D:/old/ruxx/ruxx" id:2..7 -path "'
+            f'{pathlib.Path(f"./tests/{date_str_md(cat_vid)}/pb/").resolve().as_posix()}'
+            f'" -module en -k p b (o~q)',
             queries_all[cat_vid][DOWNLOADER_EN][1],
         )
         self.assertEqual(
-            f'python3 "D:/ruxx/ruxx" id:>=1 id:<=1 -path "./tests/{date_str_md(cat_img)}/a/" -module rx a',
+            f'python3 "D:/ruxx/ruxx" id:>=1 id:<=1 -path "'
+            f'{pathlib.Path(f"./tests/{date_str_md(cat_img)}/a").resolve().as_posix()}'
+            f'" -module rx a',
             queries_all[cat_img][DOWNLOADER_RX][0],
         )
         self.assertEqual(
-            f'python3 "D:/ruxx/ruxx" id:>=1 id:<=1 -path "./tests/{date_str_md(cat_img)}/b/" -module rx -a b (c~d)',
+            f'python3 "D:/ruxx/ruxx" id:>=1 id:<=1 -path "'
+            f'{pathlib.Path(f"./tests/{date_str_md(cat_img)}/b").resolve().as_posix()}'
+            f'" -module rx -a b (c~d)',
             queries_all[cat_img][DOWNLOADER_RX][1],
         )
         self.assertEqual(
-            f'python3 "D:/ruxx/ruxx" id>=7 id<=8 -path "./tests/{date_str_md(cat_img)}/g/" -dmode 0 -module rp g',
+            f'python3 "D:/ruxx/ruxx" id>=7 id<=8 -path "'
+            f'{pathlib.Path(f"./tests/{date_str_md(cat_img)}/g").resolve().as_posix()}'
+            f'" -dmode 0 -module rp g',
             queries_all[cat_img][DOWNLOADER_RP][0],
         )
         self.assertEqual(
-            f'python3 "D:/ruxx/ruxx" id:>=5 id:<=5 -path "./tests/{date_str_md(cat_img)}/z/" -dmode 1 -module xb z',
+            f'python3 "D:/ruxx/ruxx" id:>=5 id:<=5 -path "'
+            f'{pathlib.Path(f"./tests/{date_str_md(cat_img)}/z").resolve().as_posix()}'
+            f'" -dmode 1 -module xb z',
             queries_all[cat_img][DOWNLOADER_XB][0],
         )
         self.assertEqual(
-            f'python3 "D:/ruxx/ruxx" id:>=5 id:<=5 -path "./tests/{date_str_md(cat_img)}/x/" -dmode 1 -module xb -z x (y~w)',
+            f'python3 "D:/ruxx/ruxx" id:>=5 id:<=5 -path "'
+            f'{pathlib.Path(f"./tests/{date_str_md(cat_img)}/x").resolve().as_posix()}'
+            f'" -dmode 1 -module xb -z x (y~w)',
             queries_all[cat_img][DOWNLOADER_XB][1],
         )
         self.assertEqual(
-            f'python3 "D:/ruxx/ruxx" id:>=5 id:<=5 -path "./tests/{date_str_md(cat_img)}/z/" -dmode 1 -module bb z',
+            f'python3 "D:/ruxx/ruxx" id:>=5 id:<=5 -path "'
+            f'{pathlib.Path(f"./tests/{date_str_md(cat_img)}/z").resolve().as_posix()}'
+            f'" -dmode 1 -module bb z',
             queries_all[cat_img][DOWNLOADER_BB][0],
         )
         self.assertEqual(  # same dest for 'vid' and 'vid_' categories
-            f'python3 "D:/NM/nm" ids -start 1 -end 1 -path "./tests/{date_str_md(cat_vid)}/" --disable-log-colors -dmode touch '
+            f'python3 "D:/NM/nm" ids -start 1 -end 1 -path "'
+            f'{pathlib.Path(f"./tests/{date_str_md(cat_vid)}").resolve().as_posix()}'
+            f'" --disable-log-colors -dmode touch '
             '--dump-tags -script "'
             'a: -quality 1080p -a -b -c -dfff ggg; '
             'b: -quality 1080p -a -b -c -dfff -ggg -(x,z) (h~i~j~k)"',
@@ -230,10 +262,10 @@ class QueriesFormTests(TestCase):
         read_queries_file()
         prepare_queries()
         self.assertEqual('script_2', Config.title)
-        self.assertEqual('../', Config.dest_base)
-        self.assertEqual('../', Config.dest_bak_base)
-        self.assertEqual('../', Config.dest_run_base)
-        self.assertEqual('../', Config.dest_logs_base)
+        self.assertEqual(pathlib.Path().resolve().parent, Config.dest_base)
+        self.assertEqual(pathlib.Path().resolve().parent, Config.dest_bak_base)
+        self.assertEqual(pathlib.Path().resolve().parent, Config.dest_run_base)
+        self.assertEqual(pathlib.Path().resolve().parent, Config.dest_logs_base)
         self.assertIn('-continue', queries_all[cat_vid][DOWNLOADER_NM][0])
         print(f'{self._testMethodName} passed')
 

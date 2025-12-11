@@ -6,7 +6,6 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
-import os
 from collections.abc import Iterable
 from subprocess import CalledProcessError, check_output
 from threading import Lock, Thread
@@ -25,7 +24,7 @@ from .executor import register_queries
 from .logger import trace
 from .parsers import create_parser
 from .sequences import form_queries, report_queries, report_unoptimized, validate_runners, validate_sequences
-from .strings import NEWLINE, SLASH, datetime_str_nfull
+from .strings import NEWLINE, datetime_str_nfull
 
 __all__ = ('make_parser', 'prepare_queries', 'read_queries_file', 'update_next_ids')
 
@@ -125,7 +124,7 @@ def make_parser() -> None:
 
 
 def read_queries_file() -> None:
-    trace(f'\nReading queries file: \'{Config.script_path}\'')
+    trace(f'\nReading queries file: \'{Config.script_path.as_posix()}\'')
     with open(Config.script_path, 'rt', encoding=UTF8) as qfile:
         Config.parser.queries.queries_file_lines[:] = qfile.readlines()
 
@@ -195,15 +194,15 @@ def update_next_ids() -> None:
     trace('\nNext ids update initiated...')
 
     queries = Config.parser.queries
-    queries_file_name = Config.script_path[Config.script_path.rfind(SLASH) + 1:]
+    queries_file_name = Config.script_path.name
 
-    filename_bak = f'{queries_file_name}_bak_{datetime_str_nfull()}.list'
-    trace(f'File: \'{queries_file_name}\', backup file: \'{filename_bak}\'')
+    filename_bak = f'{Config.script_path.name}_bak_{datetime_str_nfull()}.list'
+    trace(f'File: \'{Config.script_path.name}\', backup file: \'{filename_bak}\'')
     try:
         fetch_maxids_if_needed(context=MaxIdFetchContext.CONTEXT_UPDATE_NEXT)
         if Config.fetched_maxids:
             trace(f'\nSaving backup to \'{filename_bak}\'...')
-            bak_fullpath = f'{Config.dest_bak_base}{filename_bak}'
+            bak_fullpath = Config.dest_bak_base / filename_bak
             with open(bak_fullpath, 'wt', encoding=UTF8, buffering=1) as outfile_bak:
                 outfile_bak.writelines(queries.queries_file_lines)
                 trace('Saving done')
@@ -211,8 +210,8 @@ def update_next_ids() -> None:
             trace(f'\nSetting read-only permissions for \'{filename_bak}\'...')
             perm = 0
             try:
-                os.chmod(bak_fullpath, 0o100444)  # S_IFREG | S_IRUSR | S_IRGRP | S_IROTH
-                perm = os.stat(bak_fullpath).st_mode
+                bak_fullpath.chmod(0o100444)  # S_IFREG | S_IRUSR | S_IRGRP | S_IROTH
+                perm = bak_fullpath.stat().st_mode
                 assert (perm & 0o777) == 0o444
                 trace('Permissions successfully updated')
             except AssertionError:
@@ -229,7 +228,6 @@ def update_next_ids() -> None:
                     trace(f'Applying {dt.upper()} update offset {uoffset:d}: {maxids[dt] - uoffset:d} -> {maxids[dt]:d}')
                 else:
                     trace(f'Warning: {dt.upper()} autoupdate offset ({uoffset:d}) was provided but its max id is not being updated')
-            cat: str
             for cat in queries.sequences_ids:
                 dtseq: tuple[str, IntSequence | None]
                 for i, dtseq in enumerate(queries.sequences_ids[cat].items()):

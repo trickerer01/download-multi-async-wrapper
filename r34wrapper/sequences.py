@@ -6,6 +6,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
+import pathlib
 import re
 from subprocess import check_output
 
@@ -17,8 +18,6 @@ from .defs import (
     MIN_PYTHON_VERSION,
     MIN_PYTHON_VERSION_STR,
     PAGE_DOWNLOADERS,
-    PATH_APPEND_DOWNLOAD_IDS,
-    PATH_APPEND_DOWNLOAD_PAGES,
     RANGE_TEMPLATE_IDS,
     RANGE_TEMPLATE_PAGE_IDS,
     RANGE_TEMPLATE_PAGES,
@@ -77,20 +76,18 @@ def validate_runners(queries: Queries) -> None:
     if not Config.no_download:
         for cat in queries.sequences_paths:
             for dtd in queries.sequences_paths[cat]:
-                dpath: str | None = queries.sequences_paths[cat][dtd]
+                dpath: pathlib.Path | None = queries.sequences_paths[cat][dtd]
                 if not dpath or dtd not in Config.downloaders:
                     continue
-                dtype = ('pages' if dpath.endswith(PATH_APPEND_DOWNLOAD_PAGES[dtd]) else
-                         'ids' if dpath.endswith(PATH_APPEND_DOWNLOAD_IDS[dtd]) else 'unknown')
-                runner_type_download = f'{dtd}_{dtype}'
+                runner_type_download = f'{dtd}_download'
                 if runner_type_download in validated_runners:
                     continue
                 if dpath in checked_paths:
-                    trace(f'{dtd} {dtype} downloader path is already checked!')
+                    trace(f'{dtd} downloader path is already checked!')
                     continue
-                checked_paths.add(dpath)
+                checked_paths.add(dpath.as_posix())
                 try:
-                    trace(f'Looking for {dtd} {dtype} downloader...')
+                    trace(f'Looking for {dtd} downloader...')
                     out_d = check_output((Config.python, dpath, '--version'))
                     out_d_str = out_d.decode().strip()
                     out_d_str = out_d_str[out_d_str.rfind('\n') + 1:]
@@ -98,7 +95,7 @@ def validate_runners(queries: Queries) -> None:
                     validated_runners.add(runner_type_download)
                     trace(f'Found \'{dpath}\'')
                 except Exception:
-                    trace(f'Error: invalid {dtd} {dtype} downloader found at: \'{dpath}\' ({cat})!')
+                    trace(f'Error: invalid {dtd} downloader found at: \'{dpath}\' ({cat})!')
                     raise OSError
     if Config.update:
         for dtu, upath in queries.sequences_paths_update.items():
@@ -198,9 +195,9 @@ def _get_base_qs(queries: Queries) -> DownloadCollection[str]:
     return base_qs
 
 
-def form_queries(queries: Queries) -> DownloadCollection[list[str]]:
-    stags, ssubs, scomms, spaths = queries.sequences_tags, queries.sequences_subfolders, queries.sequences_common, queries.sequences_paths
-    base_qs = _get_base_qs(queries)
+def form_queries(qs: Queries) -> DownloadCollection[list[str]]:
+    stags, ssubs, scomms, spaths = qs.sequences_tags, qs.sequences_subfolders, qs.sequences_common, qs.sequences_paths
+    base_qs = _get_base_qs(qs)
     queries_final: DownloadCollection[list[str]] = DownloadCollection()
     [queries_final.update({
         k: {
@@ -219,9 +216,9 @@ def form_queries(queries: Queries) -> DownloadCollection[list[str]]:
     return queries_final
 
 
-def report_unoptimized(queries: Queries) -> None:
-    stags, ssubs, scomms, spaths = queries.sequences_tags, queries.sequences_subfolders, queries.sequences_common, queries.sequences_paths
-    base_qs = _get_base_qs(queries)
+def report_unoptimized(qs: Queries) -> None:
+    stags, ssubs, scomms, spaths = qs.sequences_tags, qs.sequences_subfolders, qs.sequences_common, qs.sequences_paths
+    base_qs = _get_base_qs(qs)
     queries: DownloadCollection[list[str]] = DownloadCollection()
     [queries.update({
         k: {

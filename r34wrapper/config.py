@@ -6,6 +6,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
+import pathlib
 from argparse import Namespace
 
 from .defs import APPEND_SEPARATOR, IDLIST_SEPARATOR, MAX_CMD_LEN, OS_WINDOWS
@@ -104,7 +105,7 @@ class ExtraArgs:
 
 
 class BaseConfig:
-    DEFAULT_PATH = './'
+    DEFAULT_PATH = pathlib.Path().resolve()
 
     def __init__(self, *, test=False, console_log=False) -> None:
         # arguments
@@ -118,14 +119,14 @@ class BaseConfig:
         self.extra_args: list[ExtraArgs] = []
         self.downloaders: tuple[str, ...] = ()
         self.categories: list[str] = []
-        self.script_path: str = ''
+        self.script_path: pathlib.Path = BaseConfig.DEFAULT_PATH.with_name('script.list')
         self.parser_type: str = ''
         # script
         self.parser: ParserMeta | None = None
-        self.dest_base: str = BaseConfig.DEFAULT_PATH
-        self.dest_run_base: str = BaseConfig.DEFAULT_PATH
-        self.dest_logs_base: str = BaseConfig.DEFAULT_PATH
-        self.dest_bak_base: str = BaseConfig.DEFAULT_PATH
+        self.dest_base: pathlib.Path = BaseConfig.DEFAULT_PATH
+        self.dest_run_base: pathlib.Path = BaseConfig.DEFAULT_PATH
+        self.dest_logs_base: pathlib.Path = BaseConfig.DEFAULT_PATH
+        self.dest_bak_base: pathlib.Path = BaseConfig.DEFAULT_PATH
         self.title: str = ''
         self.title_increment: int = 0
         self.python: str = ''
@@ -166,9 +167,9 @@ class BaseConfig:
     def __str__(self) -> str:
         return (
             f'debug: {self.debug}, '
-            f'parser_type_str: {self.parser_type}, parser_type: {self.parser.__class__.__name__!s}, '
-            f'downloaders: {self.downloaders!s}, script: {self.script_path}, dest: {self.dest_base}, '
-            f'run: {self.dest_run_base}, logs: {self.dest_logs_base}, bak: {self.dest_bak_base}, update: {self.update}, '
+            f'parser_type_str: {self.parser_type}, parser_type: {self.parser.__class__.__name__!s}, downloaders: {self.downloaders!s}, '
+            f'script: {self.script_path.resolve()}, dest: {self.dest_base.as_posix()}, run: {self.dest_run_base.as_posix()}, '
+            f'logs: {self.dest_logs_base.as_posix()}, bak: {self.dest_bak_base.as_posix()}, update: {self.update}, '
             f'no_download: {self.no_download}, no_update: {self.no_update}, update_prefetch: {self.update_prefetch}, '
             f'ignored_args: {self.ignored_args!s}, id_overrides: {self.override_ids!s}, max_cmd_len: {self.max_cmd_len}'
         )

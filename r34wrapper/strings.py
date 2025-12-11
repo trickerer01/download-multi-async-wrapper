@@ -7,9 +7,9 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 
 import datetime
+import pathlib
 from collections.abc import Iterable
 
-SLASH = '/'
 NEWLINE = '\n'
 
 
@@ -76,12 +76,6 @@ def remove_trailing_comments(line: str) -> str:
     return result
 
 
-def normalize_path(basepath: str, append_slash=True) -> str:
-    normalized_path = basepath.replace('\\', SLASH)
-    need_slash = append_slash is True and len(normalized_path) != 0 and normalized_path[-1] != SLASH
-    return f'{normalized_path}{SLASH}' if need_slash else normalized_path
-
-
 def timestamped_string(msg: str) -> str:
     ts = f'[{datetime_str_nfull()}] '
     nts = f'{NEWLINE}{ts}'
@@ -103,8 +97,10 @@ def all_tags_positive(taglist: Iterable[str]) -> bool:
     return all_tags_same_sign(taglist, False)
 
 
-def path_args(dest_base: str, cat: str, sub: str, datepath: bool) -> str:
-    return f'-path "{dest_base}{f"{date_str_md(cat.strip())}/" if datepath else ""}{f"{sub}/" if sub else ""}"'
+def path_args(dest_base: pathlib.Path, cat: str, sub: str, datepath: bool) -> str:
+    date_path = dest_base.joinpath(f'{date_str_md(cat.strip())}') if datepath else dest_base
+    sub_path = date_path.joinpath(sub) if sub else date_path
+    return f'-path "{sub_path.as_posix()}"'
 
 
 def time_now_fmt(fmt: str) -> str:

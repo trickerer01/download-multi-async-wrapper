@@ -27,7 +27,7 @@ IO_ERR_POLICY = 'backslashreplace'
 def _open_logfile() -> None:
     title_part = f'{Config.full_title}_' if Config.title else ''
     log_basename = f'log_{title_part}{datetime_str_nfull()}.log' if not Config.debug else 'log.log'
-    logfile.reset(open(f'{Config.dest_logs_base}{log_basename}', 'at', encoding=UTF8, errors=IO_ERR_POLICY, buffering=1))
+    logfile.reset(open(Config.dest_logs_base / log_basename, 'at', encoding=UTF8, errors=IO_ERR_POLICY, buffering=1))
     if buffered_strings:
         trace('\n#^^Buffered strings dumped^^#\n', False)
 
@@ -86,10 +86,10 @@ def calculate_title_suffix() -> None:
     trace('Calculating title suffix...')
     max_suffix_len = Config.title_increment
     max_suffix_val = 0
-    if os.path.isdir(Config.dest_logs_base):
+    if Config.dest_logs_base.is_dir():
         log_prefixes = tuple(f'{_}_{Config.title}' for _ in ('log', 'run'))
         base_idx = len(log_prefixes[0])
-        with os.scandir(Config.dest_logs_base) as listing:
+        with os.scandir(Config.dest_logs_base.as_posix()) as listing:
             logsdir_files: list[str] = [f.name for f in listing if f.is_file() and f.name.startswith(log_prefixes)]
         for fname in logsdir_files:
             sep_idx = fname.find('_', base_idx)

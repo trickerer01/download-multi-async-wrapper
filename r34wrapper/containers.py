@@ -6,7 +6,11 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
-from typing import Dict, Generic, NamedTuple, Type
+from __future__ import annotations
+
+import pathlib
+from collections.abc import Iterator
+from typing import Generic, NamedTuple, Type
 
 from .defs import AT, DOWNLOADERS, DT, IntSequence, StrPair
 from .util import assert_notnull
@@ -14,23 +18,47 @@ from .util import assert_notnull
 __all__ = ('CmdRunParams', 'DownloadCollection', 'Queries', 'Wrapper')
 
 
-class DownloadCollection(Dict[str, Dict[str, DT | None]]):
+class DownloadCollection(Generic[DT]):
     """
     DownloadCollection is a dict which stores data of type **DT** per download module per download category
     """
     def __init__(self) -> None:
-        super().__init__()
+        self._container: dict[str, dict[str, DT | None]] = {}
+
+    def __getitem__(self, item: str) -> dict[str, DT | None]:
+        return self._container.__getitem__(item)
+
+    def __setitem__(self, key: str, value: dict[str, DT | None]) -> None:
+        self._container.__setitem__(key, value)
+
+    def __delitem__(self, key: str) -> None:
+        return self._container.__delitem__(key)
+
+    def __len__(self) -> int:
+        return len(self._container)
+
+    def __iter__(self) -> Iterator[str]:
+        return self._container.__iter__()
+
+    def __eq__(self, other: DownloadCollection[DT]) -> bool:
+        return self._container == other._container
+
+    def items(self):
+        return self._container.items()
+
+    def update(self, mapping: DownloadCollection[DT] | dict[str, dict[str, DT | None]], **kwargs) -> None:
+        return self._container.update(mapping._container if isinstance(mapping, DownloadCollection) else mapping, **kwargs)
 
     def add_category(self, cat: str, init_type: Type[DT] | None = None, *args, **kwargs) -> None:
         self[cat] = {dt: self._make_init_value(init_type, *args, **kwargs) for dt in DOWNLOADERS}
 
     @property
     def at_cur_cat(self) -> dict[str, DT | None]:
-        return next(reversed(self.values()))
+        return next(reversed(self._container.values()))
 
     @property
     def cur_cat(self) -> str:
-        return next(reversed(self.keys()))
+        return next(reversed(self._container.keys()))
 
     @staticmethod
     def _make_init_value(init_type: Type[DT], *args, **kwargs) -> DT | None:
@@ -125,7 +153,7 @@ class Queries:
 
         self.sequences_ids: DownloadCollection[IntSequence] = DownloadCollection()
         self.sequences_pages: DownloadCollection[IntSequence] = DownloadCollection()
-        self.sequences_paths: DownloadCollection[str] = DownloadCollection()
+        self.sequences_paths: DownloadCollection[pathlib.Path] = DownloadCollection()
         self.sequences_common: DownloadCollection[list[str]] = DownloadCollection()
         self.sequences_tags: DownloadCollection[list[list[str]]] = DownloadCollection()
         self.sequences_subfolders: DownloadCollection[list[str]] = DownloadCollection()
