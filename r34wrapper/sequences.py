@@ -6,7 +6,6 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 #
 #
 
-import pathlib
 import re
 from subprocess import check_output
 
@@ -76,7 +75,7 @@ def validate_runners(queries: Queries) -> None:
     if not Config.no_download:
         for cat in queries.sequences_paths:
             for dtd in queries.sequences_paths[cat]:
-                dpath: pathlib.Path | None = queries.sequences_paths[cat][dtd]
+                dpath = queries.sequences_paths[cat][dtd]
                 if not dpath or dtd not in Config.downloaders:
                     continue
                 runner_type_download = f'{dtd}_download'
@@ -85,7 +84,7 @@ def validate_runners(queries: Queries) -> None:
                 if dpath in checked_paths:
                     trace(f'{dtd} downloader path is already checked!')
                     continue
-                checked_paths.add(dpath.as_posix())
+                checked_paths.add(dpath)
                 try:
                     trace(f'Looking for {dtd} downloader...')
                     out_d = check_output((Config.python, dpath, '--version'))

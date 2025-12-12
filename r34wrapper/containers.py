@@ -8,7 +8,6 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 
 from __future__ import annotations
 
-import pathlib
 from collections.abc import Iterator
 from typing import Generic, NamedTuple, Type
 
@@ -153,7 +152,7 @@ class Queries:
 
         self.sequences_ids: DownloadCollection[IntSequence] = DownloadCollection()
         self.sequences_pages: DownloadCollection[IntSequence] = DownloadCollection()
-        self.sequences_paths: DownloadCollection[pathlib.Path] = DownloadCollection()
+        self.sequences_paths: DownloadCollection[str] = DownloadCollection()
         self.sequences_common: DownloadCollection[list[str]] = DownloadCollection()
         self.sequences_tags: DownloadCollection[list[list[str]]] = DownloadCollection()
         self.sequences_subfolders: DownloadCollection[list[str]] = DownloadCollection()
