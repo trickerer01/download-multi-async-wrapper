@@ -6,7 +6,7 @@ on:
       - 'master'
     paths:
       - '.github/workflows/**'
-      - 'r34wrapper/*.py'
+      - 'r34wrapper/**.py'
       - 'tests/**'
       - 'examples/**'
   pull_request:
@@ -16,7 +16,7 @@ on:
       - synchronize
     paths:
       - '.github/workflows/**'
-      - 'r34wrapper/*.py'
+      - 'r34wrapper/**.py'
       - 'tests/**'
       - 'examples/**'
 

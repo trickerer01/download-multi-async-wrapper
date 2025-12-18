@@ -4,7 +4,7 @@ build-backend = 'setuptools.build_meta'
 
 [project]
 name = 'download-multi-async-wrapper'
-version = '1.0.260'
+version = '1.0.261'
 authors = [
     {name = 'trickerer01'},
 ]
