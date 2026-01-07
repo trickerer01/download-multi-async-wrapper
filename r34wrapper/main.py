@@ -12,7 +12,7 @@ from platform import system as running_system
 
 from .cmdargs import parse_arglist
 from .config import Config
-from .defs import MIN_PYTHON_VERSION, MIN_PYTHON_VERSION_STR, SUPPORTED_SYSTEMS
+from .defs import MIN_PYTHON_VERSION, MIN_PYTHON_VERSION_STR, OS_WINDOWS, SUPPORTED_SYSTEMS
 from .executor import execute
 from .logger import close_logfile, trace
 from .queries import make_parser, prepare_queries, read_queries_file, update_next_ids
@@ -62,6 +62,9 @@ def run_main(args: Sequence[str]) -> int:
 def main_sync(args: Sequence[str]) -> int:
     assert sys.version_info >= MIN_PYTHON_VERSION, f'Minimum python version required is {MIN_PYTHON_VERSION_STR}!'
     assert running_system() in SUPPORTED_SYSTEMS, f'Unsupported system \'{running_system()}\''
+    if running_system() == OS_WINDOWS:
+        from asyncio import WindowsProactorEventLoopPolicy, set_event_loop_policy
+        set_event_loop_policy(WindowsProactorEventLoopPolicy())
     return run_main(args)
 
 
