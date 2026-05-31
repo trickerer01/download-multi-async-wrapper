@@ -75,9 +75,12 @@ def fetch_maxids(dts: Iterable[str]) -> None:
                 module_arguments.append('pages')
             if dtype in COLOR_LOG_DOWNLOADERS:
                 module_arguments.append('--disable-log-colors')
-            if dtype in queries.proxies_update and queries.proxies_update[dtype] and dtype not in Config.noproxy_fetches:
+            if queries.proxies_update.get(dtype) and dtype not in Config.noproxy_fetches:
                 if queries.proxies_update[dtype].second:
                     module_arguments.extend((queries.proxies_update[dtype].first, queries.proxies_update[dtype].second))
+            if queries.api_keys.get(dtype):
+                if queries.api_keys[dtype].second:
+                    module_arguments.extend((queries.api_keys[dtype].first, queries.api_keys[dtype].second))
             for extra_args in Config.extra_args:
                 if extra_args.is_for(queries.sequences_common.cur_cat, dtype):
                     module_arguments.extend(extra_args.args)

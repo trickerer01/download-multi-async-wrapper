@@ -13,7 +13,8 @@ from typing import NamedTuple, SupportsIndex, TypeVar
 UTF8 = 'utf-8'
 ACTION_STORE_TRUE = 'store_true'
 ACTION_APPEND = 'append'
-PROXY_ARG = '-proxy'
+CMD_ARG_EX_PROXY = '-proxy'
+CMD_ARG_EX_APIKEY = '-api_key'
 MIN_IDS_SEQ_LENGTH = 2
 MAX_CATEGORY_NAME_LENGTH = 10
 APPEND_SEPARATOR = ','

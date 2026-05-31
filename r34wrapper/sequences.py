@@ -146,8 +146,8 @@ def validate_sequences(queries: Queries) -> None:
                             Config.disabled_downloaders[cat] = set()
                         Config.disabled_downloaders[cat].add(dt)
         for cat in queries.sequences_paths:
-            if bool(queries.sequences_paths[cat][dt]) != (bool(queries.sequences_ids[cat][dt] or queries.sequences_tags[cat][dt])):
-                trace(f'Error: sequence list existance for {cat}:{dt} paths/ids mismatch!')
+            if bool(queries.sequences_paths[cat][dt]) != bool(queries.sequences_ids[cat][dt] or queries.sequences_tags[cat][dt]):
+                trace(f'Error: sequence list existence for {cat}:{dt} paths/ids mismatch!')
                 raise OSError
         for cat in queries.sequences_tags:
             len1, len2 = len(queries.sequences_tags[cat][dt]), len(queries.sequences_subfolders[cat][dt])

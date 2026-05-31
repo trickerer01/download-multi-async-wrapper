@@ -14,6 +14,8 @@ from r34wrapper.config import Config
 from r34wrapper.containers import Queries
 from r34wrapper.defs import (
     BOOL_STRS,
+    CMD_ARG_EX_APIKEY,
+    CMD_ARG_EX_PROXY,
     COLOR_LOG_DOWNLOADERS,
     DOWNLOADERS,
     MAX_CATEGORY_NAME_LENGTH,
@@ -23,7 +25,6 @@ from r34wrapper.defs import (
     PARSER_TYPE_TXT,
     PATH_APPEND_DOWNLOADER,
     PATH_APPEND_REQUIREMENTS,
-    PROXY_ARG,
     IntSequence,
     StrPair,
 )
@@ -66,11 +67,19 @@ class ParserText:
     def get_type_names() -> set[str]:
         return {PARSER_TYPE_LIST, PARSER_TYPE_TXT}
 
+    @staticmethod
+    def try_parse_arg_pair(pargs: list[str], ct: str, dl: str,
+                           arg_type: str, arg_hrname: str, dest: dict[str, StrPair | None]) -> None:
+        arg_idx = pargs.index(arg_type) if arg_type in pargs else -1
+        if arg_idx >= 0:
+            assert len(pargs) > arg_idx + 1, f'No {ct}:{dl} {arg_hrname} argument found after \'{arg_type}\' argument!'
+            dest[dl] = StrPair(pargs[arg_idx], pargs[arg_idx + 1])
+
     def try_parse_proxy(self, pargs: list[str], ct: str, dl: str) -> None:
-        proxy_idx = pargs.index(PROXY_ARG) if PROXY_ARG in pargs else -1
-        if proxy_idx >= 0:
-            assert len(pargs) > proxy_idx + 1, f'No {ct}:{dl} proxy argument found after \'-proxy\' argument'
-            self.queries.proxies_update[dl] = StrPair(pargs[proxy_idx], pargs[proxy_idx + 1])
+        self.try_parse_arg_pair(pargs, ct, dl, CMD_ARG_EX_PROXY, 'proxy', self.queries.proxies_update)
+
+    def try_parse_api_key(self, pargs: list[str], ct: str, dl: str) -> None:
+        self.try_parse_arg_pair(pargs, ct, dl, CMD_ARG_EX_APIKEY, 'api key', self.queries.api_keys)
 
     def parse_queries_file(self) -> None:
         def cur_ct() -> str:
@@ -301,6 +310,7 @@ class ParserText:
                     elif re_common_arg.fullmatch(line):
                         common_args = line[line.find(':') + 1:].split(' ')
                         self.try_parse_proxy(common_args, cur_ct(), cur_dl())
+                        self.try_parse_api_key(common_args, cur_ct(), cur_dl())
                         self.queries.sequences_common.at_cur_cat[cur_dl()].extend(common_args)
                     elif re_sub_begin.fullmatch(line):
                         cdt = cur_dl()
@@ -315,6 +325,7 @@ class ParserText:
                             if extra_args.is_for(cat, cdt):
                                 trace(f'Using \'{cat}:{cdt}\' extra args: {extra_args.args!s} -> {" ".join(extra_args.args)}')
                                 self.try_parse_proxy(extra_args.args, cur_ct(), cur_dl())
+                                self.try_parse_api_key(extra_args.args, cur_ct(), cur_dl())
                                 self.queries.sequences_common.at_cur_cat[cur_dl()].extend(f'"{arg}"' for arg in extra_args.args)
                         cur_tags_list.clear()
                         cur_dwn = ''
