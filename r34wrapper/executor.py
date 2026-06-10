@@ -8,11 +8,12 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 
 import math
 import os
-from asyncio import AbstractEventLoop, Future, SubprocessProtocol, as_completed, new_event_loop, sleep
+from asyncio import AbstractEventLoop, Future, ProactorEventLoop, Runner, SubprocessProtocol, as_completed, sleep
+from platform import system as running_system
 
 from .config import Config
 from .containers import CmdRunParams, DownloadCollection, Wrapper
-from .defs import DOWNLOADERS, RUN_FILE_DOWNLOADERS, UTF8
+from .defs import DOWNLOADERS, OS_WINDOWS, RUN_FILE_DOWNLOADERS, UTF8
 from .logger import log_to, trace
 from .strings import datetime_str_nfull, split_into_args
 from .util import sum_lists
@@ -28,7 +29,7 @@ class DummyResultProtocol(SubprocessProtocol):
         self.future.set_result(True)
 
 
-executor_event_loop: Wrapper[AbstractEventLoop] = Wrapper()
+_runner: Wrapper[Runner] = Wrapper()
 
 queries_all: DownloadCollection[list[str]] = DownloadCollection()
 dwqn_fmt = Wrapper('02d')
@@ -61,9 +62,10 @@ async def run_cmd(params: CmdRunParams) -> None:
             cmd_args[2:] = ['file', '-path', run_file_abspath]
             with open(run_file_abspath, 'wt', encoding=UTF8, buffering=1) as run_file:
                 run_file.write('\n'.join(cmd_args_new))
-        ef = Future(loop=executor_event_loop.val)
-        tr, _ = await executor_event_loop.val.subprocess_exec(lambda: DummyResultProtocol(ef), *cmd_args, stderr=log_file, stdout=log_file,
-                                                              env={**os.environ, 'PYTHONIOENCODING': UTF8, 'PYTHONUNBUFFERED': '1'})
+        loop: AbstractEventLoop = _runner.val.get_loop()
+        ef = Future(loop=loop)
+        tr, _ = await loop.subprocess_exec(lambda: DummyResultProtocol(ef), *cmd_args, stderr=log_file, stdout=log_file,
+                                           env={**os.environ, 'PYTHONIOENCODING': UTF8, 'PYTHONUNBUFFERED': '1'})
         await ef
         tr.close()
         log_file.seek(0)
@@ -133,10 +135,10 @@ async def run_all_cmds() -> None:
 
 
 def execute() -> None:
-    executor_event_loop.reset(new_event_loop())
-    executor_event_loop.val.run_until_complete(run_all_cmds())
-    executor_event_loop.val.close()
-    executor_event_loop.reset()
+    _runner.reset(Runner(loop_factory=ProactorEventLoop if running_system() == OS_WINDOWS else None))
+    with _runner.val:
+        _runner.val.run(run_all_cmds())
+    _runner.reset()
 
 #
 #

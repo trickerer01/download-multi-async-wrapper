@@ -100,7 +100,7 @@ class ArgParseTests(TestCase):
 
 
 class QueriesFormTests(TestCase):
-    @test_prepare(console_log=True)
+    @test_prepare()
     def test_queries1(self) -> None:
         if system() != 'Windows':
             print(f'{self._testMethodName} passed')

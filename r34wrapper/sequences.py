@@ -42,7 +42,7 @@ def validate_runners(queries: Queries) -> None:
     runner_type_python = 'python'
     if runner_type_python not in _validated_runners:
         trace('Looking for python executable...')
-        re_py_ver = re.compile(r'^[Pp]ython (\d)\.(\d{1,2})\.(\d+)$')
+        re_py_ver = re.compile(r'^[Pp]ython (\d)\.(\d{1,2})\.(\w+)$')
         out_py = check_output((Config.python, '-V'))
         out_py_str = out_py.decode().strip()
         match_py_ver = re_py_ver.fullmatch(out_py_str)
