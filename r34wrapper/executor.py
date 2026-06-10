@@ -8,7 +8,7 @@ Author: trickerer (https://github.com/trickerer, https://github.com/trickerer01)
 
 import math
 import os
-from asyncio import AbstractEventLoop, Future, ProactorEventLoop, Runner, SubprocessProtocol, as_completed, sleep
+from asyncio import AbstractEventLoop, Future, Runner, SubprocessProtocol, as_completed, sleep
 from platform import system as running_system
 
 from .config import Config
@@ -17,6 +17,9 @@ from .defs import DOWNLOADERS, OS_WINDOWS, RUN_FILE_DOWNLOADERS, UTF8
 from .logger import log_to, trace
 from .strings import datetime_str_nfull, split_into_args
 from .util import sum_lists
+
+if running_system() == OS_WINDOWS:
+    from asyncio import ProactorEventLoop
 
 __all__ = ('execute', 'register_queries')
 

@@ -3,7 +3,7 @@ This is a small scripting engine that basically processes different r34 download
 ![c3](https://user-images.githubusercontent.com/76029665/203684613-3f11e0c9-1a42-4cb5-b56d-3da22b9cb219.gif)
 
 ### Dependencies:
-- Python 3.10 or greater
+- Python 3.11 or greater
 - Downloaders:
   - https://github.com/trickerer01/Ruxx
   - https://github.com/trickerer01/RV
