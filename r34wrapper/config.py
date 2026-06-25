@@ -140,6 +140,7 @@ class BaseConfig:
         self.max_cmd_len: int = MAX_CMD_LEN[OS_WINDOWS] // 2  # MAX_CMD_LEN.get(running_system())
         self.disabled_downloaders: dict[str, set[str]] = {}
         self.fetched_maxids: dict[str, str] = {}
+        self.validated_runners: set[str] = set()
         # internal
         self.test: bool = test
         self.console_log: bool = console_log or not test
